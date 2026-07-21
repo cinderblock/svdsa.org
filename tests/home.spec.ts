@@ -5,46 +5,45 @@ test.describe("Home Page", () => {
     await page.goto("/");
   });
 
-  test("has correct title", async ({ page }) => {
-    await expect(page).toHaveTitle("My Site");
+  test("has chapter title", async ({ page }) => {
+    await expect(page).toHaveTitle(/Silicon Valley DSA/);
   });
 
-  test("displays heading", async ({ page }) => {
+  test("displays hero heading", async ({ page }) => {
     const heading = page.getByRole("heading", { level: 1 });
-    await expect(heading).toHaveText("Hello, World");
+    await expect(heading).toContainText("working-class power");
   });
 
-  test("has proper meta description", async ({ page }) => {
-    const metaDescription = page.locator('meta[name="description"]');
-    await expect(metaDescription).toHaveAttribute(
-      "content",
-      "A static site built with React Router and Vite.",
-    );
+  test("shows upcoming events section", async ({ page }) => {
+    await expect(
+      page.getByRole("heading", { name: "Upcoming events" }),
+    ).toBeVisible();
   });
 
-  test("has Open Graph tags", async ({ page }) => {
-    await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
-      "content",
-      "My Site",
-    );
-    await expect(page.locator('meta[property="og:type"]')).toHaveAttribute(
-      "content",
-      "website",
-    );
+  test("has primary nav to the calendar", async ({ page }) => {
+    await expect(
+      page.getByRole("link", { name: "Calendar" }).first(),
+    ).toBeVisible();
   });
 });
 
-test.describe("404 Page", () => {
-  test("displays not found message", async ({ page }) => {
-    await page.goto("/nonexistent-page");
-    const heading = page.getByRole("heading", { level: 1 });
-    await expect(heading).toHaveText("404");
+test.describe("Content routes", () => {
+  test("renders a migrated WordPress page", async ({ page }) => {
+    await page.goto("/about/");
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    await expect(page.locator(".prose")).toContainText("Democratic Socialists");
   });
 
-  test("has link back to home", async ({ page }) => {
-    await page.goto("/nonexistent-page");
-    const link = page.getByRole("link", { name: "Go back home" });
-    await expect(link).toBeVisible();
-    await expect(link).toHaveAttribute("href", "/");
+  test("calendar lists events and can filter", async ({ page }) => {
+    await page.goto("/calendar");
+    await expect(page.getByRole("button", { name: "All" })).toBeVisible();
+    await expect(page.locator(".event-row").first()).toBeVisible();
+  });
+
+  test("unknown path shows 404", async ({ page }) => {
+    await page.goto("/this-page-does-not-exist");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+      "Page not found",
+    );
   });
 });

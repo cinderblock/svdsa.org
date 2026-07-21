@@ -1,6 +1,8 @@
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
 import "@fontsource-variable/inter/index.css";
 import "./styles/global.css";
+import { Header } from "~/components/Header";
+import { Footer } from "~/components/Footer";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -29,7 +31,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
         )}
       </head>
       <body>
+        <a href="#main" className="skip-link">
+          Skip to content
+        </a>
+        <Header />
         {children}
+        <Footer />
         <ScrollRestoration />
         <Scripts />
       </body>

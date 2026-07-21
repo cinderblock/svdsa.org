@@ -16,7 +16,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
 const SITE = "https://siliconvalleydsa.org";
-const OUT = join(import.meta.dir, "..", "content");
+const OUT = join(import.meta.dirname, "..", "content");
 const RAW = join(OUT, ".raw");
 const UA = "svdsa-static-migration/1.0 (one-time content export)";
 
