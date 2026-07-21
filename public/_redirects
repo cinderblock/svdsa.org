@@ -1,0 +1,12 @@
+# Cloudflare redirects (Pages + Workers static assets honor this file).
+#
+# Legacy WordPress "The Events Calendar" archive lived at /events/ with
+# list/month/day/category sub-views — all now consolidated into /calendar.
+# Individual event permalinks (/event/<slug>/) are preserved as real pages.
+/events            /calendar   301
+/events/*          /calendar   301
+
+# Old WordPress feed endpoints have no static equivalent — send to the blog.
+/feed              /blog       301
+/feed/*            /blog       301
+/comments/feed/*   /blog       301

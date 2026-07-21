@@ -134,15 +134,30 @@ refresh calendar events and blog posts.
 
 ## Remaining before/at deploy
 
-- [ ] Event detail pages (`/event/<slug>/`) — deferred; calendar is self-
-      contained for now. When added: per-event JSON split to avoid bundling
-      the 1.8 MB events file, and add their paths to prerender.
-- [ ] Embed the real forms (Action Network newsletter, Zeffy dues/donate,
-      contact Google Form) on join/donate/contact pages (currently the
-      migrated WP HTML + external links in nav/footer).
-- [ ] Legacy redirects: export the Redirection plugin rules; confirm any
-      non-permalink redirects (e.g. /events/ -> /calendar).
+- [x] Event detail pages (`/event/<slug>/`) — 459 upcoming prerendered; full
+      detail in events-full.json, imported only by the event route. cleanHtml
+      extracted to lib/html.ts so Prose doesn't drag pages/posts JSON.
+- [x] Embed the real forms — purpose-built /join/ /donate/ /contact/ routes
+      with Zeffy / Action Network / Google Form iframes (EmbedFrame). No
+      backend needed.
+- [x] Image-forward home page — solidarity SVG hero + "In the streets" photo
+      strip (CHAPTER_PHOTOS manifest, empty by default pending chapter-cleared
+      member photos; see note below).
+- [x] Legacy redirects — public/\_redirects (/events/\* -> /calendar, feeds ->
+      /blog) + public/\_headers (security + asset caching). Portable to Pages
+      and Workers. NOTE: full Redirection-plugin export needs WP admin; only
+      the obvious archive redirects are covered.
 - [ ] Deploy (task 4, WITH Cameron): choose Pages vs Workers; update
       deploy.yml (currently ssg-base's `pages deploy --project-name=my-site`);
       set CLOUDFLARE_API_TOKEN + account id; branch previews.
 - [ ] Scheduled rebuild (cron) to re-run migrate + rebuild for fresh content.
+
+### Member photos — needs Cameron/chapter
+
+Authentic action photos exist in the WP media library (`/wp-json/wp/v2/media`),
+including ICE-protest shots. NOT auto-imported: publishing identifiable members
+(esp. at ICE actions) is a consent/safety call for the chapter, and committing
+them to a repo republishes them. To add: drop cleared photos in
+`public/photos/`, list in `CHAPTER_PHOTOS` (app/lib/site.ts) — the "In the
+streets" strip then appears. Sample candidates surfaced (for Cameron to vet):
+uploads/2026/07/747062966\_\*.jpg, uploads/2026/05/IMG_7731.jpg, IMG_7053.jpg.
