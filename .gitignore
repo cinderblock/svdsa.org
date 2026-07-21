@@ -34,3 +34,6 @@ playwright/.cache/
 
 # Misc
 *.tsbuildinfo
+
+# Migration cache (raw WP API responses)
+content/.raw/

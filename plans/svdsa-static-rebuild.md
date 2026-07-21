@@ -53,19 +53,19 @@ refresh calendar events and blog posts.
 - Build on `ssg-base`, not from scratch. (Cameron's explicit ask.)
 - Prototype on Cameron's GitHub + Cloudflare; migrate to DSA infra later.
 - "Best way", not "fastest" (per global CLAUDE.md).
-
-## Open questions for the user (see AskUserQuestion round 1)
-
-1. Deploy target: Cloudflare **Pages** (what ssg-base is wired for, `*.pages.dev`
-   branch previews) vs **Workers Static Assets** (`*.workers.dev`, the newer
-   path Cloudflare is steering toward). Cameron said "workers.dev" — lean Workers,
-   but ssg-base ships Pages config. RECOMMENDATION: confirm which.
-2. Clone fidelity: pixel-faithful visual clone of current WP theme, or
-   content+structure clone with a cleaner fresh design? RECOMMENDATION:
-   content/structure clone, tidy design, since a rebuild is the point.
-3. Content pull: fetch real content from the WP REST APIs at build time
-   (recommended — proves the thesis) vs hand-copy a few representative pages
-   for the prototype.
+- **Deploy target: decide at deploy time.** Build framework-agnostic; keep the
+  static output portable between Cloudflare Pages and Workers Static Assets.
+  Don't over-invest in either deploy path until task 4 (with Cameron).
+- **Clone fidelity: content/structure clone with a fresh, clean design.** Same
+  pages/nav/content, tidy modern redesign (recognizable DSA branding). Not a
+  pixel clone of the WP theme.
+- **Content source: NO runtime API dependency.** Content lives in the repo as
+  committed files. The WordPress REST API is used ONLY as a one-time migration
+  source (dev-time export script), never at build or runtime — the whole point
+  is that WordPress can be retired. If something genuinely needs to be dynamic
+  later (e.g. frequently-updated events), use a Cloudflare Worker + D1, NOT the
+  WP backend. Design the events data layer so it can swap local JSON -> D1
+  fetch without restructuring the UI.
 
 ## Plan / steps
 
@@ -73,8 +73,9 @@ refresh calendar events and blog posts.
 2. [DONE] Copy ssg-base into svdsa.org; git init; write this plan.
 3. [ ] Get base building/running locally (bun install, dev, build).
 4. [ ] Decisions round with Cameron (the 3 open questions above).
-5. [ ] Data layer: build-time fetch scripts for pages/posts/events ->
-       local JSON (cached, committed or generated in CI).
+5. [ ] One-time WP export script (dev tool, `scripts/`) -> committed content
+       files in repo (`content/`). NOT part of build/runtime. Re-runnable to
+       re-sync from WP until WP is retired.
 6. [ ] Routes/design: layout + nav matching site IA (Calendar, About,
        Resources, Blog, Join/Donate); working-group/committee pages;
        blog index + post pages; event index + event pages.
