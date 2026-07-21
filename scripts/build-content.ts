@@ -5,9 +5,13 @@
  * fetch-wp-content.ts migration) and derives the slim artifacts the client
  * actually ships:
  *
- *   content/events-upcoming.json  — upcoming events only, minimal fields,
- *                                    so the 1.8 MB full events file never
- *                                    reaches the browser bundle.
+ *   content/events-upcoming.json  — upcoming events, minimal fields, for the
+ *                                    calendar/home lists. Keeps the 1.8 MB full
+ *                                    events file out of the browser entirely.
+ *   content/events-full.json      — upcoming events WITH full detail
+ *                                    (description, venue, organizer). Imported
+ *                                    only by the event route, so detail loads
+ *                                    only when viewing an event.
  *   content/posts-index.json      — post metadata + excerpts WITHOUT the full
  *                                    HTML bodies, so index pages (home, blog)
  *                                    don't pull every article's body.
@@ -31,10 +35,23 @@ interface FullEvent {
   start: string;
   end: string;
   allDay: boolean;
-  isVirtual: boolean;
+  timezone: string;
+  descriptionHtml: string;
   excerpt: string;
-  venue: { name: string } | null;
+  cost: string | null;
+  website: string | null;
+  isVirtual: boolean;
+  virtualUrl: string | null;
+  venue: {
+    name: string;
+    address: string | null;
+    city: string | null;
+    state: string | null;
+    zip: string | null;
+  } | null;
+  organizer: string | null;
   categories: string[];
+  image: string | null;
 }
 
 interface FullPost {
@@ -55,21 +72,43 @@ const posts = (await read("posts.json")) as FullPost[];
 // start strings without timezone surprises.
 const today = new Date().toISOString().slice(0, 10);
 
-const upcoming = events
+const upcomingEvents = events
   .filter((e) => e.start.slice(0, 10) >= today)
-  .sort((a, b) => a.start.localeCompare(b.start))
-  .map((e) => ({
-    id: e.id,
-    path: e.path,
-    title: e.title,
-    start: e.start,
-    end: e.end,
-    allDay: e.allDay,
-    isVirtual: e.isVirtual,
-    venue: e.venue?.name ?? null,
-    categories: e.categories,
-    excerpt: e.excerpt,
-  }));
+  .sort((a, b) => a.start.localeCompare(b.start));
+
+// Slim list for calendar/home.
+const eventsUpcoming = upcomingEvents.map((e) => ({
+  id: e.id,
+  path: e.path,
+  title: e.title,
+  start: e.start,
+  end: e.end,
+  allDay: e.allDay,
+  isVirtual: e.isVirtual,
+  venue: e.venue?.name ?? null,
+  categories: e.categories,
+  excerpt: e.excerpt,
+}));
+
+// Full detail for the event route (keyed lookups by path).
+const eventsFull = upcomingEvents.map((e) => ({
+  id: e.id,
+  path: e.path,
+  title: e.title,
+  start: e.start,
+  end: e.end,
+  allDay: e.allDay,
+  timezone: e.timezone,
+  descriptionHtml: e.descriptionHtml,
+  cost: e.cost,
+  website: e.website,
+  isVirtual: e.isVirtual,
+  virtualUrl: e.virtualUrl,
+  venue: e.venue,
+  organizer: e.organizer,
+  categories: e.categories,
+  image: e.image,
+}));
 
 const postsIndex = posts.map((p) => ({
   id: p.id,
@@ -84,7 +123,11 @@ const postsIndex = posts.map((p) => ({
 
 await writeFile(
   join(DIR, "events-upcoming.json"),
-  JSON.stringify(upcoming, null, 2) + "\n",
+  JSON.stringify(eventsUpcoming, null, 2) + "\n",
+);
+await writeFile(
+  join(DIR, "events-full.json"),
+  JSON.stringify(eventsFull, null, 2) + "\n",
 );
 await writeFile(
   join(DIR, "posts-index.json"),
@@ -92,5 +135,6 @@ await writeFile(
 );
 
 console.log(
-  `build-content: ${upcoming.length} upcoming events, ${postsIndex.length} post index entries`,
+  `build-content: ${eventsUpcoming.length} upcoming events (slim + full), ` +
+    `${postsIndex.length} post index entries`,
 );

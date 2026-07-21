@@ -51,17 +51,3 @@ export function getPost(pathname: string): Post | undefined {
   const want = normalize(pathname);
   return posts.find((p) => normalize(p.path) === want);
 }
-
-/**
- * Prepare rendered WordPress HTML for display:
- *  - rewrite absolute siliconvalleydsa.org links to site-relative (so the
- *    static site is self-contained and old internal links keep working),
- *  - strip `title=` attributes (never use hover-only tooltips),
- *  - drop the legacy "Read more »" excerpt tails.
- */
-export function cleanHtml(html: string): string {
-  return html
-    .replace(/https?:\/\/(www\.)?siliconvalleydsa\.org/g, "")
-    .replace(/\s+title="[^"]*"/g, "")
-    .replace(/\s+title='[^']*'/g, "");
-}

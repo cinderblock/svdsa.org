@@ -616,6 +616,36 @@ img {
   font-size: 0.9rem;
   color: var(--muted);
 }
+a.event-row {
+  color: inherit;
+  text-decoration: none;
+}
+a.event-row:hover h3 {
+  color: var(--red);
+}
+a.event-row:hover {
+  text-decoration: none;
+}
+
+.event-detail-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 1.25rem;
+  padding: 1.25rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.event-detail-meta h4 {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin: 0 0 0.35rem;
+}
+.event-detail-meta p {
+  margin: 0;
+}
 
 .text-center {
   text-align: center;

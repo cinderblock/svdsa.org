@@ -61,7 +61,7 @@ export default function Home() {
             {nextEvents.map((e) => {
               const { month, day } = dateParts(e.start);
               return (
-                <div className="event-row" key={e.id}>
+                <Link className="event-row" key={e.id} to={e.path}>
                   <div className="event-row__date">
                     <div className="m">{month}</div>
                     <div className="d">{day}</div>
@@ -81,7 +81,7 @@ export default function Home() {
                       </span>
                     ))}
                   </div>
-                </div>
+                </Link>
               );
             })}
           </div>

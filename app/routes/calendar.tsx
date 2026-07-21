@@ -1,5 +1,6 @@
 import type { MetaFunction } from "react-router";
 import { useMemo, useState } from "react";
+import { Link } from "react-router";
 import { upcomingEvents } from "~/lib/data";
 import { dateParts, longDate, time } from "~/lib/format";
 import { SITE } from "~/lib/site";
@@ -123,7 +124,7 @@ export default function Calendar() {
                   {monthKey}
                 </h2>
               )}
-              <div className="event-row">
+              <Link to={e.path} className="event-row">
                 <div className="event-row__date">
                   <div className="m">{month}</div>
                   <div className="d">{day}</div>
@@ -152,7 +153,7 @@ export default function Calendar() {
                       </span>
                     ))}
                 </div>
-              </div>
+              </Link>
             </div>
           );
         })}

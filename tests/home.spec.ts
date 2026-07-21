@@ -40,6 +40,16 @@ test.describe("Content routes", () => {
     await expect(page.locator(".event-row").first()).toBeVisible();
   });
 
+  test("calendar row links to an event detail page", async ({ page }) => {
+    await page.goto("/calendar");
+    await page.locator("a.event-row").first().click();
+    await expect(page).toHaveURL(/\/event\//);
+    await expect(page.getByRole("heading", { name: "When" })).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: "Back to calendar" }),
+    ).toBeVisible();
+  });
+
   test("unknown path shows 404", async ({ page }) => {
     await page.goto("/this-page-does-not-exist");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(
