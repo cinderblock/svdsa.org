@@ -1,5 +1,6 @@
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
-import "@fontsource-variable/inter/index.css";
+import "@fontsource-variable/archivo/index.css";
+import "@fontsource-variable/roboto-slab/index.css";
 import "./styles/global.css";
 import { Header } from "~/components/Header";
 import { Footer } from "~/components/Footer";

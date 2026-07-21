@@ -68,6 +68,15 @@ export default function Home() {
         </div>
       </section>
 
+      <section className="slogan-band">
+        <div className="container">
+          <p>
+            An injury to one is an injury to all.{" "}
+            <span className="em">Solidarity forever.</span>
+          </p>
+        </div>
+      </section>
+
       {CHAPTER_PHOTOS.length > 0 && (
         <section className="section">
           <div className="container">
