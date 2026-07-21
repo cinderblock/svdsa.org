@@ -140,13 +140,13 @@ refresh calendar events and blog posts.
 
 - `bun run dev` -> http://localhost:9999
 - `bun run build` -> build/client (555 static pages)
-- Repo: **github.com/cinderblock/svdsa.org** (private, default branch `red`).
+- Repo: **github.com/cinderblock/svdsa.org** (public, default branch `red`).
   CI (ci.yml) green on first push. `wrangler deploy --dry-run` passes locally.
 - Preview MCP (t3-code) needs re-auth to screenshot; verified via built HTML.
 
 ### Go-live checklist (dashboard = Cameron; infra rule)
 
-1. [DONE] Push to GitHub (private).
+1. [DONE] Push to GitHub (public).
 2. [ ] CF dashboard -> Workers & Pages -> Create -> Import repository ->
        cinderblock/svdsa.org. Build cmd `bun run build`, deploy cmd
        `npx wrangler deploy`, production branch `red`. -> svdsa.workers.dev
