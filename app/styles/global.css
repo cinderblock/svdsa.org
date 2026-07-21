@@ -4,6 +4,31 @@
    DSA red, warm neutrals, accessible, light + dark.
    ========================================================================== */
 
+/* Brand font — "Manifold DSA" (DSA's licensed typeface).
+   We do NOT ship the font files: they're licensed and this site is public, so
+   redistributing them without the license would be infringement. Until the
+   chapter holds the license, the stack falls back to Inter (bundled).
+
+   To enable once licensed: drop the .woff2 files in public/fonts/manifold-dsa/
+   and uncomment the rules below (see public/fonts/README.md). No other change
+   is needed — "Manifold DSA" is already first in --font.
+
+@font-face {
+  font-family: "Manifold DSA";
+  src: url("/fonts/manifold-dsa/ManifoldDSA-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Manifold DSA";
+  src: url("/fonts/manifold-dsa/ManifoldDSA-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+*/
+
 :root {
   --red: #ec1f27;
   --red-700: #c0141a;
@@ -22,7 +47,12 @@
   --radius: 0.6rem;
   --shadow: 0 1px 2px rgba(25, 21, 18, 0.06), 0 4px 16px rgba(25, 21, 18, 0.06);
 
-  --font: "Inter Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* "Manifold DSA" is DSA's licensed brand font — falls back to Inter until
+     the chapter has the license and the font files are added. See the
+     @font-face scaffold below and public/fonts/README.md. */
+  --font:
+    "Manifold DSA", "Inter Variable", system-ui, -apple-system, "Segoe UI",
+    sans-serif;
 
   color-scheme: light dark;
 }
