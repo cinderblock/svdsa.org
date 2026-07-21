@@ -6,11 +6,21 @@ import events from "./content/events-upcoming.json";
 // Every path that gets prerendered to static HTML. Preserves the legacy
 // WordPress URLs (pages at their own paths, posts at /YYYY/MM/DD/slug/, events
 // at /event/<slug>/[<date>/]) so old links keep resolving.
-const staticPaths = ["/", "/calendar", "/blog"];
+const staticPaths = [
+  "/",
+  "/calendar",
+  "/blog",
+  "/join/",
+  "/donate/",
+  "/contact/",
+];
+
+// Paths that have their own purpose-built routes instead of the WP-page splat.
+const OVERRIDDEN = new Set(["/", "/blog/", "/join/", "/donate/", "/contact/"]);
 
 const pagePaths = (pages as { path: string }[])
   .map((p) => p.path)
-  .filter((p) => p !== "/" && p !== "/blog/"); // home + blog handled explicitly
+  .filter((p) => !OVERRIDDEN.has(p));
 
 const postPaths = (posts as { path: string }[]).map((p) => p.path);
 

@@ -668,6 +668,17 @@ a.event-row:hover {
   margin: 0;
 }
 
+.embed-frame iframe {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.embed-frame__fallback {
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+}
+
 .photo-strip {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));

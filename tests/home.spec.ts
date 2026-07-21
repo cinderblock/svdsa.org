@@ -50,6 +50,14 @@ test.describe("Content routes", () => {
     ).toBeVisible();
   });
 
+  test("join page embeds the dues + newsletter forms", async ({ page }) => {
+    await page.goto("/join/");
+    await expect(
+      page.getByRole("heading", { name: "Join the movement" }),
+    ).toBeVisible();
+    await expect(page.locator("iframe").first()).toBeVisible();
+  });
+
   test("unknown path shows 404", async ({ page }) => {
     await page.goto("/this-page-does-not-exist");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(
