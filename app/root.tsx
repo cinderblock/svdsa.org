@@ -23,6 +23,20 @@ export function Layout({ children }: { children: React.ReactNode }) {
           href="/favicon-192.png"
         />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link
+          rel="preload"
+          href="/fonts/manifold-dsa/ManifoldDSA-Medium.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          href="/fonts/manifold-dsa/ManifoldDSA-Bold.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
         <Meta />
         <Links />
         {import.meta.env.DEV && (

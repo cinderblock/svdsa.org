@@ -32,38 +32,55 @@ export default function Home() {
     <main id="main">
       <section className="hero">
         <div className="container hero__grid">
-          <div>
-            <p className="kicker">Silicon Valley · South Bay</p>
-            <h1>
-              Building working-class power,
-              <br />
-              for the many — not the few.
+          <div className="hero__logo">
+            <img
+              src="/svdsa-logo.svg"
+              alt="Silicon Valley DSA rose emblem"
+              width={190}
+              height={269}
+            />
+          </div>
+          <div className="plate">
+            <h1 className="plate__wordmark">
+              <span className="sv">Silicon Valley</span>
+              <span className="dsa">Democratic Socialists of America</span>
             </h1>
-            <p className="lead">
-              We're not a political party — we're a community building
-              working-class power while fighting for a radically equitable
-              society. DSA is the largest socialist organization in America,
-              with 100,000+ members nationwide.
+            <hr />
+            <p>
+              We believe economies and societies should be run{" "}
+              <strong>democratically</strong> to meet the needs of the many, not
+              the few. We're <em>not</em> a political party… we're a community
+              building <strong>working class power</strong> while fighting for a{" "}
+              <strong>radically equitable</strong> society. DSA is the{" "}
+              <strong>largest socialist organization in America</strong>, with{" "}
+              <strong>100,000+ members</strong> nationwide.
+            </p>
+            <p>
+              Come join us in supporting key local causes, all while{" "}
+              <strong>building community</strong> in new and meaningful ways.
+            </p>
+            <p>
+              We'd love to see you at one of our{" "}
+              <Link to="/calendar">
+                <strong>events</strong>
+              </Link>
+              ! To stay in touch,{" "}
+              <a href={EXTERNAL.newsletter}>
+                <strong>sign up</strong>
+              </a>{" "}
+              for our newsletter. <strong>Solidarity Forever!</strong>
             </p>
             <div className="hero__actions">
               <Link className="btn btn-primary" to="/join/">
                 Join us
               </Link>
               <Link className="btn btn-outline" to="/calendar">
-                See upcoming events
+                Upcoming events
               </Link>
               <a className="btn btn-outline" href={EXTERNAL.donate}>
                 Donate
               </a>
             </div>
-          </div>
-          <div className="hero__art">
-            <img
-              src="/solidarity.svg"
-              alt="Illustration of a crowd raising fists in solidarity"
-              width={800}
-              height={600}
-            />
           </div>
         </div>
       </section>
@@ -136,7 +153,7 @@ export default function Home() {
             style={{ maxWidth: "44rem", marginTop: "-0.75rem" }}
           >
             Members organize through working groups. Jump in wherever your
-            energy is — no experience required.
+            energy is. No experience required.
           </p>
           <div className="grid grid--cards" style={{ marginTop: "1.5rem" }}>
             {WORKING_GROUPS.map((w) => (
@@ -155,10 +172,10 @@ export default function Home() {
       </section>
 
       {/* Latest dispatches */}
-      <section className="section">
+      <section className="section section--dark">
         <div className="container">
           <div className="section__head">
-            <h2>Latest dispatches</h2>
+            <h2>Dispatches</h2>
             <Link to="/blog">All posts →</Link>
           </div>
           <div className="grid grid--cards">

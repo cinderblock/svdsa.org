@@ -9,9 +9,13 @@ test.describe("Home Page", () => {
     await expect(page).toHaveTitle(/Silicon Valley DSA/);
   });
 
-  test("displays hero heading", async ({ page }) => {
+  test("displays hero wordmark heading", async ({ page }) => {
     const heading = page.getByRole("heading", { level: 1 });
-    await expect(heading).toContainText("working-class power");
+    await expect(heading).toContainText("Democratic Socialists of America");
+  });
+
+  test("hero welcome copy states the mission", async ({ page }) => {
+    await expect(page.locator(".plate")).toContainText("working class power");
   });
 
   test("shows upcoming events section", async ({ page }) => {

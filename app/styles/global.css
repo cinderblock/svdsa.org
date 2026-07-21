@@ -1,7 +1,7 @@
 /* ==========================================================================
    Silicon Valley DSA — design system
-   Content/structure clone of siliconvalleydsa.org with a fresh, clean design.
-   DSA red, warm neutrals, accessible, light + dark.
+   Faithful reskin of siliconvalleydsa.org (the official `dsa_wordpress_theme`).
+   DSA red, near-black on white, Manifold DSA type, accessible, light + dark.
    ========================================================================== */
 
 /* Brand font — "Manifold DSA" (DSA's brand typeface). Used with the chapter's
@@ -26,21 +26,27 @@
 
 :root {
   --red: #ec1f27;
-  --red-700: #c0141a;
+  --red-700: #b91016;
   --red-900: #8f0f14;
+  --red-300: #f04e54;
 
-  --bg: #fbf8f4;
+  --bg: #ffffff;
   --surface: #ffffff;
-  --surface-2: #f3efe9;
-  --text: #191512;
-  --muted: #5f574f;
-  --border: #e4ddd2;
+  --surface-2: #f2f2f2;
+  --text: #231f20;
+  --muted: #5b5757;
+  --border: #d7d7d7;
   --link: var(--red-700);
 
-  --header-h: 4rem;
-  --maxw: 68rem;
-  --radius: 0.6rem;
-  --shadow: 0 1px 2px rgba(25, 21, 18, 0.06), 0 4px 16px rgba(25, 21, 18, 0.06);
+  /* Dark chrome (top-bar hover invert, footer widget bars, dispatches band) */
+  --ink: #0a0a0a;
+  --ink-text: #ffffff;
+  --footer-bg: #ededed;
+
+  --header-h: 4.25rem;
+  --maxw: 75rem;
+  --radius: 0.5rem;
+  --shadow: 0 4px 15px -8px rgba(0, 0, 0, 0.4), 0 0 5px -2px rgba(0, 0, 0, 0.3);
 
   /* "Manifold DSA" is the DSA brand font (loaded above); Inter is the
      fallback while it loads or if it fails. */
@@ -56,15 +62,21 @@
     --red: #ff4249;
     --red-700: #ff5a60;
     --red-900: #ff8388;
+    --red-300: #ff8388;
 
-    --bg: #141210;
-    --surface: #1d1a17;
-    --surface-2: #262220;
+    --bg: #16110f;
+    --surface: #201b18;
+    --surface-2: #2a2421;
     --text: #f3efe9;
     --muted: #b3a99e;
-    --border: #352f2a;
+    --border: #3a332e;
     --link: var(--red-700);
-    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 4px 16px rgba(0, 0, 0, 0.35);
+
+    --ink: #050505;
+    --ink-text: #ffffff;
+    --footer-bg: #1b1613;
+    --shadow:
+      0 4px 15px -8px rgba(0, 0, 0, 0.7), 0 0 5px -2px rgba(0, 0, 0, 0.8);
   }
 }
 
@@ -72,13 +84,17 @@
 :root[data-force-light] {
   color-scheme: light;
   --red: #ec1f27;
-  --red-700: #c0141a;
-  --bg: #fbf8f4;
+  --red-700: #b91016;
+  --red-300: #f04e54;
+  --bg: #ffffff;
   --surface: #ffffff;
-  --surface-2: #f3efe9;
-  --text: #191512;
-  --muted: #5f574f;
-  --border: #e4ddd2;
+  --surface-2: #f2f2f2;
+  --text: #231f20;
+  --muted: #5b5757;
+  --border: #d7d7d7;
+  --ink: #0a0a0a;
+  --ink-text: #ffffff;
+  --footer-bg: #ededed;
 }
 
 *,
@@ -113,13 +129,13 @@ h1,
 h2,
 h3,
 h4 {
-  line-height: 1.15;
-  font-weight: 800;
-  letter-spacing: -0.02em;
+  line-height: 1.2;
+  font-weight: 600;
+  letter-spacing: 0;
   margin: 0 0 0.5em;
 }
 h1 {
-  font-size: clamp(2rem, 5vw, 3.2rem);
+  font-size: clamp(2rem, 5vw, 3rem);
 }
 h2 {
   font-size: clamp(1.5rem, 3vw, 2.1rem);
@@ -193,13 +209,12 @@ img {
   position: sticky;
   top: 0;
   z-index: 50;
-  background: color-mix(in srgb, var(--surface) 88%, transparent);
-  backdrop-filter: saturate(140%) blur(8px);
-  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: 0 4px 30px -10px rgba(30, 0, 0, 0.4);
 }
 .site-header__inner {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   gap: 1rem;
   min-height: var(--header-h);
 }
@@ -207,16 +222,15 @@ img {
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--text);
-  letter-spacing: -0.02em;
+  padding: 0.35rem 0;
 }
 .brand:hover {
   text-decoration: none;
 }
 .brand__mark {
   flex: none;
-  border-radius: 7px;
   display: block;
 }
 .brand__name {
@@ -226,10 +240,11 @@ img {
 }
 .brand__name b {
   color: var(--red);
+  font-weight: 700;
 }
 .brand__name small {
   font-size: 0.72rem;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--muted);
   letter-spacing: 0.01em;
 }
@@ -239,26 +254,32 @@ img {
 }
 .nav__list {
   display: flex;
-  align-items: center;
-  gap: 0.25rem;
+  align-items: stretch;
+  gap: 0;
   list-style: none;
   margin: 0;
   padding: 0;
 }
 .nav__item {
   position: relative;
+  display: flex;
+  align-items: stretch;
 }
 .nav__link {
-  display: inline-block;
-  padding: 0.5rem 0.75rem;
-  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  padding: 0 1rem;
   color: var(--text);
   font-weight: 600;
+  cursor: pointer;
 }
+/* Hard invert on hover/focus/active: the DSA top-bar signature */
 .nav__link:hover,
 .nav__item:hover > .nav__link,
-.nav__item:focus-within > .nav__link {
-  background: var(--surface-2);
+.nav__item:focus-within > .nav__link,
+.nav__link.active {
+  background: var(--ink);
+  color: var(--ink-text);
   text-decoration: none;
 }
 .nav__menu {
@@ -267,11 +288,13 @@ img {
   left: 0;
   min-width: 15rem;
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 0.4rem;
-  margin: 0.35rem 0 0;
+  border: none;
+  border-top: 3px solid var(--ink);
+  box-shadow:
+    0 4px 15px -8px rgba(0, 0, 0, 0.6),
+    0 0 5px -2px rgba(0, 0, 0, 0.8);
+  padding: 0;
+  margin: 0;
   list-style: none;
   opacity: 0;
   visibility: hidden;
@@ -286,19 +309,26 @@ img {
   visibility: visible;
   transform: translateY(0);
 }
+.nav__menu li:not(:last-child) {
+  border-bottom: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
+}
 .nav__menu a {
   display: block;
-  padding: 0.45rem 0.7rem;
-  border-radius: 0.4rem;
+  padding: 0.6rem 0.9rem;
   color: var(--text);
   font-size: 0.95rem;
+  font-weight: 500;
 }
 .nav__menu a:hover {
-  background: var(--surface-2);
+  background: var(--ink);
+  color: var(--ink-text);
   text-decoration: none;
 }
 .nav__cta {
-  margin-left: 0.4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: 0.6rem;
 }
 
 /* Mobile nav uses a native <details> disclosure — no JS required */
@@ -364,49 +394,79 @@ img {
 
 /* ---- Hero ---------------------------------------------------------------- */
 
+/* Frontispiece: full-width DSA-red band with a white "plate card". */
 .hero {
-  padding: clamp(2.5rem, 7vw, 5rem) 0;
-  background:
-    radial-gradient(
-      110% 120% at 100% 0%,
-      color-mix(in srgb, var(--red) 12%, transparent),
-      transparent 60%
-    ),
-    var(--surface);
-  border-bottom: 1px solid var(--border);
+  background: var(--red);
+  padding: clamp(2.5rem, 6vw, 3.5rem) 0;
 }
 .hero__grid {
   display: grid;
-  grid-template-columns: 1.15fr 0.85fr;
+  grid-template-columns: 1fr 1fr;
   gap: 2.5rem;
   align-items: center;
 }
-.hero__art img {
-  width: 100%;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
+.hero__logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.hero__logo img {
+  width: min(20rem, 70%);
+  height: auto;
   display: block;
+  filter: drop-shadow(0 6px 24px rgba(0, 0, 0, 0.25));
 }
 @media (max-width: 52rem) {
   .hero__grid {
     grid-template-columns: 1fr;
+    gap: 1.5rem;
   }
-  .hero__art {
-    order: -1;
-    max-width: 22rem;
+  .hero__logo img {
+    width: min(11rem, 45%);
   }
 }
-.hero p.lead {
-  font-size: clamp(1.1rem, 2vw, 1.35rem);
+
+/* The plate card holding the welcome copy */
+.plate {
+  background: var(--surface);
   color: var(--text);
-  max-width: 44rem;
+  border-radius: 1rem;
+  padding: clamp(1.5rem, 3vw, 2.5rem);
+  box-shadow: 0 10px 40px -12px rgba(0, 0, 0, 0.45);
 }
-.hero .kicker {
-  color: var(--red);
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-size: 0.85rem;
+.plate__wordmark {
+  text-align: center;
+  margin: 0 0 1rem;
+  font-weight: 700;
+}
+.plate__wordmark .sv {
+  display: block;
+  font-family:
+    ui-monospace, "Cascadia Code", "SFMono-Regular", Menlo, monospace;
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--text);
+}
+.plate__wordmark .dsa {
+  display: block;
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  font-weight: 600;
+  line-height: 1.15;
+  margin-top: 0.15rem;
+}
+.plate hr {
+  border: none;
+  border-top: 2px solid var(--red);
+  width: 4rem;
+  margin: 1rem auto 1.25rem;
+}
+.plate p {
+  margin: 0 0 0.9rem;
+  font-size: 1.02rem;
+}
+.plate p:last-child {
+  margin-bottom: 0;
 }
 .hero__actions {
   display: flex;
@@ -421,8 +481,23 @@ img {
   padding: clamp(2rem, 5vw, 3.5rem) 0;
 }
 .section--alt {
-  background: var(--surface);
+  background: var(--surface-2);
   border-block: 1px solid var(--border);
+}
+/* Dark band: the "Dispatches" treatment from the original */
+.section--dark {
+  background: var(--ink);
+  color: #fff;
+}
+.section--dark h2,
+.section--dark h3 {
+  color: #fff;
+}
+.section--dark .section__head a {
+  color: #fff;
+}
+.section--dark .muted {
+  color: rgba(255, 255, 255, 0.7);
 }
 .section__head {
   display: flex;
@@ -432,7 +507,7 @@ img {
   margin-bottom: 1.5rem;
 }
 .section__head a {
-  font-weight: 700;
+  font-weight: 600;
   white-space: nowrap;
 }
 
@@ -449,9 +524,14 @@ img {
   flex-direction: column;
   background: var(--surface);
   border: 1px solid var(--border);
+  border-top: 3px solid var(--ink);
   border-radius: var(--radius);
   padding: 1.25rem;
   box-shadow: var(--shadow);
+}
+/* On the dark band, cards read as light plates with a red top-stripe */
+.section--dark .card {
+  border-top-color: var(--red);
 }
 .card h3 {
   margin: 0 0 0.35rem;
@@ -556,8 +636,8 @@ img {
 
 .site-footer {
   margin-top: 3rem;
-  background: var(--surface);
-  border-top: 3px solid var(--red);
+  background: var(--footer-bg);
+  border-top: 3px solid var(--ink);
   color: var(--text);
 }
 .site-footer__grid {
@@ -572,11 +652,16 @@ img {
   }
 }
 .site-footer h4 {
+  display: inline-block;
   font-size: 0.8rem;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: var(--muted);
-  margin: 0 0 0.75rem;
+  color: var(--ink-text);
+  background: var(--ink);
+  padding: 0.3rem 0.6rem;
+  border-radius: 0.25rem;
+  margin: 0 0 0.9rem;
 }
 .site-footer ul {
   list-style: none;
@@ -591,8 +676,28 @@ img {
 }
 .socials {
   display: flex;
-  gap: 0.75rem;
-  margin-top: 0.75rem;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 0.9rem;
+}
+/* Circular social buttons: black, red on hover (original signature) */
+.socials a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.5rem;
+  height: 2.5rem;
+  padding: 0 0.9rem;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--ink-text);
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: background 0.15s ease;
+}
+.socials a:hover {
+  background: var(--red);
+  text-decoration: none;
 }
 .site-footer__bar {
   border-top: 1px solid var(--border);
@@ -729,6 +834,13 @@ a.event-row:hover {
   color: var(--muted);
 }
 
+.kicker {
+  color: var(--red);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.85rem;
+}
 .text-center {
   text-align: center;
 }

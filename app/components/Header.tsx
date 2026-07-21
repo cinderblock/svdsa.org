@@ -56,8 +56,6 @@ export function Header() {
               <a className="btn btn-outline" href={EXTERNAL.donate}>
                 Donate
               </a>
-            </li>
-            <li>
               <Link className="btn btn-primary" to="/join/">
                 Join
               </Link>

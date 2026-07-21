@@ -21,8 +21,8 @@ export function Footer() {
         <div>
           <h4>Silicon Valley DSA</h4>
           <p className="muted" style={{ margin: "0 0 0.5rem" }}>
-            Building working-class power in the South Bay. Not a political party
-            — a community fighting for a radically equitable society.
+            Building working class power in the South Bay. Not a political
+            party, but a community fighting for a radically equitable society.
           </p>
           <div className="socials">
             {SOCIALS.map((s) => (
