@@ -3,4 +3,6 @@ pre-commit:
   jobs:
     - name: format check
       glob: "*.{ts,tsx,js,jsx,css,json,jsonc,md,yaml,yml}"
-      run: bunx oxfmt --check {staged_files}
+      # --no-error-on-unmatched-pattern: a staged batch may be entirely under
+      # content/ (ignored via .prettierignore); don't fail when all are excluded.
+      run: bunx oxfmt --check --no-error-on-unmatched-pattern {staged_files}

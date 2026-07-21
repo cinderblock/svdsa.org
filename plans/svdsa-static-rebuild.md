@@ -121,6 +121,21 @@ refresh calendar events and blog posts.
   links rewritten to relative, zero title= attrs). Dev server moved to :9999
   (vite.config strictPort; playwright baseURL updated).
 
+## Content model (as of 2026-07-21)
+
+- **Source of truth = one Markdown file per item** (YAML frontmatter + HTML
+  body), year-bucketed: `content/posts/<year>/…md`, `content/events/<year>/…md`,
+  `content/pages/<url-path>.md`. New content = new file (no shared-file merge
+  conflicts / unbounded growth). 1070 files (53 pages, 41 posts, 976 events).
+- `fetch-wp-content.ts` writes this tree (clears + rewrites on re-sync).
+- `build-content.ts` reads it → `content/generated/*.json` (full + slim splits)
+  — **generated, git-ignored, never committed** (so regen doesn't conflict).
+  Runs before dev/typecheck/build. App imports from `content/generated/`.
+- Event URL dedup: recurring records sharing one URL collapse to one file
+  (lowest id wins); 986 records → 976 files.
+- Bodies are still WP HTML inside the .md (Markdown passes HTML through);
+  converting to clean Markdown is a later, incremental pass.
+
 ## Current state / how to view
 
 - `bun run dev` -> http://localhost:9999

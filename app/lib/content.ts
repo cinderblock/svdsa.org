@@ -7,8 +7,8 @@
  * data.ts instead. The 1.8 MB events.json is never imported anywhere.
  */
 
-import pagesData from "../../content/pages.json";
-import postsData from "../../content/posts.json";
+import pagesData from "../../content/generated/pages.json";
+import postsData from "../../content/generated/posts.json";
 
 export interface Page {
   id: number;

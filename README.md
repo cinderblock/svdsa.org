@@ -15,20 +15,33 @@ infrequently. This rebuild:
 
 - **Ships pure static output** — no runtime dependency on WordPress (or any
   API). WordPress can be retired.
-- **Keeps content in the repo** as committed JSON (`content/`), migrated once
-  from the old site.
+- **Keeps content in the repo** as committed Markdown (`content/`), migrated
+  once from the old site.
 - **Preserves the old URLs** (pages at their paths, posts at `/YYYY/MM/DD/slug/`)
   so existing links keep working.
 
 ## Content pipeline
 
-Content lives in `content/*.json`, committed to the repo. Two scripts manage it;
-**neither runs at build or in production** — the built site only reads local files.
+Content is **one Markdown file per item** (YAML frontmatter + body), committed
+to the repo — so adding a post/event is a new file, never an edit to a shared
+file (no merge conflicts, no unbounded growth):
 
-| Script                        | Command                 | What it does                                                                                                                                                                                  |
-| ----------------------------- | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `scripts/fetch-wp-content.ts` | `bun run migrate`       | One-time / on-demand migration. Pulls pages, posts, and events from the legacy WordPress REST APIs into `content/{pages,posts,events}.json`. Re-run to re-sync until WP is retired.           |
-| `scripts/build-content.ts`    | `bun run build:content` | Network-free. Derives the slim client artifacts (`events-upcoming.json`, `posts-index.json`) so large HTML bodies and past events never bloat index pages. Runs automatically before `build`. |
+```
+content/
+  posts/<year>/<date>-<slug>.md      # bucketed by publish year
+  events/<year>/<path-key>.md         # bucketed by start-date year
+  pages/<url-path>.md                 # mirrors the page URL path
+```
+
+These files are the **source of truth**. The aggregate JSON the app imports is
+a **generated, git-ignored build artifact** (`content/generated/`) — never
+hand-edited, never committed, so two people adding content never conflict on a
+shared file.
+
+| Script                        | Command                 | What it does                                                                                                                                                          |
+| ----------------------------- | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `scripts/fetch-wp-content.ts` | `bun run migrate`       | One-time / on-demand migration. Pulls WordPress → the per-item Markdown tree above (clears + rewrites the three dirs). Re-run to re-sync until WP is retired.         |
+| `scripts/build-content.ts`    | `bun run build:content` | Network-free. Reads the Markdown tree and assembles `content/generated/*.json` (full + slim splits) plus `sitemap.xml`/`robots.txt`. Runs before dev/typecheck/build. |
 
 Data delivery is split for performance:
 
@@ -59,8 +72,8 @@ HTML at build.
 
 ```sh
 bun install
-bun run dev          # dev server at http://localhost:5173
-bun run build        # derive slim content + prerender all pages
+bun run dev          # dev server at http://localhost:9999
+bun run build        # assemble content + prerender all pages
 bun run preview      # preview the built static site
 ```
 

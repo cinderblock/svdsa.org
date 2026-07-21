@@ -1,7 +1,7 @@
 import type { Config } from "@react-router/dev/config";
-import pages from "./content/pages.json";
-import posts from "./content/posts.json";
-import events from "./content/events-upcoming.json";
+import pages from "./content/generated/pages.json";
+import posts from "./content/generated/posts.json";
+import events from "./content/generated/events-upcoming.json";
 
 // Every path that gets prerendered to static HTML. Preserves the legacy
 // WordPress URLs (pages at their own paths, posts at /YYYY/MM/DD/slug/, events

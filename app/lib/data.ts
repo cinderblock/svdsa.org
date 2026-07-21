@@ -6,8 +6,8 @@
  * content route, so index pages stay light.
  */
 
-import postsIndexData from "../../content/posts-index.json";
-import eventsData from "../../content/events-upcoming.json";
+import postsIndexData from "../../content/generated/posts-index.json";
+import eventsData from "../../content/generated/events-upcoming.json";
 
 export interface PostIndex {
   id: number;

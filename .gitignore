@@ -41,3 +41,6 @@ content/.raw/
 # Wrangler / Cloudflare
 .wrangler/
 .dev.vars
+
+# Generated content aggregates (assembled from content/*/**.md at build)
+content/generated/

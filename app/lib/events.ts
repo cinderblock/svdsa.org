@@ -3,7 +3,7 @@
  * descriptions/venues never loads on the calendar or any other page.
  */
 
-import eventsFullData from "../../content/events-full.json";
+import eventsFullData from "../../content/generated/events-full.json";
 
 export interface EventFull {
   id: number;

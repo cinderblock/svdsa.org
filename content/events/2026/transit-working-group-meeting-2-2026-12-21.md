@@ -1,0 +1,20 @@
+---
+id: 10003189
+slug: transit-working-group-meeting-2
+path: /event/transit-working-group-meeting-2/2026-12-21/
+title: Transit Working Group Meeting
+start: '2026-12-21 18:30:00'
+end: '2026-12-21 19:30:00'
+allDay: false
+timezone: America/Los_Angeles
+isVirtual: false
+venue:
+  name: Zoom
+organizer: Silicon Valley DSA
+categories:
+  - SV DSA
+  - WG - Transit
+---
+
+<p class="p1">Come join us for the transit working group meeting, where we&#8217;ll discuss ongoing projects and strategies for SVDSA to build power in this space.</p>
+<p class="p1">Register for the Zoom: <a href="https://us02web.zoom.us/meeting/register/EKUU9OdiSNeHXL5jbco0_g">https://us02web.zoom.us/meeting/register/KPNJzh9XRD6tttrjrK1nOw</a></p>
