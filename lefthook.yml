@@ -1,0 +1,6 @@
+pre-commit:
+  parallel: true
+  jobs:
+    - name: format check
+      glob: "*.{ts,tsx,js,jsx,css,json,jsonc,md,yaml,yml}"
+      run: bunx oxfmt --check {staged_files}
