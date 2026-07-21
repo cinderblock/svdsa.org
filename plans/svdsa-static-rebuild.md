@@ -71,18 +71,13 @@ refresh calendar events and blog posts.
 
 1. [DONE] Crawl + map live site; confirm REST APIs; assess feasibility.
 2. [DONE] Copy ssg-base into svdsa.org; git init; write this plan.
-3. [ ] Get base building/running locally (bun install, dev, build).
-4. [ ] Decisions round with Cameron (the 3 open questions above).
-5. [ ] One-time WP export script (dev tool, `scripts/`) -> committed content
-       files in repo (`content/`). NOT part of build/runtime. Re-runnable to
-       re-sync from WP until WP is retired.
-6. [ ] Routes/design: layout + nav matching site IA (Calendar, About,
-       Resources, Blog, Join/Donate); working-group/committee pages;
-       blog index + post pages; event index + event pages.
-7. [ ] Calendar UI: month/list view with client-side filtering.
-8. [ ] Forms strategy (contact/join/donate) — external links or Worker.
-9. [ ] Preserve legacy URLs / redirects (Redirection plugin export + WP
-       permalink structure `/YYYY/MM/DD/slug/`).
+3. [DONE] Base building/running locally (bun install, dev, build).
+4. [DONE] Decisions round with Cameron.
+5. [DONE] One-time WP export script -> committed content/ (re-runnable).
+6. [DONE] Routes/design: layout + nav, WP pages/posts, blog, events.
+7. [DONE] Calendar UI: list view with client-side filter + search.
+8. [DONE] Forms: /join /donate /contact embed external services.
+9. [DONE] Legacy URLs preserved (prerender path list) + /events redirects.
 10. [ ] Deploy to Cloudflare with branch previews (WITH Cameron — infra
         rule: per-change authorization required).
 11. [ ] Scheduled rebuild (cron) for fresh events/posts.
