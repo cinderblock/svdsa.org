@@ -4,7 +4,7 @@
   // prerendered files in build/client from its edge. A Worker script can be
   // added later (e.g. a D1-backed events API) without changing hosting.
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "svdsa-org",
+  "name": "svdsa",
   "compatibility_date": "2026-07-01",
   "assets": {
     "directory": "./build/client",
