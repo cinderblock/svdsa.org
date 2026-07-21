@@ -182,7 +182,20 @@ refresh calendar events and blog posts.
   REMAINING (needs Cameron — infra rule): push repo to GitHub; connect
   Workers Builds in CF dashboard for deploy + branch previews; optional
   SITE_URL build var; custom domain later. Steps in README.
-- [ ] Scheduled rebuild (cron) to re-run migrate + rebuild for fresh content.
+- [x] Time-relative rendering (Fix A): "upcoming"/calendar filter by the
+      CLIENT clock (useNow hook — null pre-hydration to avoid mismatch, then
+      real clock; refreshes at midnight + on tab focus). A left-open tab stays
+      correct as the date changes, and "today" is right between deploys. Also
+      fixed Footer copyright year (build-year fallback via generated site.json,
+      live year after hydration) — was a latent year-boundary hydration bug.
+- [ ] Scheduled rebuild for DATA freshness (new/edited events). Decision:
+      **Cloudflare Cron Trigger** (not GitHub Actions cron) — a scheduled Worker
+      that calls GitHub `repository_dispatch` to kick a Workers Build (reliable
+      trigger + static output). Datastore decision: NOT D1 (relational,
+      per-row billing, wasted here). If we ever need deploy-independent
+      freshness, use **KV** (read-heavy/write-rare fit; both D1 & KV are $0 at
+      our scale, so choose on fit). For now: static + cron rebuild, no runtime
+      store.
 
 ### Deploy decision (Workers vs Pages) — resolved
 

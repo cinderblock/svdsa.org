@@ -2,7 +2,8 @@ import type { MetaFunction } from "react-router";
 import { useMemo, useState } from "react";
 import { Link } from "react-router";
 import { upcomingEvents } from "~/lib/data";
-import { dateParts, longDate, time } from "~/lib/format";
+import { dateParts, isUpcoming, longDate, time } from "~/lib/format";
+import { useNow } from "~/lib/useNow";
 import { SITE } from "~/lib/site";
 
 export const meta: MetaFunction = () => [
@@ -46,15 +47,27 @@ function matches(ev: (typeof upcomingEvents)[number], key: FilterKey): boolean {
 export default function Calendar() {
   const [filter, setFilter] = useState<FilterKey>("all");
   const [q, setQ] = useState("");
+  const now = useNow();
+
+  // Drop events that have already passed, relative to the *client's* current
+  // day — so the list stays correct between deploys and as a left-open tab
+  // crosses midnight. Before hydration (now === null) show the build snapshot.
+  const upcoming = useMemo(
+    () =>
+      now
+        ? upcomingEvents.filter((e) => isUpcoming(e.start, now))
+        : upcomingEvents,
+    [now],
+  );
 
   const shown = useMemo(() => {
     const needle = q.trim().toLowerCase();
-    return upcomingEvents.filter(
+    return upcoming.filter(
       (e) =>
         matches(e, filter) &&
         (!needle || e.title.toLowerCase().includes(needle)),
     );
-  }, [filter, q]);
+  }, [upcoming, filter, q]);
 
   let lastMonth = "";
 
@@ -63,7 +76,7 @@ export default function Calendar() {
       <div className="container page-head">
         <h1>Calendar</h1>
         <p className="muted">
-          {upcomingEvents.length} upcoming events. All times Pacific.
+          {upcoming.length} upcoming events. All times Pacific.
         </p>
       </div>
 

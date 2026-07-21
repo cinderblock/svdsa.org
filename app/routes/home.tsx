@@ -1,7 +1,8 @@
 import type { MetaFunction } from "react-router";
 import { Link } from "react-router";
 import { postsIndex, upcomingEvents } from "~/lib/data";
-import { dateParts, shortDate, time } from "~/lib/format";
+import { dateParts, isUpcoming, shortDate, time } from "~/lib/format";
+import { useNow } from "~/lib/useNow";
 import { CHAPTER_PHOTOS, EXTERNAL, SITE, WORKING_GROUPS } from "~/lib/site";
 
 export const meta: MetaFunction = () => {
@@ -17,7 +18,14 @@ export const meta: MetaFunction = () => {
 };
 
 export default function Home() {
-  const nextEvents = upcomingEvents.slice(0, 4);
+  const now = useNow();
+  // Next few events relative to the client's current day (see useNow); before
+  // hydration (now === null) render the build snapshot.
+  const nextEvents = (
+    now
+      ? upcomingEvents.filter((e) => isUpcoming(e.start, now))
+      : upcomingEvents
+  ).slice(0, 4);
   const latest = postsIndex.slice(0, 3);
 
   return (

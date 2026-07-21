@@ -6,9 +6,15 @@ import {
   SOCIALS,
   WORKING_GROUPS,
 } from "~/lib/site";
+import { useNow } from "~/lib/useNow";
+import site from "../../content/generated/site.json";
 
 export function Footer() {
-  const year = new Date().getFullYear();
+  // Build year in the prerendered HTML (stable across server + first client
+  // render), then the live year after hydration — avoids a year-boundary
+  // hydration mismatch.
+  const now = useNow();
+  const year = now ? now.getFullYear() : site.buildYear;
   return (
     <footer className="site-footer">
       <div className="container site-footer__grid">

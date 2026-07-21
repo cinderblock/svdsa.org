@@ -48,3 +48,14 @@ export function dateParts(s: string): { month: string; day: number } {
   const d = parse(s);
   return { month: MONTHS[d.getMonth()], day: d.getDate() };
 }
+
+export function startOfDay(d: Date): Date {
+  const s = new Date(d);
+  s.setHours(0, 0, 0, 0);
+  return s;
+}
+
+/** True if the event's start is today or later, relative to `now`. */
+export function isUpcoming(start: string, now: Date): boolean {
+  return parse(start).getTime() >= startOfDay(now).getTime();
+}

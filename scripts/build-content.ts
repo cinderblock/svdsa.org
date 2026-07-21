@@ -172,6 +172,11 @@ await mkdir(GENERATED, { recursive: true });
 const write = (name: string, value: unknown) =>
   writeFile(join(GENERATED, name), JSON.stringify(value, null, 2) + "\n");
 
+const buildDate = new Date();
+await write("site.json", {
+  builtAt: buildDate.toISOString(),
+  buildYear: buildDate.getFullYear(),
+});
 await write("pages.json", pages);
 await write("posts.json", posts);
 await write("posts-index.json", postsIndex);

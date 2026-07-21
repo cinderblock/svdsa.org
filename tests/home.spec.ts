@@ -50,12 +50,31 @@ test.describe("Content routes", () => {
     ).toBeVisible();
   });
 
+  test("calendar filters by the client's clock (past events drop)", async ({
+    page,
+  }) => {
+    // Fake only Date (not timers, so React still flushes) to far in the
+    // future: every shipped event is now in the past, so after hydration the
+    // calendar shows none.
+    await page.clock.setFixedTime(new Date("2099-01-01T12:00:00"));
+    await page.goto("/calendar");
+    await expect(page.getByText("0 upcoming events")).toBeVisible();
+    await expect(page.getByText("No events match that filter.")).toBeVisible();
+  });
+
   test("join page embeds the dues + newsletter forms", async ({ page }) => {
-    await page.goto("/join/");
+    // domcontentloaded, not load: don't wait on the external form iframes to
+    // finish loading (slow/unreliable); their elements are in the DOM already.
+    await page.goto("/join/", { waitUntil: "domcontentloaded" });
     await expect(
       page.getByRole("heading", { name: "Join the movement" }),
     ).toBeVisible();
-    await expect(page.locator("iframe").first()).toBeVisible();
+    // Assert the embeds are wired (present in the DOM) without waiting on the
+    // external services to render — keeps the test fast and network-independent.
+    await expect(page.locator('iframe[src*="zeffy.com"]')).toHaveCount(1);
+    await expect(page.locator('iframe[src*="actionnetwork.org"]')).toHaveCount(
+      1,
+    );
   });
 
   test("unknown path shows 404", async ({ page }) => {
