@@ -2,7 +2,7 @@ import type { MetaFunction } from "react-router";
 import { Link } from "react-router";
 import { postsIndex, upcomingEvents } from "~/lib/data";
 import { dateParts, shortDate, time } from "~/lib/format";
-import { EXTERNAL, SITE, WORKING_GROUPS } from "~/lib/site";
+import { CHAPTER_PHOTOS, EXTERNAL, SITE, WORKING_GROUPS } from "~/lib/site";
 
 export const meta: MetaFunction = () => {
   const title = `${SITE.name} — ${SITE.tagline}`;
@@ -23,32 +23,60 @@ export default function Home() {
   return (
     <main id="main">
       <section className="hero">
-        <div className="container">
-          <p className="kicker">Silicon Valley · South Bay</p>
-          <h1>
-            Building working-class power,
-            <br />
-            for the many — not the few.
-          </h1>
-          <p className="lead">
-            We're not a political party — we're a community building
-            working-class power while fighting for a radically equitable
-            society. DSA is the largest socialist organization in America, with
-            100,000+ members nationwide.
-          </p>
-          <div className="hero__actions">
-            <Link className="btn btn-primary" to="/join/">
-              Join us
-            </Link>
-            <Link className="btn btn-outline" to="/calendar">
-              See upcoming events
-            </Link>
-            <a className="btn btn-outline" href={EXTERNAL.donate}>
-              Donate
-            </a>
+        <div className="container hero__grid">
+          <div>
+            <p className="kicker">Silicon Valley · South Bay</p>
+            <h1>
+              Building working-class power,
+              <br />
+              for the many — not the few.
+            </h1>
+            <p className="lead">
+              We're not a political party — we're a community building
+              working-class power while fighting for a radically equitable
+              society. DSA is the largest socialist organization in America,
+              with 100,000+ members nationwide.
+            </p>
+            <div className="hero__actions">
+              <Link className="btn btn-primary" to="/join/">
+                Join us
+              </Link>
+              <Link className="btn btn-outline" to="/calendar">
+                See upcoming events
+              </Link>
+              <a className="btn btn-outline" href={EXTERNAL.donate}>
+                Donate
+              </a>
+            </div>
+          </div>
+          <div className="hero__art">
+            <img
+              src="/solidarity.svg"
+              alt="Illustration of a crowd raising fists in solidarity"
+              width={800}
+              height={600}
+            />
           </div>
         </div>
       </section>
+
+      {CHAPTER_PHOTOS.length > 0 && (
+        <section className="section">
+          <div className="container">
+            <div className="section__head">
+              <h2>In the streets</h2>
+            </div>
+            <div className="photo-strip">
+              {CHAPTER_PHOTOS.map((p) => (
+                <figure key={p.src}>
+                  <img src={p.src} alt={p.alt} loading="lazy" />
+                  {p.caption && <figcaption>{p.caption}</figcaption>}
+                </figure>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Upcoming events */}
       <section className="section">

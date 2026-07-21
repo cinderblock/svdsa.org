@@ -25,6 +25,25 @@ export const EXTERNAL = {
     "https://docs.google.com/forms/d/1YGZIftsaZGCvtPY2HN4sVb91CakMTiIfVtLKiZfiOo0/viewform",
 };
 
+export interface ChapterPhoto {
+  src: string;
+  alt: string;
+  caption?: string;
+}
+
+/**
+ * Photos of the chapter in action, shown in the home-page "In the streets"
+ * strip. Intentionally EMPTY by default: member/action photos are the
+ * chapter's to clear (consent + safety — e.g. face exposure at ICE actions),
+ * so they aren't scraped in automatically.
+ *
+ * To add real photos: drop files in `public/photos/` and list them here, e.g.
+ *   { src: "/photos/rally-2026.jpg", alt: "Members marching with a banner",
+ *     caption: "No Kings rally, Gilroy" }
+ * The strip only renders when this array is non-empty.
+ */
+export const CHAPTER_PHOTOS: ChapterPhoto[] = [];
+
 export const SOCIALS = [
   { label: "Instagram", href: "https://www.instagram.com/silicon_valley_dsa/" },
   { label: "Facebook", href: "https://www.facebook.com/svdsa/" },
