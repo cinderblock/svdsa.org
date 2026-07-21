@@ -142,10 +142,25 @@ refresh calendar events and blog posts.
       /blog) + public/\_headers (security + asset caching). Portable to Pages
       and Workers. NOTE: full Redirection-plugin export needs WP admin; only
       the obvious archive redirects are covered.
-- [ ] Deploy (task 4, WITH Cameron): choose Pages vs Workers; update
-      deploy.yml (currently ssg-base's `pages deploy --project-name=my-site`);
-      set CLOUDFLARE_API_TOKEN + account id; branch previews.
+- [x] Polish: real SVDSA favicon (tree+handshake logo) pulled from live WP,
+      used for favicon + header brand; sitemap.xml + robots.txt generated;
+      embeds verified frameable.
+- [~] Deploy target chosen: **Workers Static Assets** (free-tier + custom
+  domain confirmed; one project for static + future D1 API). Repo prepped:
+  wrangler.jsonc (assets-only), `bun run deploy`/`cf:dev`, CI-only GH
+  workflow (ci.yml). `wrangler deploy --dry-run` passes (1237 assets).
+  REMAINING (needs Cameron — infra rule): push repo to GitHub; connect
+  Workers Builds in CF dashboard for deploy + branch previews; optional
+  SITE_URL build var; custom domain later. Steps in README.
 - [ ] Scheduled rebuild (cron) to re-run migrate + rebuild for fresh content.
+
+### Deploy decision (Workers vs Pages) — resolved
+
+Cameron chose Workers Static Assets. Rationale: free unmetered static assets,
+custom domain on free plan, and the future D1 events API can live in the SAME
+Worker/project (vs. bolting a separate Worker onto Pages). \*.workers.dev now,
+custom domain later. Branch previews via Workers Builds (Pages-style Git
+integration).
 
 ### Member photos — needs Cameron/chapter
 

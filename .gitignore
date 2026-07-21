@@ -37,3 +37,7 @@ playwright/.cache/
 
 # Migration cache (raw WP API responses)
 content/.raw/
+
+# Wrangler / Cloudflare
+.wrangler/
+.dev.vars

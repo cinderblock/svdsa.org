@@ -75,8 +75,38 @@ site needs no backend for them: **Action Network** (newsletter), **Zeffy** (loca
 dues / donations), **national DSA** (join), and a **Google Form** (contact).
 These are configured in `app/lib/site.ts`.
 
-## Deployment
+## Deployment — Cloudflare Workers Static Assets
 
-Target (Cloudflare Pages vs. Workers Static Assets) is decided at deploy time;
-the build output (`build/client`) is portable between them. See
-`plans/svdsa-static-rebuild.md` for the current plan and decisions.
+The site deploys as an **assets-only Worker** (`wrangler.jsonc`): Cloudflare
+serves the prerendered `build/client` from its edge. A Worker script (e.g. a
+future D1-backed events API) can be added later without changing hosting.
+
+- **Free tier:** static-asset requests are free and unmetered; a static site
+  effectively costs nothing.
+- **Custom domain:** fully supported on the free plan — add the domain to the
+  Worker once DSA's domain is on Cloudflare DNS.
+
+### Local
+
+```sh
+bun run build        # -> build/client
+bunx wrangler deploy --dry-run   # validate config
+bun run cf:dev       # serve the built site via wrangler locally
+```
+
+### First-time setup (Cloudflare dashboard — needs the repo on a Git host)
+
+Deploys and **per-branch preview URLs** use **Workers Builds** (the Pages-style
+Git integration for Workers):
+
+1. Push this repo to GitHub/GitLab.
+2. Cloudflare dashboard → Workers & Pages → Create → **Import a repository**;
+   pick this repo.
+3. Build command `bun run build`; deploy command `npx wrangler deploy`
+   (auto-detected from `wrangler.jsonc`). Production branch `main`.
+4. (Optional) set a `SITE_URL` build variable so `sitemap.xml`/`robots.txt`
+   use the deployed origin instead of the default production domain.
+5. Push to `main` → production; open a PR / push a branch → a preview URL.
+
+`.github/workflows/ci.yml` runs format/typecheck/test/build on every push and
+PR (no Cloudflare secrets needed there — Workers Builds does the deploying).

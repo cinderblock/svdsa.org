@@ -12,14 +12,17 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link
           rel="icon"
-          href="/favicon-light.svg"
-          media="(prefers-color-scheme: light)"
+          type="image/png"
+          sizes="32x32"
+          href="/favicon-32.png"
         />
         <link
           rel="icon"
-          href="/favicon-dark.svg"
-          media="(prefers-color-scheme: dark)"
+          type="image/png"
+          sizes="192x192"
+          href="/favicon-192.png"
         />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <Meta />
         <Links />
         {import.meta.env.DEV && (

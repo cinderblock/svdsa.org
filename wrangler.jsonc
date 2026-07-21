@@ -1,0 +1,15 @@
+{
+  // Cloudflare Workers Static Assets config.
+  // This is an assets-only Worker (no server code): Cloudflare serves the
+  // prerendered files in build/client from its edge. A Worker script can be
+  // added later (e.g. a D1-backed events API) without changing hosting.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "svdsa-org",
+  "compatibility_date": "2026-07-01",
+  "assets": {
+    "directory": "./build/client",
+    // Unknown paths fall back to the SPA shell so client-side routing can
+    // render the right page or our 404 (all real routes are prerendered).
+    "not_found_handling": "single-page-application",
+  },
+}

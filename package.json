@@ -8,6 +8,8 @@
     "build": "bun run build:content && react-router build",
     "migrate": "bun run scripts/fetch-wp-content.ts",
     "preview": "vite preview --outDir build/client",
+    "deploy": "bun run build && wrangler deploy",
+    "cf:dev": "bun run build && wrangler dev",
     "test": "playwright test",
     "test:ui": "playwright test --ui",
     "fmt": "oxfmt --write .",
@@ -32,6 +34,7 @@
     "lefthook": "^2.1.9",
     "oxfmt": "^0.57.0",
     "typescript": "^6.0.3",
-    "vite": "^8.1.2"
+    "vite": "^8.1.2",
+    "wrangler": "^4.112.0"
   }
 }

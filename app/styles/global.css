@@ -192,6 +192,8 @@ img {
 }
 .brand__mark {
   flex: none;
+  border-radius: 7px;
+  display: block;
 }
 .brand__name {
   display: flex;

@@ -1,11 +1,16 @@
 import { Link, NavLink } from "react-router";
 import { EXTERNAL, NAV } from "~/lib/site";
-import { Rose } from "./Rose";
 
 function Brand() {
   return (
     <Link to="/" className="brand" aria-label="Silicon Valley DSA — home">
-      <Rose size={30} />
+      <img
+        className="brand__mark"
+        src="/favicon-192.png"
+        alt=""
+        width={34}
+        height={34}
+      />
       <span className="brand__name">
         <span>
           <b>Silicon Valley</b>

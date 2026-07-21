@@ -1,8 +1,14 @@
-name: Deploy to Cloudflare Pages
+name: CI
+
+# Deploys + per-branch preview URLs are handled by Cloudflare Workers Builds
+# (connected in the Cloudflare dashboard), which runs `bun run build` and
+# `wrangler deploy` on push. This workflow only validates the code, so no
+# Cloudflare secrets are needed here.
 
 on:
   push:
     branches:
+      - main
       - master
   pull_request:
   workflow_dispatch:
@@ -12,7 +18,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-and-deploy:
+  check:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -29,22 +35,14 @@ jobs:
       - name: Format check
         run: bun run fmt:check
 
+      - name: Type check
+        run: bun run typecheck
+
       - name: Install Playwright browsers
         run: bunx playwright install --with-deps chromium
 
       - name: Run tests
         run: bun run test --project=chromium
 
-      - name: Type check
-        run: bun run typecheck
-
       - name: Build
         run: bun run build
-
-      - name: Deploy to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
-          # TODO: Update project name for your site
-          command: pages deploy build/client --project-name=my-site
