@@ -136,6 +136,25 @@ refresh calendar events and blog posts.
 - Bodies are still WP HTML inside the .md (Markdown passes HTML through);
   converting to clean Markdown is a later, incremental pass.
 
+## Alternate designs (branches, for comparison)
+
+The base/production design lives on `red` (warm cream + DSA red, Inter, soft
+rounded). Alternates are pushed as branches so Cloudflare Workers Builds
+generates a per-branch preview URL to compare side by side. The design is
+entirely class-driven in `app/styles/global.css` (shared by every route), so
+an alternate = swap that file + font imports in `app/root.tsx`; markup, routes,
+and content are untouched.
+
+- **`design-broadside`** (pushed 2026-07-21) — "Midnight Rose". Dark ink
+  hero/slogan-band/footer with DSA-red rose accents on light newsprint; display
+  type = **Roboto Slab** (the DSA national design guide's sanctioned slab
+  serif), body = Archivo grotesque. Small uppercase labels, sentence-case
+  headings, red section rules, full-width solidarity slogan band on home.
+  Drawn from design.dsausa.org + NYC-DSA (socialists.nyc) dark aesthetic.
+  Fonts swapped Inter -> Archivo + Roboto Slab. Verified: typecheck + build
+  (555 pages) green; the one Playwright "failure" locally was a shared-:9999
+  dev server from another worktree, not this branch (CI starts its own server).
+
 ## Current state / how to view
 
 - `bun run dev` -> http://localhost:9999
