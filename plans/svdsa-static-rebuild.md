@@ -111,5 +111,38 @@ refresh calendar events and blog posts.
 
 - 2026-07-20: Crawled site via Yoast sitemaps; mapped ~50 pages, 43 posts,
   244 event URLs (462 API records). Confirmed WP + TEC REST APIs open.
-  Copied ssg-base into repo, git init, wrote this plan. Next: get it building,
-  then decisions round with Cameron.
+  Copied ssg-base into repo, git init, wrote this plan.
+- 2026-07-20: Decisions round done (deploy target = decide later; fresh design;
+  no runtime API — content committed in repo). Built migration tool
+  (fetch-wp-content.ts) -> content/{pages,posts,events}.json (53/41/986).
+  build-content.ts derives slim events-upcoming.json + posts-index.json.
+- 2026-07-20: Built the site — design system, Header/Footer/Rose/Prose,
+  routes (home, calendar w/ filter+search, blog, splat content route for all
+  WP pages+posts, 404). 96 paths prerendered. Data split (slim data.ts for
+  index pages, full content.ts only on article route) — home no longer pulls
+  the 495 KB HTML chunk. Added `~` Vite alias (dev was broken without it;
+  caught by tests). 7 Playwright tests pass. README updated.
+- 2026-07-20: Verified rendering via built HTML (real events, real WP prose,
+  links rewritten to relative, zero title= attrs). Dev server moved to :9999
+  (vite.config strictPort; playwright baseURL updated).
+
+## Current state / how to view
+
+- `bun run dev` -> http://localhost:9999 (running now)
+- `bun run build` -> build/client (96 static pages)
+- Preview MCP (t3-code) needs re-auth to screenshot; verified via built HTML.
+
+## Remaining before/at deploy
+
+- [ ] Event detail pages (`/event/<slug>/`) — deferred; calendar is self-
+      contained for now. When added: per-event JSON split to avoid bundling
+      the 1.8 MB events file, and add their paths to prerender.
+- [ ] Embed the real forms (Action Network newsletter, Zeffy dues/donate,
+      contact Google Form) on join/donate/contact pages (currently the
+      migrated WP HTML + external links in nav/footer).
+- [ ] Legacy redirects: export the Redirection plugin rules; confirm any
+      non-permalink redirects (e.g. /events/ -> /calendar).
+- [ ] Deploy (task 4, WITH Cameron): choose Pages vs Workers; update
+      deploy.yml (currently ssg-base's `pages deploy --project-name=my-site`);
+      set CLOUDFLARE_API_TOKEN + account id; branch previews.
+- [ ] Scheduled rebuild (cron) to re-run migrate + rebuild for fresh content.
