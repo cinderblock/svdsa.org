@@ -23,6 +23,13 @@ import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
 const DIR = join(import.meta.dirname, "..", "content");
+const PUBLIC = join(import.meta.dirname, "..", "public");
+
+// Canonical origin for sitemap/robots. Override at build with SITE_URL for a
+// preview/staging domain; defaults to the production site.
+const SITE_URL = (
+  process.env.SITE_URL ?? "https://siliconvalleydsa.org"
+).replace(/\/$/, "");
 
 const read = async (name: string) =>
   JSON.parse(await readFile(join(DIR, name), "utf8"));
@@ -60,13 +67,20 @@ interface FullPost {
   path: string;
   title: string;
   date: string;
+  modified: string;
   excerpt: string;
   categories: string[];
   featuredImage: string | null;
 }
 
+interface FullPage {
+  path: string;
+  modified: string;
+}
+
 const events = (await read("events.json")) as FullEvent[];
 const posts = (await read("posts.json")) as FullPost[];
+const pages = (await read("pages.json")) as FullPage[];
 
 // "Now" as a plain YYYY-MM-DD so it compares against the stored local-time
 // start strings without timezone surprises.
@@ -134,7 +148,64 @@ await writeFile(
   JSON.stringify(postsIndex, null, 2) + "\n",
 );
 
+// ---- sitemap.xml + robots.txt ----------------------------------------------
+
+interface SitemapEntry {
+  path: string;
+  lastmod?: string;
+}
+
+const staticEntries: SitemapEntry[] = [
+  { path: "/" },
+  { path: "/calendar" },
+  { path: "/blog" },
+  { path: "/join/" },
+  { path: "/donate/" },
+  { path: "/contact/" },
+];
+
+// WP pages minus the ones handled by purpose-built routes above.
+const overridden = new Set(["/", "/blog/", "/join/", "/donate/", "/contact/"]);
+const pageEntries: SitemapEntry[] = pages
+  .filter((p) => !overridden.has(p.path))
+  .map((p) => ({ path: p.path, lastmod: p.modified?.slice(0, 10) }));
+
+const postEntries: SitemapEntry[] = posts.map((p) => ({
+  path: p.path,
+  lastmod: (p.modified ?? p.date)?.slice(0, 10),
+}));
+
+const eventEntries: SitemapEntry[] = eventsUpcoming.map((e) => ({
+  path: e.path,
+}));
+
+const urls = [
+  ...staticEntries,
+  ...pageEntries,
+  ...postEntries,
+  ...eventEntries,
+];
+
+const sitemap =
+  `<?xml version="1.0" encoding="UTF-8"?>\n` +
+  `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
+  urls
+    .map(
+      (u) =>
+        `  <url><loc>${SITE_URL}${u.path}</loc>` +
+        (u.lastmod ? `<lastmod>${u.lastmod}</lastmod>` : "") +
+        `</url>`,
+    )
+    .join("\n") +
+  `\n</urlset>\n`;
+
+await writeFile(join(PUBLIC, "sitemap.xml"), sitemap);
+await writeFile(
+  join(PUBLIC, "robots.txt"),
+  `User-agent: *\nAllow: /\n\nSitemap: ${SITE_URL}/sitemap.xml\n`,
+);
+
 console.log(
   `build-content: ${eventsUpcoming.length} upcoming events (slim + full), ` +
-    `${postsIndex.length} post index entries`,
+    `${postsIndex.length} post index entries, ${urls.length} sitemap URLs`,
 );
