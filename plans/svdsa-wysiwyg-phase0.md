@@ -229,6 +229,38 @@ None created yet. When we start Phase 2, authorize individually:
 4. (Already specced separately) the daily-rebuild **Cron Trigger Worker +
    deploy hook** — independent of the editor.
 
+## Credential & Access specifics (execute at Phase 2 start — Cameron)
+
+Exact settings so the bot credential + auth can be created quickly. None exist
+yet; each is a per-change authorization.
+
+**GitHub App (now):**
+
+- Repository permissions: **Contents: Read & write**, **Pull requests: Read &
+  write**, **Metadata: Read** (required). No webhook needed.
+- Install on **`cinderblock/svdsa.org`** only. Generate a **private key**.
+- `svdsa-edit` Worker secrets: `GH_APP_ID`, `GH_INSTALLATION_ID`,
+  `GH_PRIVATE_KEY`. Worker mints short-lived installation tokens from these
+  (`POST /app/installations/{id}/access_tokens`).
+
+**GitLab project access token (at gitlab.com migration):**
+
+- Project → Settings → Access Tokens. Scope **`api`**. Role: **Developer** is
+  enough for draft branches + opening MRs; **Maintainer** only if we enable
+  direct-merge to a protected `red` (governance choice). Set an expiry +
+  rotation reminder.
+- Worker secrets: `GITLAB_TOKEN`, `GITLAB_PROJECT_ID`, plus `GIT_HOST=gitlab`.
+
+**Cloudflare Access (both hosts — identity is git-host-independent):**
+
+- Zero Trust → Access → Applications → **Self-hosted**, domain = the edit
+  domain (start `svdsa-edit.isozilla.workers.dev`). Identity: **One-time PIN
+  (email)** and/or **Google**. Policy: **Allow**, Include = the editors'
+  emails (or an email domain). Free tier ≤ 50 users.
+- The Worker verifies `Cf-Access-Jwt-Assertion` against the team's public keys
+  (`https://<team>.cloudflareaccess.com/cdn-cgi/access/certs`), checking the
+  app **AUD**. That JWT yields `{ email, name }` for attribution.
+
 ## Governance (defer to the chapter)
 
 - Who may **direct-merge to `red`** vs must **open an MR**? Encode as
