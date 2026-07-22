@@ -152,17 +152,79 @@ needing repo access or a git-host account.
 per editor keeps previews stable and merges small. `listBranches("draft/")`
 enumerates open drafts.
 
+## Git host implementations (GitHub **and** GitLab)
+
+One `GitHostAdapter` interface, two concrete implementations chosen at runtime
+by config (`GIT_HOST=github|gitlab`). Both hosts support every operation we
+need, including **commit-author override** (so the editor is the author while
+the bot is the committer). Endpoint mapping:
+
+| Adapter method      | GitHub REST                                                                                       | GitLab REST (gitlab.com)                                                                                        |
+| ------------------- | ------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `readFile`          | `GET /repos/{o}/{r}/contents/{path}?ref` (base64 + `sha`)                                         | `GET /projects/{id}/repository/files/{path}?ref` (base64 + `blob_id`)                                           |
+| `listFiles`         | `GET /repos/{o}/{r}/git/trees/{ref}?recursive=1`                                                  | `GET /projects/{id}/repository/tree?path&ref&recursive=true&per_page=100`                                       |
+| `ensureBranch`      | `POST /repos/{o}/{r}/git/refs` (`refs/heads/…`, `sha`)                                            | `POST /projects/{id}/repository/branches?branch&ref`                                                            |
+| `listBranches`      | `GET /repos/{o}/{r}/branches`                                                                     | `GET /projects/{id}/repository/branches?search`                                                                 |
+| `commitFile`        | Git Data API (blob→tree→commit with `author{}`) or `PUT …/contents/{path}` (`author`+`committer`) | `POST /projects/{id}/repository/commits` (`branch`, `actions[]`, `author_name`, `author_email`, `start_branch`) |
+| `openChangeRequest` | `POST /repos/{o}/{r}/pulls` (`head`,`base`,`title`)                                               | `POST /projects/{id}/merge_requests` (`source_branch`,`target_branch`,`title`)                                  |
+| `merge`             | `PUT /repos/{o}/{r}/pulls/{n}/merge`                                                              | `PUT /projects/{id}/merge_requests/{iid}/merge`                                                                 |
+| `deleteBranch`      | `DELETE /repos/{o}/{r}/git/refs/heads/{branch}`                                                   | `DELETE /projects/{id}/repository/branches/{branch}`                                                            |
+
+**Auth (the "app" credential), per host:**
+
+- **GitHub** — a **GitHub App** installed on the repo. Permissions: Contents
+  read+write, Pull requests read+write. The Worker mints short-lived
+  installation tokens from the App's private key (stored as a Worker secret).
+  Revocable per-install; commits attributed via the `author` field.
+- **GitLab (gitlab.com)** — a **project access token** (or group token) with
+  scope `api` (or `write_repository` + MR via `api`), sent as `PRIVATE-TOKEN`
+  / `Authorization: Bearer`. Simplest bot credential; rotate/revoke in project
+  settings. For per-editor OAuth instead of a shared bot, a **GitLab OAuth
+  application** also works (and is self-host-portable), but the project token
+  is the least-moving-parts fit and attribution still comes from
+  `author_name`/`author_email`.
+
+**Auth-agnostic pieces (identical on both hosts):** Cloudflare Access identity,
+branch-as-draft flow, `PublishTarget`, gray-matter serialization, and the
+Workers Builds branch previews (Workers Builds connects to github.com **and**
+gitlab.com). Only the adapter class + the credential type differ.
+
+## GitHub → GitLab migration (when the chapter moves to gitlab.com)
+
+Short, because the design was built for it:
+
+1. Create/mirror the repo on **gitlab.com** (project under the DSA group),
+   preserving branches (esp. `red`) and history.
+2. **Workers Builds:** connect the GitLab project (dashboard) — same build
+   command, production branch `red`, branch previews and MR status comments
+   work as on GitHub. Re-create the **deploy hook** (daily rebuild) for the new
+   project; the Cron Trigger Worker just points at the new hook URL.
+3. **Bot credential:** create a GitLab project access token; set it + `GIT_HOST=gitlab`
+   as `svdsa-edit` Worker secrets. Retire the GitHub App.
+4. **Editor code:** flip the adapter selection to the GitLab impl. No changes to
+   the UI, the draft/branch model, publish logic, or Cloudflare Access.
+5. **Cloudflare Access:** unchanged (identity is independent of the git host).
+6. CI: the `.github/workflows/ci.yml` checks become a **GitLab CI** pipeline
+   (`.gitlab-ci.yml`) running the same `fmt/typecheck/test/build`. (Deploy still
+   flows through Workers Builds, so CI stays checks-only.)
+
+What does NOT change: content model, the static site, the branch-as-draft
+editor, attribution, Access. The migration is "swap the adapter + reconnect
+Workers Builds," not a rebuild.
+
 ## Infra shopping list (each staged for Cameron's per-change authorization)
 
 None created yet. When we start Phase 2, authorize individually:
 
 1. **Cloudflare Access** application on the edit domain + a policy allowing the
    chapter editors' emails (email OTP / Google). Free Zero Trust tier (≤50 users).
-2. **Git-host bot credential**, scoped to `cinderblock/svdsa.org`, able to push
-   branches + open PRs/MRs:
-   - now: a **GitHub App** (installable, scoped, revocable), or
-   - later: a **GitLab project access token / OAuth app** (gitlab.com).
-     Stored as a Worker secret; never in the repo.
+2. **Git-host bot credential** (the "app"), scoped to the repo, able to push
+   branches + open PRs/MRs. Selected by `GIT_HOST` config:
+   - **github** (now): a **GitHub App** (Contents + PRs read/write; Worker mints
+     installation tokens from the App private key).
+   - **gitlab** (target, gitlab.com): a **project access token** (scope `api`),
+     or a GitLab OAuth app for per-editor auth.
+     Stored as a Worker secret; never in the repo. See "Git host implementations".
 3. **`svdsa-edit` Worker** + a `*.workers.dev` domain (custom domain later).
 4. (Already specced separately) the daily-rebuild **Cron Trigger Worker +
    deploy hook** — independent of the editor.
@@ -187,6 +249,10 @@ None created yet. When we start Phase 2, authorize individually:
   Cloudflare Access as identity; bot-authored-as-editor attribution; infra
   shopping list enumerated (unbuilt, awaiting per-change auth). Phase 1 (config
   extraction to content/config/) already shipped on `red`.
+- 2026-07-21 (GitLab pass): added concrete dual-host adapter mapping (GitHub +
+  GitLab REST per method), per-host auth (GitHub App vs GitLab project access
+  token / OAuth), and a GitHub→gitlab.com migration checklist. Only the adapter
+  class + credential differ; identity/draft/publish/Access are host-agnostic.
 
 ---
 
