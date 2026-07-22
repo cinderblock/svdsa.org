@@ -182,26 +182,39 @@ async function stepGithubVars(): Promise<void> {
 
 async function stepAccessVars(): Promise<void> {
   const t = await readWrangler();
-  if (getVar(t, "CF_ACCESS_TEAM_DOMAIN") && getVar(t, "CF_ACCESS_AUD")) {
-    ok("Access vars set (CF_ACCESS_TEAM_DOMAIN, CF_ACCESS_AUD)");
-    return;
-  }
-  todo("Create the Cloudflare Access app (browser)");
+  todo(
+    "Create the Cloudflare Access app (browser) — this is what gates the editor",
+  );
   console.log("   Zero Trust → Access → Applications → Add → Self-hosted;");
   console.log(
     "   domain = svdsa-edit.<subdomain>.workers.dev; identity One-time PIN/Google;",
   );
   console.log("   policy Allow = editor emails.");
+  console.log(
+    c.dim(
+      "   The two values below are OPTIONAL — only for stricter JWT pinning (a",
+    ),
+  );
+  console.log(
+    c.dim(
+      "   later hardening step). The editor uses the Access-injected email for now.",
+    ),
+  );
+  console.log(
+    c.dim(
+      "   Team domain: Settings → 'Team name and domain'. AUD: the app's Overview.",
+    ),
+  );
   const team = await askValue(
     "Access team domain",
     TEAM,
-    "yourteam.cloudflareaccess.com",
+    "optional — Enter to skip; e.g. yourteam.cloudflareaccess.com",
     getVar(t, "CF_ACCESS_TEAM_DOMAIN"),
   );
   const aud = await askValue(
     "Access application AUD",
     AUD,
-    "64 hex chars",
+    "optional — Enter to skip; 64 hex chars",
     getVar(t, "CF_ACCESS_AUD"),
   );
   const teamHost = team.replace(/^https?:\/\//i, "").replace(/\/$/, "");
