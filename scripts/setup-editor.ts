@@ -119,7 +119,9 @@ function secretList(): string | null {
 }
 
 const ID = /^\d{5,}$/;
-const TEAM = /^[a-z0-9][a-z0-9-]*\.cloudflareaccess\.com$/i;
+// Accept the domain with or without scheme/trailing slash (Custom Pages shows
+// it as https://yourteam.cloudflareaccess.com); we store the bare host.
+const TEAM = /^(https?:\/\/)?[a-z0-9][a-z0-9-]*\.cloudflareaccess\.com\/?$/i;
 const AUD = /^[a-f0-9]{64}$/i;
 
 const CHECKLIST = [
@@ -202,7 +204,8 @@ async function stepAccessVars(): Promise<void> {
     "64 hex chars",
     getVar(t, "CF_ACCESS_AUD"),
   );
-  if (team) await setVar("CF_ACCESS_TEAM_DOMAIN", team);
+  const teamHost = team.replace(/^https?:\/\//i, "").replace(/\/$/, "");
+  if (teamHost) await setVar("CF_ACCESS_TEAM_DOMAIN", teamHost);
   if (aud) await setVar("CF_ACCESS_AUD", aud);
 }
 
