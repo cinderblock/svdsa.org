@@ -237,9 +237,17 @@ async function stepDeploy(): Promise<void> {
 async function stepKeySecret(): Promise<void> {
   if (secretList()?.includes("GH_PRIVATE_KEY")) {
     ok("GH_PRIVATE_KEY secret is set");
-    return;
+    const ans = (
+      await rl.question(
+        `   re-set it (e.g. to fix a PKCS#1 key → PKCS#8)? ${c.dim("[y/N]")} `,
+      )
+    )
+      .trim()
+      .toLowerCase();
+    if (ans !== "y" && ans !== "yes") return;
+  } else {
+    todo("Set the GitHub App private key (the only secret)");
   }
-  todo("Set the GitHub App private key (the only secret)");
   let pem = (
     await rl.question(
       `   Path to the .pem ${c.dim("(drag it in / paste path)")}: `,
