@@ -7,6 +7,7 @@
     "build:content": "bun run scripts/build-content.ts",
     "build": "bun run build:content && react-router build",
     "migrate": "bun run scripts/fetch-wp-content.ts",
+    "setup:editor": "bun run scripts/setup-editor.ts",
     "preview": "vite preview --outDir build/client",
     "deploy": "bun run build && wrangler deploy",
     "cf:dev": "bun run build && wrangler dev",

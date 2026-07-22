@@ -44,3 +44,6 @@ content/.raw/
 
 # Generated content aggregates (assembled from content/*/**.md at build)
 content/generated/
+
+# Editor setup walkthrough progress (local, non-secret)
+.editor-setup.local.json
