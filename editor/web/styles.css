@@ -1,0 +1,177 @@
+:root {
+  --red: #c0141a;
+  --ink: #191512;
+  --muted: #5f574f;
+  --line: #e4ddd2;
+  --hover: #f3efe9;
+  --sel: #f3d9da;
+}
+
+* {
+  box-sizing: border-box;
+}
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+body {
+  font-family: system-ui, sans-serif;
+  color: var(--ink);
+}
+#root {
+  display: flex;
+  flex-direction: column;
+}
+
+header {
+  background: var(--red);
+  color: #fff;
+  padding: 0.6rem 1rem;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+  flex: 0 0 auto;
+}
+header b {
+  font-size: 1.1rem;
+}
+header .who {
+  margin-left: auto;
+  font-size: 0.85rem;
+}
+header select {
+  font: inherit;
+}
+
+.wrap {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 20rem 1fr;
+}
+
+#list {
+  border-right: 1px solid var(--line);
+  overflow: auto;
+  padding: 0.5rem;
+}
+#list .f {
+  width: 100%;
+  padding: 0.4rem;
+  margin-bottom: 0.5rem;
+  font: inherit;
+}
+#list a {
+  display: block;
+  padding: 0.25rem 0.4rem;
+  font-size: 0.85rem;
+  border-radius: 4px;
+  cursor: pointer;
+  word-break: break-all;
+}
+#list a:hover {
+  background: var(--hover);
+}
+#list a.sel {
+  background: var(--sel);
+}
+
+#ed {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 1rem;
+  gap: 0.5rem;
+}
+#ed .empty {
+  color: var(--muted);
+}
+.path {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.fm {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+}
+.fmField {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.75rem;
+  color: var(--muted);
+  flex: 1 1 12rem;
+}
+.fmField input {
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--ink);
+  padding: 0.35rem;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+}
+
+.modebar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.tabs button {
+  font: inherit;
+  border: 1px solid var(--line);
+  background: #fff;
+  padding: 0.35rem 0.8rem;
+  cursor: pointer;
+}
+.tabs button:first-child {
+  border-radius: 6px 0 0 6px;
+}
+.tabs button:last-child {
+  border-radius: 0 6px 6px 0;
+  border-left: 0;
+}
+.tabs button.on {
+  background: var(--sel);
+  font-weight: 600;
+}
+.save {
+  margin-left: auto;
+  background: var(--red);
+  color: #fff;
+  border: 0;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font: inherit;
+}
+.save:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.pane {
+  flex: 1 1 auto;
+  min-height: 0;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.pane .wysiwyg {
+  height: 100%;
+  overflow: auto;
+}
+
+.msg {
+  font-size: 0.9rem;
+  flex: 0 0 auto;
+}
+.msg.err {
+  color: var(--red);
+}
+.msg a {
+  color: var(--red);
+}
