@@ -10,25 +10,42 @@ MR. Git stays the single source of truth. Full design:
 
 ## Status
 
-- **Done (this slice):** deployable Worker skeleton (`src/index.ts`,
-  Access-aware), the host-agnostic contracts (`src/content/types.ts`), and the
-  shared frontmatter (de)serialization (`src/content/serialize.ts`) that
-  round-trips the exact on-disk `.md` format.
-- **Next (needs the git-host credential — run `bun run setup:editor`):**
-  the GitHub and GitLab `GitHostAdapter` implementations, the content API
-  (list / read / save-draft / publish), full Access JWT verification, and the
-  editor UI + client-side preview.
+- **Done:** deployed Worker (`src/index.ts`, Access-aware) with the content API
+  (`/api/me`, `/api/branches`, `/api/list`, `/api/item`, `/api/save`,
+  `/api/health`); GitHub App auth (`src/git/github.ts`); shared frontmatter
+  (de)serialization (`src/content/serialize.ts`); and the **rich editing UI** —
+  a Vite-built SPA (`web/`) served by the Worker's Static Assets binding, with
+  two interchangeable body editors (Milkdown WYSIWYG ↔ Monaco raw), a
+  frontmatter form, and a folder-aware branch selector. Save → draft branch →
+  the branch's Workers Build preview.
+- **Next:** publish (merge to base / open MR via `PublishTarget`), full Access
+  JWT verification, structured event fields, GitLab adapter for the gitlab.com move.
 
 ## Layout
 
 ```
 editor/
-  wrangler.jsonc        # svdsa-edit Worker config (nodejs_compat for gray-matter)
-  src/index.ts          # Worker entry (Access-aware placeholder)
+  wrangler.jsonc        # svdsa-edit Worker config (nodejs_compat; assets binding)
+  vite.config.ts        # builds web/ → dist/
+  tsconfig.json         # SPA + Worker types
+  src/index.ts          # Worker entry — owns /api/* (assets serve the SPA)
+  src/git/github.ts     # GitHub App auth + REST (read/write/branch/commit)
   src/content/
     types.ts            # Editor, EditableItem, Draft, GitHostAdapter, PublishTarget
     serialize.ts        # parse/serialize .md + slug/branch helpers (host-agnostic)
-    github.ts | gitlab.ts | index.ts   # adapters + factory (next slice)
+  web/                  # the editor SPA (React)
+    app.tsx             # list + base picker + frontmatter form + mode toggle + save
+    editors/            # wysiwyg.tsx (Milkdown), raw.tsx (Monaco), monaco-setup.ts
+    api.ts, main.tsx, index.html, styles.css
+  dist/                 # Vite build output (git-ignored)
+```
+
+## Develop
+
+```sh
+bun run editor:dev      # Vite dev server (web/), proxies /api → wrangler dev
+bun run editor:build    # build the SPA → editor/dist
+bun run editor:deploy   # build + wrangler deploy
 ```
 
 ## Deploy / configure

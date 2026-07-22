@@ -75,23 +75,50 @@ editor/
 
 ## Plan / steps
 
-1. [ ] Add deps: `@milkdown/crepe`, `monaco-editor`, `@monaco-editor/react`.
-2. [ ] `editor/web/` SPA: index.html, main.tsx, app.tsx, api.ts, styles.
-3. [ ] WYSIWYG component (Crepe) + Raw component (Monaco) with imperative refs.
-4. [ ] `editor/vite.config.ts` + `editor/tsconfig.json`.
-5. [ ] `editor/wrangler.jsonc`: assets binding + run_worker_first.
-6. [ ] `editor/src/index.ts`: add `/api/me`; remove inline HTML page.
-7. [ ] Root `package.json` scripts: `editor:dev`, `editor:build`, `editor:deploy`.
-8. [ ] `bun run editor:build` clean; deploy; smoke-test edit→save→preview.
+1. [x] Add deps: `@milkdown/crepe`, `monaco-editor`, `@monaco-editor/react`,
+       `@vitejs/plugin-react` (dev).
+2. [x] `editor/web/` SPA: index.html, main.tsx, app.tsx, api.ts, styles.
+3. [x] WYSIWYG component (Crepe) + Raw component (Monaco) with imperative refs.
+4. [x] `editor/vite.config.ts` + `editor/tsconfig.json`.
+5. [x] `editor/wrangler.jsonc`: assets binding + run_worker_first.
+6. [x] `editor/src/index.ts`: add `/api/me`; remove inline HTML page.
+7. [x] Root `package.json` scripts: `editor:dev`, `editor:build`, `editor:deploy`.
+8. [x] `bun run editor:build` clean; deployed (commit 5d73877). **Smoke-test
+       edit→save→preview in the browser is still pending (user to verify).**
+9. [x] Folder-aware branch selector (optgroups by first path segment).
 
 ## Findings / gotchas
 
-- Monaco needs a web worker; markdown has no language-service worker, so only
-  `editor.worker` is required. Wire via `?worker` import + `self.MonacoEnvironment`.
+- **Vite `root`/`outDir` resolve against CWD, not the config file.** Run from the
+  repo root via `--config editor/vite.config.ts`, so `root: "web"` looked for
+  `<repo>/web`. Fixed by anchoring both to the config dir with
+  `fileURLToPath(new URL(..., import.meta.url))`.
+- **monaco@0.56 `exports` map is `"./*" → "./esm/vs/*.js"`.** So deep imports
+  must be `monaco-editor/editor/editor.worker.js` (→ `esm/vs/editor/...`), NOT
+  `monaco-editor/esm/vs/editor/...` (that double-prefixes and fails to resolve
+  under rolldown/Vite 8). 0.56 also moved per-language files under
+  `esm/vs/languages/definitions/`, so hand-picking `basic-languages/markdown`
+  no longer works — we import the barrel `monaco-editor` (includes markdown).
+- **Bundle:** the barrel Monaco is ~1.5 MB gzip. Kept out of the initial load by
+  `React.lazy`-loading the Raw editor — only fetched on switch to Raw mode.
+  Eager bundle is then ~518 KB gzip (Milkdown Crepe + React).
+  TODO(perf): trim Monaco to markdown-only once 0.56's layout settles.
 - Crepe: `new Crepe({ root, defaultValue })`; pull markdown with
-  `crepe.getMarkdown()`; destroy on unmount. Recreate from `body` on mount.
-- Crepe CSS must be imported (`@milkdown/crepe/theme/common/style.css` + a theme).
-- Bundle is large (Monaco ~hundreds of KB). Acceptable — tool is behind Access.
+  `crepe.getMarkdown()`; `create()` on mount, `destroy()` on unmount. CSS imports
+  required (`@milkdown/crepe/theme/common/style.css` + `theme/frame.css`).
+- **Frontmatter round-trip reformats dates.** gray-matter parses YAML dates to
+  JS `Date`; the API returns them JSON-stringified; saving re-emits them as
+  quoted strings. Pre-existing (the old textarea did this too), not a regression.
+  Fix later by preserving raw frontmatter formatting. Only _edited_ primitive
+  fields are coerced; untouched values pass through as received.
+
+## Related branch work (this session)
+
+- Deleted the dead `update_worker_name_to_svdsa` branch (auto-created by the
+  Cloudflare Workers Builds connect flow; its one change was already in `red`).
+- Renamed the alternate-theme branches under a `theme/` folder:
+  `faithful-design → theme/faithful`, `design-broadside → theme/midnight-rose`.
+  Preview URLs changed accordingly. See the `svdsa-design-branches` memory.
 
 ## Things not to do
 
