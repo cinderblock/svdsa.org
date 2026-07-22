@@ -1,0 +1,16 @@
+{
+  // The WYSIWYG editor — a SEPARATE Worker from production `svdsa` (which stays
+  // pure static). Deployed to its own domain behind Cloudflare Access.
+  // See plans/svdsa-wysiwyg-phase0.md.
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  "name": "svdsa-edit",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-07-01",
+  // gray-matter (frontmatter serialize) needs Node Buffer at runtime.
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true },
+  // Secrets/vars are set via `bun run setup:editor` (never committed):
+  //   GIT_HOST, GH_APP_ID, GH_INSTALLATION_ID, GH_PRIVATE_KEY,
+  //   (gitlab) GITLAB_TOKEN, GITLAB_PROJECT_ID,
+  //   CF_ACCESS_TEAM_DOMAIN, CF_ACCESS_AUD
+}
