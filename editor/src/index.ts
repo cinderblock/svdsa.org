@@ -10,6 +10,7 @@
 
 export interface Env {
   GIT_HOST?: "github" | "gitlab";
+  EDITOR_DEFAULT_BASE?: string; // default base branch to edit from (e.g. "red")
   // Secrets set via setup:editor — not present until configured:
   GH_APP_ID?: string;
   GH_INSTALLATION_ID?: string;

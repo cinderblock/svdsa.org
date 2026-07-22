@@ -14,8 +14,9 @@
   // GitLab host, GITLAB_TOKEN), set via `wrangler secret put` — never committed.
   "vars": {
     "GIT_HOST": "github",
-    "GH_APP_ID": "",
-    "GH_INSTALLATION_ID": "",
+    "EDITOR_DEFAULT_BASE": "red",
+    "GH_APP_ID": "4368113",
+    "GH_INSTALLATION_ID": "148335084",
     "GITLAB_PROJECT_ID": "",
     "CF_ACCESS_TEAM_DOMAIN": "",
     "CF_ACCESS_AUD": "",

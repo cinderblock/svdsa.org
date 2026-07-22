@@ -147,10 +147,29 @@ needing repo access or a git-host account.
 
 ## Branch naming
 
-`draft/<editor-slug>/<item-slug>` — editor-slug from the Access email
-(local-part, sanitized), item-slug from the content path. One branch per item
-per editor keeps previews stable and merges small. `listBranches("draft/")`
-enumerates open drafts.
+`draft/<editor-slug>/<base>/<item-slug>` — editor-slug from the Access email
+(local-part, sanitized), **base** = the branch being edited (see "Base
+branches"), item-slug from the content path. Including the base keeps drafts off
+different bases from colliding and records where a publish merges back.
+`listBranches("draft/")` enumerates open drafts.
+
+## Base branches (edit from any base, not just `red`)
+
+The base a draft branches from is **selectable**, not hardcoded:
+
+- Default base = **`red`** (production, configurable via the
+  `EDITOR_DEFAULT_BASE` var), but the editor lets you pick any existing branch
+  via `listBranches()` — e.g. a design branch (`faithful-design`) or a staging
+  branch.
+- `readFile`/`listFiles` load content from the chosen base ref, so you edit that
+  branch's content.
+- The draft branches off the chosen base, and **publish targets the same base**
+  (`merge`/`openChangeRequest` into `Draft.base`) — edits land on the branch you
+  picked, not necessarily production.
+
+The `red` mentions elsewhere in this doc are just the default base; every
+git operation already takes an explicit base/ref, so nothing about the schema
+changes.
 
 ## Git host implementations (GitHub **and** GitLab)
 
