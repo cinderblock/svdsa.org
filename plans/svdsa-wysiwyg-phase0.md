@@ -261,6 +261,18 @@ yet; each is a per-change authorization.
   (`https://<team>.cloudflareaccess.com/cdn-cgi/access/certs`), checking the
   app **AUD**. That JWT yields `{ email, name }` for attribution.
 
+## Editor access model (resolved)
+
+- **Editors bring their own account.** Enable multiple IdPs on the Access app
+  (Google, GitHub, Microsoft, generic OIDC); the login screen offers a picker,
+  and passkeys/2FA ride on whichever IdP the editor uses. No OTP tokens emailed.
+- **Authorization = a Cloudflare Access Group** named e.g. "SVDSA editors"
+  holding the editors' emails; the app policy is `Allow, Include = that group`.
+  Adding/removing an editor = editing that one group in the dashboard.
+- The Worker trusts the **Access-issued JWT / injected email** regardless of
+  which IdP was used — Access enforces the group policy _before_ issuing its
+  token (iss = team domain, aud = app), so no per-IdP logic in our code.
+
 ## Governance (defer to the chapter)
 
 - Who may **direct-merge to `red`** vs must **open an MR**? Encode as
