@@ -9,8 +9,15 @@
   // gray-matter (frontmatter serialize) needs Node Buffer at runtime.
   "compatibility_flags": ["nodejs_compat"],
   "observability": { "enabled": true },
-  // Secrets/vars are set via `bun run setup:editor` (never committed):
-  //   GIT_HOST, GH_APP_ID, GH_INSTALLATION_ID, GH_PRIVATE_KEY,
-  //   (gitlab) GITLAB_TOKEN, GITLAB_PROJECT_ID,
-  //   CF_ACCESS_TEAM_DOMAIN, CF_ACCESS_AUD
+  // Non-secret config — plain variables, safe to commit. Filled per deployment
+  // by `bun run setup:editor`. The ONLY secret is GH_PRIVATE_KEY (and, for the
+  // GitLab host, GITLAB_TOKEN), set via `wrangler secret put` — never committed.
+  "vars": {
+    "GIT_HOST": "github",
+    "GH_APP_ID": "",
+    "GH_INSTALLATION_ID": "",
+    "GITLAB_PROJECT_ID": "",
+    "CF_ACCESS_TEAM_DOMAIN": "",
+    "CF_ACCESS_AUD": "",
+  },
 }
