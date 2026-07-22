@@ -185,15 +185,18 @@ async function stepAccessVars(): Promise<void> {
   todo(
     "Create the Cloudflare Access app (browser) — this is what gates the editor",
   );
-  console.log("   1) Access → Access Groups → Add: name 'SVDSA editors',");
-  console.log("      Include = Emails → add each editor's email.");
-  console.log("      (Add/remove editors here later — nothing emailed.)");
+  console.log("   1) Access → Policies → Add a policy: name 'SVDSA editors',");
+  console.log(
+    "      Action Allow, Include = Emails → add each editor's email.",
+  );
+  console.log("      (Reusable policy = your editor list; edit it later.");
+  console.log("       'Access Groups' were replaced by reusable policies.)");
   console.log("   2) Access → Applications → Add → Self-hosted; domain =");
   console.log(
     "      svdsa-edit.<subdomain>.workers.dev; enable the IdPs editors",
   );
-  console.log("      will use (Google, GitHub, Microsoft, …); policy Allow,");
-  console.log("      Include = the 'SVDSA editors' group.");
+  console.log("      will use (Google, GitHub, Microsoft, …); attach the");
+  console.log("      'SVDSA editors' policy.");
   console.log(
     c.dim(
       "   The two values below are OPTIONAL — only for stricter JWT pinning (a",

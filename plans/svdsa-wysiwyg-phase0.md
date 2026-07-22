@@ -285,12 +285,14 @@ yet; each is a per-change authorization.
 - **Editors bring their own account.** Enable multiple IdPs on the Access app
   (Google, GitHub, Microsoft, generic OIDC); the login screen offers a picker,
   and passkeys/2FA ride on whichever IdP the editor uses. No OTP tokens emailed.
-- **Authorization = a Cloudflare Access Group** named e.g. "SVDSA editors"
-  holding the editors' emails; the app policy is `Allow, Include = that group`.
-  Adding/removing an editor = editing that one group in the dashboard.
+- **Authorization = a reusable Access policy** named e.g. "SVDSA editors",
+  Action Allow, Include = Emails (the editors' list), attached to the app.
+  (Cloudflare replaced "Access Groups" with reusable policies — Access →
+  Policies.) Adding/removing an editor = editing that one policy's email list;
+  it applies to every app it's attached to.
 - The Worker trusts the **Access-issued JWT / injected email** regardless of
-  which IdP was used — Access enforces the group policy _before_ issuing its
-  token (iss = team domain, aud = app), so no per-IdP logic in our code.
+  which IdP was used — Access enforces the policy _before_ issuing its token
+  (iss = team domain, aud = app), so no per-IdP logic in our code.
 
 ## Governance (defer to the chapter)
 
