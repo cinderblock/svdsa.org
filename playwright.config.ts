@@ -29,5 +29,8 @@ export default defineConfig({
     command: "bun run dev",
     url: "http://localhost:9999",
     reuseExistingServer: !process.env.CI,
+    // `bun run dev` assembles content (build:content) before Vite boots, so
+    // allow generous startup time under load / on a large content tree.
+    timeout: 180_000,
   },
 });

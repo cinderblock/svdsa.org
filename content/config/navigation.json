@@ -1,0 +1,31 @@
+{
+  "workingGroups": [
+    { "label": "Housing", "to": "/housing/" },
+    { "label": "Labor", "to": "/labor/" },
+    { "label": "Transit", "to": "/transit/" },
+    { "label": "Community Safety", "to": "/community-safety/" },
+    { "label": "Ecosocialist", "to": "/ecosocialist/" },
+    { "label": "Healthcare", "to": "/healthcare/" },
+    { "label": "International Solidarity", "to": "/international-solidarity/" },
+    { "label": "Liberation & Justice", "to": "/liberation-and-justice/" },
+    { "label": "Mutual Aid", "to": "/mutual-aid/" },
+    { "label": "Political Education", "to": "/political-education/" },
+    { "label": "Socialist Feminist", "to": "/socialist-feminist/" }
+  ],
+  "committees": [
+    { "label": "Steering", "to": "/steering/" },
+    { "label": "Communications", "to": "/communications/" },
+    { "label": "Finance", "to": "/finance/" },
+    { "label": "Membership", "to": "/membership/" },
+    { "label": "Electoral", "to": "/electoral/" },
+    { "label": "Tech & Data", "to": "/tech-and-data/" },
+    { "label": "Social", "to": "/social/" }
+  ],
+  "resources": [
+    { "label": "Voters' Guide", "to": "/voters-guide/" },
+    { "label": "Protest Safety", "to": "/protest-safety/" },
+    { "label": "Strike Solidarity Kit", "to": "/strike-solidarity-kit/" },
+    { "label": "Tenant Union (SVTU)", "to": "/svtu/" },
+    { "label": "SVDSA Links", "to": "/links/" }
+  ]
+}

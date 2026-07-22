@@ -1,29 +1,44 @@
 /**
  * Site information architecture and external integrations.
  *
- * The nav is curated (content/structure clone of siliconvalleydsa.org) rather
- * than auto-generated, so ordering and grouping stay intentional. All targets
- * are real pages in content/pages.json or the external services the chapter
- * already uses (Action Network, Zeffy, national DSA, Google Forms).
+ * The editable DATA lives in committed config files under `content/config/`
+ * (so a future in-browser editor can round-trip it, and edits are traceable in
+ * git). This module just types that data and composes the nav. Structure and
+ * layout stay in code — only the lists/values are content.
+ *
+ * All nav targets are real pages in content/pages/ or the external services the
+ * chapter already uses (Action Network, Zeffy, national DSA, Google Forms).
  */
 
-export const SITE = {
-  name: "Silicon Valley DSA",
-  tagline: "Solidarity Forever.",
-  description:
-    "Silicon Valley Democratic Socialists of America — building working-class power in the South Bay.",
-};
+import siteData from "../../content/config/site.json";
+import externalData from "../../content/config/external.json";
+import socialsData from "../../content/config/socials.json";
+import navData from "../../content/config/navigation.json";
+import photosData from "../../content/config/photos.json";
+
+export interface SiteInfo {
+  name: string;
+  tagline: string;
+  description: string;
+}
+export const SITE = siteData as SiteInfo;
 
 /** External services the chapter already uses (verified from the live site). */
-export const EXTERNAL = {
-  joinNational: "https://www.dsausa.org/join",
-  duesWaiver: "https://act.dsausa.org/survey/dueswaiver/",
-  localDues: "https://www.zeffy.com/embed/donation-form/sv-dsa-local-dues",
-  donate: "https://www.zeffy.com/embed/donation-form/sv-dsa-local-dues",
-  newsletter: "https://actionnetwork.org/forms/sv-dsa-newsletter",
-  contactForm:
-    "https://docs.google.com/forms/d/1YGZIftsaZGCvtPY2HN4sVb91CakMTiIfVtLKiZfiOo0/viewform",
-};
+export interface External {
+  joinNational: string;
+  duesWaiver: string;
+  localDues: string;
+  donate: string;
+  newsletter: string;
+  contactForm: string;
+}
+export const EXTERNAL = externalData as External;
+
+export interface Social {
+  label: string;
+  href: string;
+}
+export const SOCIALS = socialsData as Social[];
 
 export interface ChapterPhoto {
   src: string;
@@ -33,22 +48,14 @@ export interface ChapterPhoto {
 
 /**
  * Photos of the chapter in action, shown in the home-page "In the streets"
- * strip. Intentionally EMPTY by default: member/action photos are the
- * chapter's to clear (consent + safety — e.g. face exposure at ICE actions),
- * so they aren't scraped in automatically.
- *
- * To add real photos: drop files in `public/photos/` and list them here, e.g.
- *   { src: "/photos/rally-2026.jpg", alt: "Members marching with a banner",
- *     caption: "No Kings rally, Gilroy" }
- * The strip only renders when this array is non-empty.
+ * strip (content/config/photos.json). Empty by default: member/action photos
+ * are the chapter's to clear (consent + safety — e.g. face exposure at ICE
+ * actions), so they aren't scraped in automatically. To add: drop files in
+ * `public/photos/` and add entries like
+ *   { "src": "/photos/rally-2026.jpg", "alt": "Members marching", "caption": "…" }
+ * The strip only renders when the array is non-empty.
  */
-export const CHAPTER_PHOTOS: ChapterPhoto[] = [];
-
-export const SOCIALS = [
-  { label: "Instagram", href: "https://www.instagram.com/silicon_valley_dsa/" },
-  { label: "Facebook", href: "https://www.facebook.com/svdsa/" },
-  { label: "Twitter / X", href: "https://twitter.com/SV_DSA" },
-];
+export const CHAPTER_PHOTOS = photosData as ChapterPhoto[];
 
 export interface NavLink {
   label: string;
@@ -60,38 +67,16 @@ export interface NavGroup {
   children?: NavLink[];
 }
 
-export const WORKING_GROUPS: NavLink[] = [
-  { label: "Housing", to: "/housing/" },
-  { label: "Labor", to: "/labor/" },
-  { label: "Transit", to: "/transit/" },
-  { label: "Community Safety", to: "/community-safety/" },
-  { label: "Ecosocialist", to: "/ecosocialist/" },
-  { label: "Healthcare", to: "/healthcare/" },
-  { label: "International Solidarity", to: "/international-solidarity/" },
-  { label: "Liberation & Justice", to: "/liberation-and-justice/" },
-  { label: "Mutual Aid", to: "/mutual-aid/" },
-  { label: "Political Education", to: "/political-education/" },
-  { label: "Socialist Feminist", to: "/socialist-feminist/" },
-];
+const nav = navData as {
+  workingGroups: NavLink[];
+  committees: NavLink[];
+  resources: NavLink[];
+};
+export const WORKING_GROUPS = nav.workingGroups;
+export const COMMITTEES = nav.committees;
+export const RESOURCES = nav.resources;
 
-export const COMMITTEES: NavLink[] = [
-  { label: "Steering", to: "/steering/" },
-  { label: "Communications", to: "/communications/" },
-  { label: "Finance", to: "/finance/" },
-  { label: "Membership", to: "/membership/" },
-  { label: "Electoral", to: "/electoral/" },
-  { label: "Tech & Data", to: "/tech-and-data/" },
-  { label: "Social", to: "/social/" },
-];
-
-export const RESOURCES: NavLink[] = [
-  { label: "Voters' Guide", to: "/voters-guide/" },
-  { label: "Protest Safety", to: "/protest-safety/" },
-  { label: "Strike Solidarity Kit", to: "/strike-solidarity-kit/" },
-  { label: "Tenant Union (SVTU)", to: "/svtu/" },
-  { label: "SVDSA Links", to: "/links/" },
-];
-
+/** Primary nav composition (structure in code; the lists above are content). */
 export const NAV: NavGroup[] = [
   { label: "Calendar", to: "/calendar" },
   {
