@@ -255,8 +255,25 @@ async function stepKeySecret(): Promise<void> {
       .catch(() => false))
   )
     return console.log(c.red(`   ✗ no file at ${pem}`));
-  // The shell pipes the file to wrangler; this tool never reads the key.
-  await confirmRun(`bunx wrangler secret put GH_PRIVATE_KEY < "${pem}"`);
+  // GitHub's key is PKCS#1; Web Crypto (the Worker) needs PKCS#8. Convert on
+  // the way in. The shell pipes file→openssl→wrangler; this tool never reads it.
+  if (sh("openssl version", { capture: true }).code === 0) {
+    await confirmRun(
+      `openssl pkcs8 -topk8 -nocrypt -inform PEM -in "${pem}" | bunx wrangler secret put GH_PRIVATE_KEY`,
+    );
+  } else {
+    console.log(c.red("   openssl not found — convert to PKCS#8, then set:"));
+    console.log(
+      c.dim(
+        `     openssl pkcs8 -topk8 -nocrypt -inform PEM -in "${pem}" -out key.pkcs8.pem`,
+      ),
+    );
+    console.log(
+      c.dim(
+        "     (cd editor) bunx wrangler secret put GH_PRIVATE_KEY < key.pkcs8.pem",
+      ),
+    );
+  }
 }
 
 async function stepVerify(): Promise<void> {
