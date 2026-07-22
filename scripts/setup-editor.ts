@@ -17,6 +17,7 @@
 
 import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import { createInterface } from "node:readline/promises";
 
 const STATE = join(import.meta.dirname, "..", ".editor-setup.local.json");
 const WORKER = "svdsa-edit";
@@ -167,11 +168,16 @@ if (!process.stdin.isTTY) {
   process.exit(0);
 }
 
+// Node readline (reliable under `bun run` in a TTY; the global prompt() does
+// not block here).
+const rl = createInterface({ input: process.stdin, output: process.stdout });
 const done = await loadState();
 for (let i = 0; i < steps.length; i++) {
   const step = steps[i];
   renderStep(step, i + 1, done.has(step.id));
-  const ans = (prompt(`   ${c.dim("[enter]=done  s=skip  q=quit")} `) ?? "q")
+  const ans = (
+    await rl.question(`   ${c.dim("[enter]=done  s=skip  q=quit")} `)
+  )
     .trim()
     .toLowerCase();
   if (ans === "q") break;
@@ -179,6 +185,7 @@ for (let i = 0; i < steps.length; i++) {
   done.add(step.id);
   await saveState(done);
 }
+rl.close();
 
 const remaining = steps.filter((s) => !done.has(s.id)).length;
 console.log(
