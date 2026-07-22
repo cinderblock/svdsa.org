@@ -44,6 +44,9 @@ export function branchName(
 ): string {
   const who = slugify(editorEmail.split("@")[0] || "editor");
   const b = slugify(base);
-  const what = slugify(itemPath.replace(/^content\//, "").replace(/\.md$/, ""));
+  // Basename only (not the full path) so the Workers Builds preview alias stays
+  // under the 63-char DNS-label limit and the preview URL is predictable.
+  const file = itemPath.split("/").pop() ?? itemPath;
+  const what = slugify(file.replace(/\.md$/, ""));
   return `draft/${who}/${b}/${what}`;
 }
