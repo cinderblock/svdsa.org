@@ -1,162 +1,33 @@
 /**
- * Interactive setup walkthrough for the WYSIWYG editor's Phase 2 infra
- * (see plans/svdsa-wysiwyg-phase0.md). Guides creating the GitHub App,
- * deploying the `svdsa-edit` Worker, setting its secrets, and wiring
- * Cloudflare Access.
+ * Setup orchestrator for the WYSIWYG editor's Phase 2 infra
+ * (see plans/svdsa-wysiwyg-phase0.md).
  *
  *   bun run setup:editor
  *
- * It PROMPTS for (and regex-validates) the NON-secret identifiers — App ID,
- * Installation ID, Access team domain, AUD — remembers them in
- * .editor-setup.local.json (gitignored), and inlines them into ready-to-run
- * commands. It NEVER handles true secrets (the GitHub App private key, tokens):
- * those are entered via `wrangler secret put …` in your own terminal (wrangler
- * prompts / reads a piped file), so the secret goes straight to Cloudflare —
- * never through this script, its state file, or shell history.
+ * It detects current state itself (wrangler whoami / secret list) and skips
+ * anything already done — so re-running jumps straight to the first unfinished
+ * step. It RUNS the commands for you (deploy, secrets) after a y/n prompt;
+ * you only hand-enter the values it can't detect (App ID, Installation ID, the
+ * .pem path, Access team domain + AUD), which are regex-validated.
  *
- * Interactive in a TTY; prints the whole checklist when piped/non-TTY.
+ * Secrets are never seen by this tool: the GitHub App private key is piped to
+ * wrangler straight from the .pem file via shell redirection; non-secret IDs
+ * are fed on stdin. Nothing sensitive is stored or logged. Non-secret IDs are
+ * remembered in .editor-setup.local.json (gitignored). Read-only checks run
+ * silently; every account-mutating command asks first (n → prints it instead).
+ *
+ * Prints a static checklist when piped/non-TTY (runs nothing).
  */
 
-import { readFile, writeFile } from "node:fs/promises";
+import { readFile, writeFile, stat } from "node:fs/promises";
 import { join } from "node:path";
-import { createInterface } from "node:readline/promises";
+import { homedir } from "node:os";
+import { createInterface, type Interface } from "node:readline/promises";
+import { spawnSync } from "node:child_process";
 
-const STATE = join(import.meta.dirname, "..", ".editor-setup.local.json");
-const WORKER = "svdsa-edit";
-
-interface Ask {
-  key: string;
-  label: string;
-  pattern: RegExp;
-  hint: string;
-}
-interface Step {
-  id: string;
-  title: string;
-  detail: string[];
-  /** Non-secret values to prompt for + validate (never secrets). */
-  ask?: Ask[];
-  /** Commands to run. `{KEY}` is replaced with a captured value. */
-  commands?: string[];
-}
-
-const steps: Step[] = [
-  {
-    id: "prereqs",
-    title: "Prerequisites",
-    detail: [
-      "You'll need the repo checked out, Bun installed, and a Cloudflare login.",
-      "Confirm the account is the one that hosts the production svdsa Worker.",
-    ],
-    commands: ["bunx wrangler login", "bunx wrangler whoami"],
-  },
-  {
-    id: "gh-app-create",
-    title: "Create the GitHub App (the editor's bot credential)",
-    detail: [
-      "Open: https://github.com/settings/apps/new",
-      "  • Name: svdsa-edit  •  Homepage: https://github.com/cinderblock/svdsa.org",
-      "  • Uncheck 'Webhook → Active'.",
-      "  • Repository permissions: Contents = Read & write,",
-      "    Pull requests = Read & write, Metadata = Read (auto).",
-      "  • 'Where can this be installed': Only on this account.",
-      "Create it, then 'Generate a private key' (downloads a .pem — keep it safe;",
-      "it's the only real secret and is entered later straight from the file).",
-    ],
-    ask: [
-      {
-        key: "GH_APP_ID",
-        label: "GitHub App ID",
-        pattern: /^\d{5,}$/,
-        hint: "the numeric App ID near the top of the app settings page",
-      },
-    ],
-  },
-  {
-    id: "gh-app-install",
-    title: "Install the App on the repo",
-    detail: [
-      "On the App page → 'Install App' → install on cinderblock/svdsa.org",
-      "  (select 'Only select repositories' → svdsa.org).",
-      "After installing, the URL ends in /installations/<number>.",
-    ],
-    ask: [
-      {
-        key: "GH_INSTALLATION_ID",
-        label: "Installation ID",
-        pattern: /^\d{5,}$/,
-        hint: "the number at the end of the install URL",
-      },
-    ],
-  },
-  {
-    id: "deploy-worker",
-    title: "Deploy the svdsa-edit Worker skeleton",
-    detail: ["The Worker must exist before its secrets can be set."],
-    commands: ["cd editor && bunx wrangler deploy"],
-  },
-  {
-    id: "set-secrets",
-    title: "Set the Worker config + secret",
-    detail: [
-      "The App ID / Installation ID below are non-secret and are filled in from",
-      "what you entered. GH_PRIVATE_KEY is the only real secret — it's piped",
-      "straight from the .pem file and never seen by this tool.",
-      "Run from the editor/ directory:",
-    ],
-    commands: [
-      "cd editor",
-      'echo "{GH_APP_ID}" | bunx wrangler secret put GH_APP_ID',
-      'echo "{GH_INSTALLATION_ID}" | bunx wrangler secret put GH_INSTALLATION_ID',
-      "bunx wrangler secret put GH_PRIVATE_KEY < ~/Downloads/svdsa-edit.*.private-key.pem",
-    ],
-  },
-  {
-    id: "cf-access",
-    title: "Put Cloudflare Access in front of the editor",
-    detail: [
-      "Cloudflare dashboard → Zero Trust → Access → Applications → Add →",
-      "Self-hosted. Application domain = the editor URL",
-      `  (e.g. ${WORKER}.<your-subdomain>.workers.dev).`,
-      "Identity: One-time PIN (email) and/or Google.",
-      "Policy: Allow, Include = the editors' emails (or an email domain).",
-      "Then read off the app's AUD tag and your team domain.",
-    ],
-    ask: [
-      {
-        key: "CF_ACCESS_TEAM_DOMAIN",
-        label: "Access team domain",
-        pattern: /^[a-z0-9][a-z0-9-]*\.cloudflareaccess\.com$/i,
-        hint: "e.g. yourteam.cloudflareaccess.com (host only)",
-      },
-      {
-        key: "CF_ACCESS_AUD",
-        label: "Access application AUD",
-        pattern: /^[a-f0-9]{64}$/i,
-        hint: "64 hex characters, from the Access app overview",
-      },
-    ],
-    commands: [
-      "cd editor",
-      'echo "{CF_ACCESS_TEAM_DOMAIN}" | bunx wrangler secret put CF_ACCESS_TEAM_DOMAIN',
-      'echo "{CF_ACCESS_AUD}" | bunx wrangler secret put CF_ACCESS_AUD',
-    ],
-  },
-  {
-    id: "verify",
-    title: "Verify",
-    detail: [
-      "Redeploy so secrets are picked up, then open the editor URL — you should",
-      "hit the Access login, then the editor.",
-    ],
-    commands: [
-      "cd editor && bunx wrangler deploy",
-      "bunx wrangler secret list",
-    ],
-  },
-];
-
-// ---- rendering --------------------------------------------------------------
+const ROOT = join(import.meta.dirname, "..");
+const EDITOR = join(ROOT, "editor");
+const STATE = join(ROOT, ".editor-setup.local.json");
 
 const c = {
   bold: (s: string) => `\x1b[1m${s}\x1b[0m`,
@@ -165,111 +36,297 @@ const c = {
   dim: (s: string) => `\x1b[2m${s}\x1b[0m`,
   cyan: (s: string) => `\x1b[36m${s}\x1b[0m`,
 };
+const ok = (s: string) => console.log(`${c.green("✔")} ${s}`);
+const todo = (s: string) => console.log(`\n${c.bold("→ " + s)}`);
 
-type Values = Record<string, string>;
+// ---- shell helpers ----------------------------------------------------------
 
-function fill(cmd: string, values: Values): string {
-  return cmd.replace(/\{(\w+)\}/g, (_, k: string) => values[k] ?? `<${k}>`);
-}
-
-function renderStep(step: Step, n: number, done: boolean, values: Values) {
-  console.log(
-    `\n${done ? c.green("✔") : c.dim("▢")} ${c.bold(`${n}. ${step.title}`)}`,
-  );
-  for (const line of step.detail) console.log(`   ${line}`);
-  for (const cmd of step.commands ?? [])
-    console.log(`     ${c.cyan("$ " + fill(cmd, values))}`);
-}
-
-interface State {
-  done: string[];
-  values: Values;
-}
-async function loadState(): Promise<State> {
+/** Run a command via the shell. capture=true → silent, returns output. */
+function sh(
+  cmd: string,
+  opts: { cwd?: string; capture?: boolean; input?: string } = {},
+) {
   try {
-    const s = JSON.parse(await readFile(STATE, "utf8")) as Partial<State>;
-    return { done: s.done ?? [], values: s.values ?? {} };
+    const r = spawnSync(cmd, {
+      cwd: opts.cwd,
+      shell: true,
+      encoding: "utf8",
+      input: opts.input,
+      stdio: opts.capture
+        ? ["pipe", "pipe", "pipe"]
+        : ["inherit", "inherit", "inherit"],
+    });
+    return { code: r.status ?? 1, out: `${r.stdout ?? ""}${r.stderr ?? ""}` };
   } catch {
-    return { done: [], values: {} };
+    return { code: 1, out: "" };
   }
 }
-const save = (s: State) => writeFile(STATE, JSON.stringify(s, null, 2) + "\n");
+
+let rl: Interface;
+async function confirmRun(
+  label: string,
+  cmd: string,
+  cwd = EDITOR,
+): Promise<boolean> {
+  const ans = (await rl.question(`   run ${c.cyan(cmd)} ? ${c.dim("[Y/n]")} `))
+    .trim()
+    .toLowerCase();
+  if (ans === "n" || ans === "no") {
+    console.log(c.dim(`   skipped — run it yourself:  (cd ${cwd}) $ ${cmd}`));
+    return false;
+  }
+  const r = sh(cmd, { cwd });
+  if (r.code !== 0) console.log(c.red(`   command exited ${r.code}`));
+  return r.code === 0;
+}
+
+async function askValue(
+  label: string,
+  pattern: RegExp,
+  hint: string,
+  existing?: string,
+): Promise<string | undefined> {
+  while (true) {
+    const shown = existing ? ` [${existing}]` : "";
+    const ans = (
+      await rl.question(`   ${label}${shown} ${c.dim("(" + hint + ")")}: `)
+    ).trim();
+    if (ans === "") return existing; // keep/skip
+    if (pattern.test(ans)) return ans;
+    console.log(
+      c.red(`   ✗ doesn't match ${pattern} — try again (Enter to skip)`),
+    );
+  }
+}
+
+// ---- state ------------------------------------------------------------------
+
+type Values = Record<string, string>;
+async function loadValues(): Promise<Values> {
+  try {
+    return (
+      (JSON.parse(await readFile(STATE, "utf8")) as { values?: Values })
+        .values ?? {}
+    );
+  } catch {
+    return {};
+  }
+}
+const saveValues = (values: Values) =>
+  writeFile(STATE, JSON.stringify({ values }, null, 2) + "\n");
+
+// ---- live checks ------------------------------------------------------------
+
+function whoami(): string | null {
+  const r = sh("bunx wrangler whoami", { capture: true });
+  if (r.code !== 0 || /not authenticated/i.test(r.out)) return null;
+  const m =
+    r.out.match(/email\s+([^\s.]+@[^\s]+)/i) || r.out.match(/([^\s]+@[^\s]+)/);
+  return m ? m[1] : "logged in";
+}
+/** Raw text of `wrangler secret list` for the editor Worker, or null if the
+ *  Worker isn't deployed yet. */
+function secretList(): string | null {
+  const r = sh("bunx wrangler secret list", { cwd: EDITOR, capture: true });
+  if (r.code !== 0) return null;
+  return r.out;
+}
+const has = (list: string | null, name: string) =>
+  !!list && list.includes(name);
+
+// ---- steps ------------------------------------------------------------------
+
+const ID = /^\d{5,}$/;
+const TEAM = /^[a-z0-9][a-z0-9-]*\.cloudflareaccess\.com$/i;
+const AUD = /^[a-f0-9]{64}$/i;
+
+const CHECKLIST = [
+  "1. wrangler login (auto-detected)",
+  "2. Deploy the svdsa-edit Worker skeleton (auto)",
+  "3. Create + install the GitHub App (browser) → App ID, Installation ID, .pem",
+  "4. Set GitHub secrets (auto, from your values + the .pem)",
+  "5. Create the Cloudflare Access app (browser) → team domain, AUD",
+  "6. Set Access secrets (auto) + redeploy + verify",
+];
+
+async function stepLogin(): Promise<boolean> {
+  const who = whoami();
+  if (who) {
+    ok(`Logged in to Cloudflare as ${who}`);
+    console.log(
+      c.dim("   (confirm this is the account hosting production svdsa)"),
+    );
+    return true;
+  }
+  todo("Log in to Cloudflare");
+  return confirmRun("login", "bunx wrangler login", ROOT);
+}
+
+async function stepDeploy(): Promise<boolean> {
+  if (secretList() !== null) {
+    ok("svdsa-edit Worker is deployed");
+    return true;
+  }
+  todo("Deploy the svdsa-edit Worker skeleton (must exist before secrets)");
+  return confirmRun("deploy", "bunx wrangler deploy");
+}
+
+async function stepGithub(values: Values): Promise<void> {
+  const secrets = secretList();
+  if (
+    has(secrets, "GH_APP_ID") &&
+    has(secrets, "GH_INSTALLATION_ID") &&
+    has(secrets, "GH_PRIVATE_KEY")
+  ) {
+    ok("GitHub App secrets are set");
+    return;
+  }
+  todo("Create + install the GitHub App (browser), then I'll set the secrets");
+  console.log("   https://github.com/settings/apps/new");
+  console.log("     • Name: svdsa-edit  • Webhook: off");
+  console.log(
+    "     • Permissions: Contents R/W, Pull requests R/W, Metadata R",
+  );
+  console.log(
+    "     • Install on cinderblock/svdsa.org, and 'Generate a private key' (.pem).",
+  );
+
+  const appId = await askValue("GitHub App ID", ID, "digits", values.GH_APP_ID);
+  const instId = await askValue(
+    "Installation ID",
+    ID,
+    "digits (end of install URL)",
+    values.GH_INSTALLATION_ID,
+  );
+  if (appId) values.GH_APP_ID = appId;
+  if (instId) values.GH_INSTALLATION_ID = instId;
+  await saveValues(values);
+
+  // .pem path (not secret — the file path). The key content is piped to
+  // wrangler by the shell; this tool never reads it.
+  let pem = (
+    await rl.question(
+      `   Path to the downloaded .pem ${c.dim("(drag it in / paste path)")}: `,
+    )
+  )
+    .trim()
+    .replace(/^["']|["']$/g, "");
+  if (pem.startsWith("~")) pem = join(homedir(), pem.slice(1));
+  const pemOk = pem
+    ? await stat(pem)
+        .then(() => true)
+        .catch(() => false)
+    : false;
+  if (pem && !pemOk)
+    console.log(
+      c.red(`   ✗ no file at ${pem} — set GH_PRIVATE_KEY yourself later`),
+    );
+
+  if (appId)
+    await confirmRun(
+      "set app id",
+      `echo ${appId} | bunx wrangler secret put GH_APP_ID`,
+    );
+  if (instId)
+    await confirmRun(
+      "set installation id",
+      `echo ${instId} | bunx wrangler secret put GH_INSTALLATION_ID`,
+    );
+  if (pemOk)
+    await confirmRun(
+      "set private key (piped from the .pem)",
+      `bunx wrangler secret put GH_PRIVATE_KEY < "${pem}"`,
+    );
+}
+
+async function stepAccess(values: Values): Promise<void> {
+  const secrets = secretList();
+  if (has(secrets, "CF_ACCESS_TEAM_DOMAIN") && has(secrets, "CF_ACCESS_AUD")) {
+    ok("Cloudflare Access secrets are set");
+    return;
+  }
+  todo("Create the Cloudflare Access app (browser), then I'll set the secrets");
+  console.log("   Zero Trust → Access → Applications → Add → Self-hosted");
+  console.log(
+    "     • Domain = the editor URL (svdsa-edit.<subdomain>.workers.dev)",
+  );
+  console.log(
+    "     • Identity: One-time PIN / Google.  Policy: Allow = editor emails.",
+  );
+
+  const team = await askValue(
+    "Access team domain",
+    TEAM,
+    "yourteam.cloudflareaccess.com",
+    values.CF_ACCESS_TEAM_DOMAIN,
+  );
+  const aud = await askValue(
+    "Access application AUD",
+    AUD,
+    "64 hex chars",
+    values.CF_ACCESS_AUD,
+  );
+  if (team) values.CF_ACCESS_TEAM_DOMAIN = team;
+  if (aud) values.CF_ACCESS_AUD = aud;
+  await saveValues(values);
+
+  if (team)
+    await confirmRun(
+      "set team domain",
+      `echo ${team} | bunx wrangler secret put CF_ACCESS_TEAM_DOMAIN`,
+    );
+  if (aud)
+    await confirmRun(
+      "set aud",
+      `echo ${aud} | bunx wrangler secret put CF_ACCESS_AUD`,
+    );
+}
+
+async function stepVerify(): Promise<void> {
+  todo("Redeploy (pick up secrets) + verify");
+  await confirmRun("redeploy", "bunx wrangler deploy");
+  console.log(
+    c.dim(
+      "   Open the editor URL — you should hit the Access login, then the editor.",
+    ),
+  );
+}
 
 // ---- main -------------------------------------------------------------------
 
-console.log(c.bold("\nSVDSA editor — Phase 2 setup walkthrough"));
-console.log(
-  c.dim("Prompts for non-secret IDs only; real secrets go via wrangler.\n"),
-);
+console.log(c.bold("\nSVDSA editor — Phase 2 setup"));
 
 if (!process.stdin.isTTY) {
-  console.log(c.dim("(non-interactive: printing the full checklist)"));
-  steps.forEach((s, i) => {
-    renderStep(s, i + 1, false, {});
-    for (const a of s.ask ?? [])
-      console.log(`     ${c.dim(`↳ you'll be asked: ${a.label} (${a.hint})`)}`);
-  });
   console.log(
-    c.dim(
-      "\nRun in a terminal (bun run setup:editor) to fill values + check off.\n",
-    ),
+    c.dim("(non-interactive: checklist only; run in a terminal to execute)\n"),
   );
+  for (const line of CHECKLIST) console.log(`  ▢ ${line}`);
+  console.log(c.dim("\n  bun run setup:editor\n"));
   process.exit(0);
 }
 
-const rl = createInterface({ input: process.stdin, output: process.stdout });
-const state = await loadState();
+rl = createInterface({ input: process.stdin, output: process.stdout });
+console.log(c.dim("Detecting current state…"));
+const values = await loadValues();
 
-for (let i = 0; i < steps.length; i++) {
-  const step = steps[i];
-  renderStep(step, i + 1, state.done.includes(step.id), state.values);
-
-  for (const a of step.ask ?? []) {
-    const existing = state.values[a.key];
-    while (true) {
-      const shown = existing ? ` [${existing}]` : "";
-      const ans = (
-        await rl.question(
-          `   ${a.label}${shown} ${c.dim("(" + a.hint + ")")}: `,
-        )
-      ).trim();
-      if (ans === "" && existing) break; // keep existing
-      if (ans === "") break; // skip for now
-      if (a.pattern.test(ans)) {
-        state.values[a.key] = ans;
-        await save(state);
-        break;
-      }
-      console.log(
-        `   ${c.red("✗ that doesn't match " + a.pattern + " — try again, or Enter to skip")}`,
-      );
-    }
-  }
-
-  // Reprint commands now that values are captured.
-  if (step.commands?.some((cmd) => /\{\w+\}/.test(cmd))) {
-    console.log(c.dim("   → commands with your values:"));
-    for (const cmd of step.commands)
-      console.log(`     ${c.cyan("$ " + fill(cmd, state.values))}`);
-  }
-
-  const nav = (
-    await rl.question(`   ${c.dim("[enter]=done  s=skip  q=quit")} `)
-  )
-    .trim()
-    .toLowerCase();
-  if (nav === "q") break;
-  if (nav === "s") continue;
-  if (!state.done.includes(step.id)) state.done.push(step.id);
-  await save(state);
+if (await stepLogin()) {
+  await stepDeploy();
+  await stepGithub(values);
+  await stepAccess(values);
+  await stepVerify();
 }
 rl.close();
 
-const remaining = steps.filter((s) => !state.done.includes(s.id)).length;
+const s = secretList();
+const remaining = [
+  "GH_APP_ID",
+  "GH_INSTALLATION_ID",
+  "GH_PRIVATE_KEY",
+  "CF_ACCESS_TEAM_DOMAIN",
+  "CF_ACCESS_AUD",
+].filter((n) => !has(s, n));
 console.log(
-  remaining === 0
-    ? c.green("\nAll steps done. The editor should be live behind Access. 🌹\n")
-    : c.dim(
-        `\n${remaining} step(s) left — re-run bun run setup:editor to continue.\n`,
-      ),
+  remaining.length === 0
+    ? c.green("\nAll set — the editor should be live behind Access. 🌹\n")
+    : c.dim(`\nStill to do: ${remaining.join(", ")} — re-run to continue.\n`),
 );
