@@ -14,8 +14,15 @@ interface GhEnv {
   GH_PRIVATE_KEY?: string;
 }
 
+export interface Author {
+  name: string;
+  email: string;
+}
+
 const API = "https://api.github.com";
 const UA = "svdsa-edit";
+
+// ---- crypto / encoding ------------------------------------------------------
 
 function b64urlFromString(s: string): string {
   return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
@@ -34,6 +41,23 @@ function pemToDer(pem: string): ArrayBuffer {
   for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
   return bytes.buffer;
 }
+/** base64-encode a UTF-8 string (for the GitHub Contents API). */
+function b64encodeUtf8(text: string): string {
+  const bytes = new TextEncoder().encode(text);
+  let bin = "";
+  for (const b of bytes) bin += String.fromCharCode(b);
+  return btoa(bin);
+}
+/** decode base64 (possibly newline-wrapped) UTF-8 content from GitHub. */
+function b64decodeUtf8(b64: string): string {
+  const bin = atob(b64.replace(/\s+/g, ""));
+  const bytes = Uint8Array.from(bin, (ch) => ch.charCodeAt(0));
+  return new TextDecoder().decode(bytes);
+}
+/** encode a repo path, preserving slashes. */
+const encPath = (p: string) => p.split("/").map(encodeURIComponent).join("/");
+
+// ---- auth -------------------------------------------------------------------
 
 async function importPrivateKey(pem: string): Promise<CryptoKey> {
   if (/BEGIN RSA PRIVATE KEY/.test(pem)) {
@@ -50,7 +74,6 @@ async function importPrivateKey(pem: string): Promise<CryptoKey> {
   );
 }
 
-/** Signed GitHub App JWT (valid ~9 min). */
 async function appJwt(env: GhEnv): Promise<string> {
   if (!env.GH_APP_ID || !env.GH_PRIVATE_KEY)
     throw new Error("GH_APP_ID / GH_PRIVATE_KEY not configured.");
@@ -69,7 +92,6 @@ async function appJwt(env: GhEnv): Promise<string> {
   return `${input}.${b64urlFromBytes(new Uint8Array(sig))}`;
 }
 
-/** Exchange the App JWT for a short-lived installation token. */
 async function installationToken(env: GhEnv): Promise<string> {
   if (!env.GH_INSTALLATION_ID)
     throw new Error("GH_INSTALLATION_ID not configured.");
@@ -91,11 +113,22 @@ async function installationToken(env: GhEnv): Promise<string> {
   return ((await res.json()) as { token: string }).token;
 }
 
+// ---- client -----------------------------------------------------------------
+
+export interface RawItem {
+  path: string;
+  sha: string; // blob sha at the read ref (for optimistic concurrency)
+  text: string; // raw .md (frontmatter + body)
+}
+
+const CONTENT_RE = /^content\/(pages|posts|events|config)\/.+\.md$/;
+
 /** A GitHub client bound to one installation token (mint once per request). */
 export async function createGitHub(env: GhEnv) {
   const [owner, repo] = (env.GH_REPO ?? "").split("/");
   if (!owner || !repo) throw new Error("GH_REPO must be 'owner/repo'.");
   const token = await installationToken(env);
+  const base = `/repos/${owner}/${repo}`;
 
   async function api(path: string, init?: RequestInit) {
     const res = await fetch(`${API}${path}`, {
@@ -113,21 +146,95 @@ export async function createGitHub(env: GhEnv) {
     return res.json();
   }
 
+  async function branchSha(ref: string): Promise<string> {
+    const r = (await api(`${base}/git/ref/heads/${encPath(ref)}`)) as {
+      object: { sha: string };
+    };
+    return r.object.sha;
+  }
+  async function branchExists(branch: string): Promise<boolean> {
+    try {
+      await api(`${base}/git/ref/heads/${encPath(branch)}`);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+  async function fileSha(
+    path: string,
+    ref: string,
+  ): Promise<string | undefined> {
+    try {
+      const r = (await api(
+        `${base}/contents/${encPath(path)}?ref=${encodeURIComponent(ref)}`,
+      )) as { sha: string };
+      return r.sha;
+    } catch {
+      return undefined; // new file
+    }
+  }
+
   return {
     owner,
     repo,
-    /** Basic reachability check — returns the repo's full name + default branch. */
     async repoInfo(): Promise<{ full_name: string; default_branch: string }> {
-      return api(`/repos/${owner}/${repo}`) as Promise<{
+      return api(base) as Promise<{
         full_name: string;
         default_branch: string;
       }>;
     },
     async listBranches(): Promise<string[]> {
-      const branches = (await api(
-        `/repos/${owner}/${repo}/branches?per_page=100`,
-      )) as { name: string }[];
+      const branches = (await api(`${base}/branches?per_page=100`)) as {
+        name: string;
+      }[];
       return branches.map((b) => b.name);
+    },
+    /** Editable content files (content/{pages,posts,events,config}/*.md) at ref. */
+    async listContent(ref: string): Promise<string[]> {
+      const sha = await branchSha(ref);
+      const t = (await api(`${base}/git/trees/${sha}?recursive=1`)) as {
+        tree: { path: string; type: string }[];
+      };
+      return t.tree
+        .filter((n) => n.type === "blob" && CONTENT_RE.test(n.path))
+        .map((n) => n.path)
+        .sort();
+    },
+    async readItem(path: string, ref: string): Promise<RawItem> {
+      const r = (await api(
+        `${base}/contents/${encPath(path)}?ref=${encodeURIComponent(ref)}`,
+      )) as { content: string; sha: string };
+      return { path, sha: r.sha, text: b64decodeUtf8(r.content) };
+    },
+    /** Create `branch` off `fromRef` if it doesn't exist. */
+    async ensureBranch(branch: string, fromRef: string): Promise<void> {
+      if (await branchExists(branch)) return;
+      const sha = await branchSha(fromRef);
+      await api(`${base}/git/refs`, {
+        method: "POST",
+        body: JSON.stringify({ ref: `refs/heads/${branch}`, sha }),
+      });
+    },
+    /** Commit `text` to `path` on `branch`, authored by the editor. */
+    async commit(args: {
+      branch: string;
+      path: string;
+      text: string;
+      message: string;
+      author: Author;
+    }): Promise<{ commitSha: string }> {
+      const sha = await fileSha(args.path, args.branch);
+      const r = (await api(`${base}/contents/${encPath(args.path)}`, {
+        method: "PUT",
+        body: JSON.stringify({
+          message: args.message,
+          content: b64encodeUtf8(args.text),
+          branch: args.branch,
+          sha,
+          author: args.author,
+        }),
+      })) as { commit: { sha: string } };
+      return { commitSha: r.commit.sha };
     },
   };
 }

@@ -36,9 +36,14 @@ export function slugify(input: string): string {
     .slice(0, 60);
 }
 
-/** Draft branch for an editor + content path, e.g. draft/jane/posts-2026-….  */
-export function branchName(editorEmail: string, itemPath: string): string {
+/** Draft branch: draft/<editor>/<base>/<item>, e.g. draft/jane/red/posts-2026-…. */
+export function branchName(
+  editorEmail: string,
+  base: string,
+  itemPath: string,
+): string {
   const who = slugify(editorEmail.split("@")[0] || "editor");
+  const b = slugify(base);
   const what = slugify(itemPath.replace(/^content\//, "").replace(/\.md$/, ""));
-  return `draft/${who}/${what}`;
+  return `draft/${who}/${b}/${what}`;
 }
