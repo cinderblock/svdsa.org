@@ -72,15 +72,33 @@ failures pre-date this work (reproduced on unmodified baseline).
   (`::canva{id=…}`, `::action-network{form=…}`, `::donate-button[label]{url}`)
   rendered to safe HTML at build; Milkdown can grow matching block widgets.
 
-## Next steps (agreed direction, not yet built)
+## 2026-07-24 round 4 — SHIPPED (8be5e56, 4a3539f, aa342f5)
 
-1. **Recurring events**: `repeats:` frontmatter (RRULE-ish: freq, byday,
-   until) on ONE file per series; build-content expands to instances at
-   build time (daily cron rebuild already exists). Migration: collapse
-   pre-generated series (sjfreestore, mawg, garden-day, ice-watch, FNB, …)
-   into single recurring files; delete the 900+ instance files.
-2. remark-directive shortcodes for the 20 raw-HTML files.
-3. New-file creation in the editor; config .json editing.
+1. **Recurring events DONE**: `repeats:` frontmatter (weekly/biweekly/monthly
+   nth-or-last weekday, optional until) expanded by
+   `scripts/expand-recurring.ts` over a rolling 180-day window in
+   build-content (daily cron keeps it moving).
+   `scripts/collapse-recurring-events.ts` collapsed 16 series / deleted 365
+   future instance files (past kept as history). FIVE series with
+   holiday-shifted dates left as instance files pending exception support
+   (`skip:`/`moved:`): electoral-wg, intl-solidarity, liberation-and-justice,
+   transit-meeting, transit-session. Instance URLs keep the WP shape
+   (/event/<slug>/<date>/); note the 2026-era `2025-07-16-mawg` slug's future
+   URLs changed to /event/mawg/<date>/ (series templated from newest slug).
+2. **Auto-fix on save DONE**: /api/save normalizes + applies rule suggestions
+   before committing; response reports autofixed count + remaining warnings.
+3. **docs/editing.md DONE**: mermaid flowchart + persona ladder (WYSIWYG-only
+   → markdown → git → dev), linked from README.
+
+## Next steps
+
+1. remark-directive shortcodes (vetted component registry) for the 20
+   raw-HTML files: ::canva, ::action-network, ::donate-button, ::embed-form.
+2. Recurrence exceptions (`skip:` dates / `moved:` map) → collapse the 5
+   irregular series; editor UI for repeats (currently JSON-readonly field).
+3. New-file creation in the editor; config .json editing (nav/socials —
+   would answer "how does an editor change layout-ish things").
+4. Corpus-wide `bun run lint:content --fix` (1519 San José) — user decision.
 
 ## Goal
 
