@@ -23,23 +23,22 @@ categories:
 
 Join Silicon Valley DSA, South Bay Mutual Aid, Food Not Bombs San José, San José Clothing Swap, and Art Pocket SJ, for a really really free goods event in the San José Peace and Justice Center parking lot. We’ll have cleaning supplies, clothes, fresh produce, fire preparedness kits, menstrual products, zines, and more available so that people can take what they need, for free.
 
-Set up begins at 2 to 2:30 PM.  The Free Store will run from 3:30 to 6:00 PM and clean up will go from 6-7 PM~.  Please wear a mask to prevent the spread of respiratory diseases.
+Set up begins at 2 to 2:30 PM.  The Free Store will run from 3:30 to 6:00 PM and clean up will go from 6-7 PM\~.  Please wear a mask to prevent the spread of respiratory diseases.
 
 Feel free to bring and leave items you want to donate, but don’t bring more than 50 pounds of items, or items that won’t fit into a 2×2 box.
 
 We look forward to seeing you!
 
-**Location Details**  
-**San José Peace & Justice Center Parking Lot**  
-48 S. 7th Street  
+**Location Details**\
+**San José Peace & Justice Center Parking Lot**\
+48 S. 7th Street\
 San Jose CA 95112
 
 **Parking**
 
 There is street parking and parking garages close by on 4th street. **Do not park at the Grocery Outlet they will tow your car.**
 
-**Public Transportation  
-**
+**Public Transportation**
 
 Bus: 7th & Santa Clara (Rapid 523, 64), San Carlos / 7th (22, 23, 66), San Fernando & 7th (72,73)
 
@@ -51,4 +50,4 @@ Train: San Jose Diridon Station – take Rapid 500 to Santa Clara / 6th or 22 to
 
 For anyone entering the Center, it is recommended that you wear a mask. Thank you!
 
-![](https://siliconvalleydsa.org/wp-content/uploads/2024/12/PREVIEW-Free-Store-Banner-Export-Not-for-Print-300x189.jpg)
+![1.00](https://siliconvalleydsa.org/wp-content/uploads/2024/12/PREVIEW-Free-Store-Banner-Export-Not-for-Print-300x189.jpg)
