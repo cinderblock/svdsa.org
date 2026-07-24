@@ -7,7 +7,12 @@ import {
   useRef,
   useState,
 } from "react";
-import { api, type DraftStatus, type ItemDetail } from "./api";
+import {
+  api,
+  type DraftStatus,
+  type ItemDetail,
+  type LintFinding,
+} from "./api";
 import { FileList } from "./filelist";
 import {
   buildFrontmatter,
@@ -23,6 +28,15 @@ const Raw = lazy(() =>
 );
 
 type Mode = "wysiwyg" | "raw";
+
+/** The production site's origin, derived from this editor's host
+ * (svdsa-edit.<sub>.workers.dev → svdsa.<sub>.workers.dev). */
+function liveOrigin(): string {
+  const host = window.location.host;
+  if (host.startsWith("svdsa-edit."))
+    return `https://${host.replace(/^svdsa-edit\./, "svdsa.")}`;
+  return "https://svdsa.isozilla.workers.dev"; // local dev fallback
+}
 
 /** Group branches by first path segment (theme/, draft/, …); rootless first. */
 function groupBranches(branches: string[]): {
@@ -64,6 +78,7 @@ export function App() {
     text: string;
     href?: string;
   } | null>(null);
+  const [lint, setLint] = useState<LintFinding[]>([]);
 
   const edRef = useRef<EditorHandle>(null);
 
@@ -109,6 +124,7 @@ export function App() {
       setTitle(String(d.frontmatter.title ?? ""));
       setSpecs(classify(d.frontmatter));
       setFmValues({});
+      setLint([]);
     } catch (e) {
       setMsg({ ok: false, text: String(e) });
     }
@@ -139,6 +155,7 @@ export function App() {
         text: `saved to ${r.branch} — preview builds in ~1–2 min`,
         href: r.previewUrl,
       });
+      setLint(r.lint ?? []);
       refreshStatus(base);
     } catch (e) {
       setMsg({ ok: false, text: String(e) });
@@ -266,6 +283,7 @@ export function App() {
 
       <div className="wrap">
         <FileList
+          base={base}
           items={items}
           selected={item?.path ?? null}
           changed={changed}
@@ -280,6 +298,16 @@ export function App() {
               <div className="path">
                 {item.path}
                 {item.fromDraft && <span className="chip">draft version</span>}
+                {typeof item.frontmatter.path === "string" && (
+                  <a
+                    className="live"
+                    href={`${liveOrigin()}${item.frontmatter.path}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    view live ↗
+                  </a>
+                )}
               </div>
               <input
                 className="title"
@@ -349,6 +377,21 @@ export function App() {
                 </>
               )}
             </p>
+          )}
+          {lint.length > 0 && (
+            <ul className="lint">
+              {lint.map((f, i) => (
+                <li key={i} className={f.level}>
+                  {f.level === "error" ? "✗" : "⚠"} line {f.line}: {f.message}
+                  {f.suggest !== undefined && (
+                    <>
+                      {" "}
+                      — <s>{f.match}</s> → <b>{f.suggest}</b>
+                    </>
+                  )}
+                </li>
+              ))}
+            </ul>
           )}
         </main>
       </div>

@@ -17,6 +17,7 @@ import {
   serializeMarkdown,
   validBranchName,
 } from "./content/serialize";
+import { lintText, type StyleRule } from "./content/lint";
 
 export interface Env {
   GIT_HOST?: "github" | "gitlab";
@@ -126,6 +127,16 @@ async function handleApi(
     });
   }
 
+  // Frontmatter titles for one directory (pretty labels in the file browser).
+  if (path === "/api/titles") {
+    const base =
+      url.searchParams.get("base") || env.EDITOR_DEFAULT_BASE || "red";
+    const dir = url.searchParams.get("dir") ?? "";
+    if (!/^content\/(pages|posts|events|config)(\/\d{4})?$/.test(dir))
+      return json({ error: "invalid dir" }, 400);
+    return json({ base, dir, titles: await gh.titlesForDir(base, dir) });
+  }
+
   // Draft workspace state for this editor+base: branch, changed files, open PR.
   if (path === "/api/status") {
     const base =
@@ -171,7 +182,24 @@ async function handleApi(
       message: `edit ${p} (via editor)`,
       author: who,
     });
-    return json({ branch, commitSha, previewUrl: previewUrl(request, branch) });
+    // Style check the saved text (rules are chapter-owned content; if the
+    // rules file is missing or broken, saves must still succeed).
+    let lint: ReturnType<typeof lintText> = [];
+    try {
+      const rulesRaw = await gh.readItem(
+        "content/config/style-rules.json",
+        base,
+      );
+      lint = lintText(text, JSON.parse(rulesRaw.text) as StyleRule[]);
+    } catch {
+      /* no rules — no findings */
+    }
+    return json({
+      branch,
+      commitSha,
+      previewUrl: previewUrl(request, branch),
+      lint,
+    });
   }
 
   // Create a real (non-draft) branch, e.g. a new theme/ experiment.

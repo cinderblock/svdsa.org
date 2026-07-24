@@ -347,3 +347,29 @@ header .ghost {
 .msg.err {
   color: var(--red);
 }
+
+#list a .date {
+  color: var(--muted);
+  font-size: 0.72rem;
+  margin-right: 0.4rem;
+  font-variant-numeric: tabular-nums;
+}
+.path .live {
+  margin-left: auto;
+  font-size: 0.8rem;
+}
+.lint {
+  margin: 0;
+  padding: 0.4rem 0 0 1.2rem;
+  font-size: 0.85rem;
+  flex: 0 0 auto;
+}
+.lint li.error {
+  color: var(--red);
+}
+.lint li.warn {
+  color: var(--muted);
+}
+.lint s {
+  opacity: 0.7;
+}

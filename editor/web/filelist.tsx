@@ -1,12 +1,14 @@
 /**
  * Grouped content browser: pages / posts (by year) / events (by year) / config
- * as collapsible sections instead of one giant flat list. Year groups are
- * collapsed except the most recent; filtering searches everything and
- * auto-expands groups with matches.
+ * as collapsible sections. Entries show the item's frontmatter TITLE (fetched
+ * lazily per group, one GraphQL round-trip each, cached per base) with the
+ * date from the filename as a prefix where present; the raw path stays
+ * available via the filter (which searches both). Year groups are collapsed
+ * except the most recent; filtering auto-expands matches.
  */
 
-import { useMemo, useState } from "react";
-import type { ChangedFile } from "./api";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { api, type ChangedFile } from "./api";
 
 interface Groups {
   [section: string]: { [sub: string]: string[] };
@@ -24,20 +26,41 @@ function groupItems(items: string[]): Groups {
   return g;
 }
 
-const label = (p: string) => (p.split("/").pop() ?? p).replace(/\.md$/, "");
+const stem = (p: string) => (p.split("/").pop() ?? p).replace(/\.md$/, "");
+const dateOf = (p: string) => stem(p).match(/\d{4}-\d{2}-\d{2}/)?.[0];
 
 export function FileList({
+  base,
   items,
   selected,
   changed,
   onOpen,
 }: {
+  base: string;
   items: string[];
   selected: string | null;
   changed: ChangedFile[];
   onOpen: (path: string) => void;
 }) {
   const [filter, setFilter] = useState("");
+  const [titles, setTitles] = useState<Record<string, string>>({});
+  const requested = useRef(new Set<string>());
+
+  // Titles are per-base; drop the cache when the base changes.
+  useEffect(() => {
+    requested.current = new Set();
+    setTitles({});
+  }, [base]);
+
+  const ensureTitles = (dir: string) => {
+    if (!base || requested.current.has(dir)) return;
+    requested.current.add(dir);
+    api
+      .titles(dir, base)
+      .then((d) => setTitles((cur) => ({ ...cur, ...d.titles })))
+      .catch(() => requested.current.delete(dir));
+  };
+
   const changedSet = useMemo(
     () => new Set(changed.map((f) => f.path)),
     [changed],
@@ -45,13 +68,55 @@ export function FileList({
 
   const groups = useMemo(() => {
     const q = filter.toLowerCase();
-    const kept = q ? items.filter((p) => p.toLowerCase().includes(q)) : items;
+    const kept = q
+      ? items.filter(
+          (p) =>
+            p.toLowerCase().includes(q) ||
+            (titles[p] ?? "").toLowerCase().includes(q),
+        )
+      : items;
     return groupItems(kept);
-  }, [items, filter]);
+  }, [items, filter, titles]);
 
   const sections = SECTION_ORDER.filter((s) => groups[s]).concat(
     Object.keys(groups).filter((s) => !SECTION_ORDER.includes(s)),
   );
+
+  // Load titles for the groups that render expanded by default.
+  useEffect(() => {
+    if (!items.length) return;
+    const g = groupItems(items);
+    for (const section of Object.keys(g)) {
+      const subs = Object.keys(g[section]).sort().reverse();
+      if (subs[0] === "") ensureTitles(`content/${section}`);
+      else if (subs[0]) ensureTitles(`content/${section}/${subs[0]}`);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items, base]);
+
+  const entry = (p: string) => {
+    const title = titles[p];
+    const date = dateOf(p);
+    return (
+      <a
+        key={p}
+        className={`${selected === p ? "sel" : ""}${changedSet.has(p) ? " edited" : ""}`}
+        onClick={() => onOpen(p)}
+      >
+        {changedSet.has(p) && (
+          <span className="dot" aria-label="has draft edits" />
+        )}
+        {title ? (
+          <>
+            {date && <span className="date">{date}</span>}
+            {title}
+          </>
+        ) : (
+          stem(p)
+        )}
+      </a>
+    );
+  };
 
   return (
     <aside id="list">
@@ -72,32 +137,24 @@ export function FileList({
             {subs.map((sub, i) =>
               sub === "" ? (
                 <div key="flat" className="entries">
-                  {groups[section][sub].map((p) => (
-                    <Entry
-                      key={p}
-                      path={p}
-                      selected={selected === p}
-                      edited={changedSet.has(p)}
-                      onOpen={onOpen}
-                    />
-                  ))}
+                  {groups[section][sub].map(entry)}
                 </div>
               ) : (
-                <details key={sub} className="year" open={i === 0 || !!filter}>
+                <details
+                  key={sub}
+                  className="year"
+                  open={i === 0 || !!filter}
+                  onToggle={(e) => {
+                    if ((e.target as HTMLDetailsElement).open)
+                      ensureTitles(`content/${section}/${sub}`);
+                  }}
+                >
                   <summary>
                     {sub}{" "}
                     <span className="count">{groups[section][sub].length}</span>
                   </summary>
                   <div className="entries">
-                    {groups[section][sub].map((p) => (
-                      <Entry
-                        key={p}
-                        path={p}
-                        selected={selected === p}
-                        edited={changedSet.has(p)}
-                        onOpen={onOpen}
-                      />
-                    ))}
+                    {groups[section][sub].map(entry)}
                   </div>
                 </details>
               ),
@@ -106,27 +163,5 @@ export function FileList({
         );
       })}
     </aside>
-  );
-}
-
-function Entry({
-  path,
-  selected,
-  edited,
-  onOpen,
-}: {
-  path: string;
-  selected: boolean;
-  edited: boolean;
-  onOpen: (path: string) => void;
-}) {
-  return (
-    <a
-      className={`${selected ? "sel" : ""}${edited ? " edited" : ""}`}
-      onClick={() => onOpen(path)}
-    >
-      {edited && <span className="dot" aria-label="has draft edits" />}
-      {label(path)}
-    </a>
   );
 }

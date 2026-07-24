@@ -146,6 +146,30 @@ export async function createGitHub(env: GhEnv) {
     return res.json();
   }
 
+  async function graphql<T>(
+    query: string,
+    variables: Record<string, unknown>,
+  ): Promise<T> {
+    const res = await fetch("https://api.github.com/graphql", {
+      method: "POST",
+      headers: {
+        Authorization: `bearer ${token}`,
+        "User-Agent": UA,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ query, variables }),
+    });
+    if (!res.ok)
+      throw new Error(`GitHub GraphQL: ${res.status} ${await res.text()}`);
+    const d = (await res.json()) as {
+      data?: T;
+      errors?: { message: string }[];
+    };
+    if (d.errors?.length)
+      throw new Error(`GitHub GraphQL: ${d.errors[0].message}`);
+    return d.data as T;
+  }
+
   async function branchSha(ref: string): Promise<string> {
     const r = (await api(`${base}/git/ref/heads/${encPath(ref)}`)) as {
       object: { sha: string };
@@ -215,6 +239,62 @@ export async function createGitHub(env: GhEnv) {
         method: "POST",
         body: JSON.stringify({ ref: `refs/heads/${branch}`, sha }),
       });
+    },
+    /** Frontmatter titles for every .md directly inside `dir` at `ref` — ONE
+     * GraphQL round-trip for the whole directory (vs N Contents calls). */
+    async titlesForDir(
+      ref: string,
+      dir: string,
+    ): Promise<Record<string, string>> {
+      const data = await graphql<{
+        repository: {
+          object: {
+            entries?: {
+              name: string;
+              type: string;
+              object?: { text?: string };
+            }[];
+          } | null;
+        };
+      }>(
+        `
+          query ($owner: String!, $repo: String!, $expr: String!) {
+            repository(owner: $owner, name: $repo) {
+              object(expression: $expr) {
+                ... on Tree {
+                  entries {
+                    name
+                    type
+                    object {
+                      ... on Blob {
+                        text
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        `,
+        { owner, repo, expr: `${ref}:${dir}` },
+      );
+      const titles: Record<string, string> = {};
+      for (const e of data.repository.object?.entries ?? []) {
+        if (e.type !== "blob" || !e.name.endsWith(".md")) continue;
+        const text = e.object?.text ?? "";
+        const fmEnd = text.indexOf("\n---", 3);
+        const fm = fmEnd === -1 ? text.slice(0, 2000) : text.slice(0, fmEnd);
+        const m = fm.match(/^title:\s*(.*)$/m);
+        if (!m) continue;
+        let t = m[1].trim();
+        if (
+          (t.startsWith("'") && t.endsWith("'")) ||
+          (t.startsWith('"') && t.endsWith('"'))
+        )
+          t = t.slice(1, -1).replace(/''/g, "'");
+        titles[`${dir}/${e.name}`] = t;
+      }
+      return titles;
     },
     async deleteBranch(branch: string): Promise<void> {
       await api(`${base}/git/refs/heads/${encPath(branch)}`, {

@@ -19,7 +19,8 @@
     "fmt": "oxfmt --write .",
     "fmt:check": "oxfmt --check .",
     "typecheck": "bun run build:content && react-router typegen && tsc",
-    "prepare": "lefthook install"
+    "prepare": "lefthook install",
+    "lint:content": "bun run scripts/lint-content.ts"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.2.8",

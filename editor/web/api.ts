@@ -12,10 +12,20 @@ export interface ItemDetail {
   body: string;
   sha: string;
 }
+export interface LintFinding {
+  ruleId: string;
+  level: "error" | "warn";
+  line: number;
+  column: number;
+  match: string;
+  message: string;
+  suggest?: string;
+}
 export interface SaveResult {
   branch: string;
   commitSha: string;
   previewUrl: string;
+  lint: LintFinding[];
 }
 export interface ChangedFile {
   path: string;
@@ -62,6 +72,10 @@ export const api = {
     ),
   status: (base: string) =>
     req<DraftStatus>(`/api/status?base=${encodeURIComponent(base)}`),
+  titles: (dir: string, base: string) =>
+    req<{ titles: Record<string, string> }>(
+      `/api/titles?dir=${encodeURIComponent(dir)}&base=${encodeURIComponent(base)}`,
+    ),
   save: (payload: {
     base: string;
     path: string;
