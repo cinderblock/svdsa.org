@@ -32,19 +32,26 @@ file (no merge conflicts, no unbounded growth):
 ```
 content/
   posts/<year>/<date>-<slug>.md      # bucketed by publish year
-  events/<year>/<path-key>.md         # bucketed by start-date year
+  events/<slug>.md                    # RECURRING series (repeats: rule, expanded at build)
+  events/<year>/<slug>-<date>.md      # one-off / irregular instances, bucketed by year
   pages/<url-path>.md                 # mirrors the page URL path
+  config/*.json                       # site config + style-rules.json (content lint rules)
 ```
+
+Bodies are **Markdown** (things Markdown can't express — embeds, forms — are
+raw HTML islands, rendered via rehype-raw). Recurring events are ONE file with
+a `repeats:` rule; the daily rebuild expands a rolling window of instances.
 
 These files are the **source of truth**. The aggregate JSON the app imports is
 a **generated, git-ignored build artifact** (`content/generated/`) — never
 hand-edited, never committed, so two people adding content never conflict on a
 shared file.
 
-| Script                        | Command                 | What it does                                                                                                                                                          |
-| ----------------------------- | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `scripts/fetch-wp-content.ts` | `bun run migrate`       | One-time / on-demand migration. Pulls WordPress → the per-item Markdown tree above (clears + rewrites the three dirs). Re-run to re-sync until WP is retired.         |
-| `scripts/build-content.ts`    | `bun run build:content` | Network-free. Reads the Markdown tree and assembles `content/generated/*.json` (full + slim splits) plus `sitemap.xml`/`robots.txt`. Runs before dev/typecheck/build. |
+| Script                        | Command                 | What it does                                                                                                                                                                                                       |
+| ----------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `scripts/fetch-wp-content.ts` | `bun run migrate`       | One-time / on-demand migration. Pulls WordPress → the per-item Markdown tree above (clears + rewrites the three dirs). Re-run to re-sync until WP is retired.                                                      |
+| `scripts/build-content.ts`    | `bun run build:content` | Network-free. Renders Markdown → HTML, expands recurring events, and assembles `content/generated/*.json` (full + slim splits) plus `sitemap.xml`/`robots.txt` (all git-ignored). Runs before dev/typecheck/build. |
+| `scripts/lint-content.ts`     | `bun run lint:content`  | Style checks from `content/config/style-rules.json` (San José accent, inclusive language, …). `--fix` applies suggestions. The in-browser editor runs the same rules on every save.                                |
 
 Data delivery is split for performance:
 
