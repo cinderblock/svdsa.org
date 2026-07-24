@@ -13,5 +13,6 @@ categories:
   - SV DSA
 ---
 
-<p>The Bylaws Committee will continue our analysis of chapter structure for Silicon Valley DSA on Tuesday July 14 from 8-9 PM. We are working to ensure our chapter infrastructure is aligned with minimum democratic baselines adopted at our 2025 National Convention. Come join as we analyze our governing documents and propose changes to ensure they meet our on-the-ground organizing needs while ensuring robust democratic participation of all members.</p>
-<p>Register for the meeting here: <a href="https://us02web.zoom.us/meeting/register/zNZaMkRSS1ycyVsO1i71Ow">https://us02web.zoom.us/meeting/register/zNZaMkRSS1ycyVsO1i71Ow</a></p>
+The Bylaws Committee will continue our analysis of chapter structure for Silicon Valley DSA on Tuesday July 14 from 8-9 PM. We are working to ensure our chapter infrastructure is aligned with minimum democratic baselines adopted at our 2025 National Convention. Come join as we analyze our governing documents and propose changes to ensure they meet our on-the-ground organizing needs while ensuring robust democratic participation of all members.
+
+Register for the meeting here: [https://us02web.zoom.us/meeting/register/zNZaMkRSS1ycyVsO1i71Ow](https://us02web.zoom.us/meeting/register/zNZaMkRSS1ycyVsO1i71Ow)

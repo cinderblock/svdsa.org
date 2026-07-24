@@ -20,4 +20,4 @@ categories:
   - WG - Labor
 ---
 
-<p><img loading="lazy" decoding="async" class="alignnone size-medium wp-image-15234" src="https://siliconvalleydsa.org/wp-content/uploads/2026/05/IMG_7690-241x300.jpeg" alt="" width="241" height="300" srcset="https://siliconvalleydsa.org/wp-content/uploads/2026/05/IMG_7690-241x300.jpeg 241w, https://siliconvalleydsa.org/wp-content/uploads/2026/05/IMG_7690.jpeg 750w" sizes="auto, (max-width: 241px) 100vw, 241px" /></p>
+![](https://siliconvalleydsa.org/wp-content/uploads/2026/05/IMG_7690-241x300.jpeg)

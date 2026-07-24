@@ -21,6 +21,6 @@ categories:
   - WG - Labor
 ---
 
-<p class="_ap3a _aaco _aacu _aacx _aad7 _aade" dir="auto">Join us in advocating for our students’ futures! Together, we can stop classroom closures, rescind layoffs, and invest in our children’s success. Mark your calendars for this Wednesday, May 20, 2026, at 4:30 PM—your voice matters!</p>
-<p dir="auto"><img loading="lazy" decoding="async" class="alignnone size-medium wp-image-15489" src="https://siliconvalleydsa.org/wp-content/uploads/2026/05/Screenshot-2026-05-19-at-20-28-42-2-Instagram-225x300.png" alt="" width="225" height="300" srcset="https://siliconvalleydsa.org/wp-content/uploads/2026/05/Screenshot-2026-05-19-at-20-28-42-2-Instagram-225x300.png 225w, https://siliconvalleydsa.org/wp-content/uploads/2026/05/Screenshot-2026-05-19-at-20-28-42-2-Instagram.png 674w" sizes="auto, (max-width: 225px) 100vw, 225px" /></p>
-<p dir="auto">
+Join us in advocating for our students’ futures! Together, we can stop classroom closures, rescind layoffs, and invest in our children’s success. Mark your calendars for this Wednesday, May 20, 2026, at 4:30 PM—your voice matters!
+
+![](https://siliconvalleydsa.org/wp-content/uploads/2026/05/Screenshot-2026-05-19-at-20-28-42-2-Instagram-225x300.png)

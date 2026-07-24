@@ -6,10 +6,14 @@ title: Donate
 modified: '2025-09-13T16:40:29'
 ---
 
-<p>🌹 <em>&#8220;From each according to their ability&#8221;</em> 🌹</p>
-<p>Silicon Valley DSA is a member-funded organization, and we rely on contributions from our members to support all the work we do here in Silicon Valley. While we appreciate all contributions, if you are not yet a member, we invite you to <strong><a href="https://siliconvalleydsa.org/join/#join_dsa">Join DSA</a></strong> as your first step! Your contributions on this page go directly to Silicon Valley DSA&#8217;s General Fund, and do not grant you DSA membership or voting rights (for those, you&#8217;ll have to join DSA National).</p>
-<p><strong>IMPORTANT NOTE: Our payment processor adds a default tip which goes to them, not to SV DSA. You can set the tip to $0 in the donation Summary. Under &#8220;Help keep Zeffy free&#8221;, click the dropdown, choose &#8220;Other&#8221;, and enter 0. Double-check your &#8220;Total&#8221; before clicking Donate!</strong></p>
-<hr />
+🌹 *“From each according to their ability”* 🌹
+
+Silicon Valley DSA is a member-funded organization, and we rely on contributions from our members to support all the work we do here in Silicon Valley. While we appreciate all contributions, if you are not yet a member, we invite you to **[Join DSA](https://siliconvalleydsa.org/join/#join_dsa)** as your first step! Your contributions on this page go directly to Silicon Valley DSA’s General Fund, and do not grant you DSA membership or voting rights (for those, you’ll have to join DSA National).
+
+**IMPORTANT NOTE: Our payment processor adds a default tip which goes to them, not to SV DSA. You can set the tip to $0 in the donation Summary. Under “Help keep Zeffy free”, click the dropdown, choose “Other”, and enter 0. Double-check your “Total” before clicking Donate!**
+
+---
+
 <style>
 .donation-container {
   overflow: hidden;
@@ -24,7 +28,7 @@ modified: '2025-09-13T16:40:29'
   height: 100%;
 }
 </style>
-<div class="donation-container">
+
 <iframe
   title='Donation form powered by Zeffy'
   src='https://www.zeffy.com/embed/donation-form/sv-dsa-local-dues'
@@ -33,13 +37,15 @@ modified: '2025-09-13T16:40:29'
   frameborder="0"
   allowTransparency="true"><br />
 </iframe>
-</div>
-<hr />
-<h3>Local Dues</h3>
-<p>Local Dues donations go directly to our Chapter, and can be allocated across any working groups or organizational needs depending on need. These may include:</p>
-<ul>
-<li>Materials and literature for campaigns.</li>
-<li>Technology tools for ongoing meetings.</li>
-<li>Supplies for our office and local events.</li>
-</ul>
-<hr />
+
+---
+
+### Local Dues
+
+Local Dues donations go directly to our Chapter, and can be allocated across any working groups or organizational needs depending on need. These may include:
+
+*   Materials and literature for campaigns.
+*   Technology tools for ongoing meetings.
+*   Supplies for our office and local events.
+
+---

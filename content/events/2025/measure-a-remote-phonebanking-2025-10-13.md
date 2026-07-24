@@ -17,6 +17,8 @@ categories:
   - SV DSA
 ---
 
-<p>Join the Silicon Valley DSA and the South Bay Labor Council for remote phonebanking to build the support we need to pass Measure A and Proposition 50! Have a laptop available, if able.</p>
-<p>RSVP here: <a href="https://actionnetwork.org/campaigns/sv-dsa-measure-a/" target="_blank">https://actionnetwork.org/campaigns/sv-dsa-measure-a/</a></p>
-<p>Join the Zoom: <a href="https://us06web.zoom.us/j/82291822916?pwd=UqTRBvV1fnr5IPDEAx2gZVBhnUlu8Q.1/" target="_blank">https://us06web.zoom.us/j/82291822916?pwd=UqTRBvV1fnr5IPDEAx2gZVBhnUlu8Q.1/</a></p>
+Join the Silicon Valley DSA and the South Bay Labor Council for remote phonebanking to build the support we need to pass Measure A and Proposition 50! Have a laptop available, if able.
+
+RSVP here: [https://actionnetwork.org/campaigns/sv-dsa-measure-a/](https://actionnetwork.org/campaigns/sv-dsa-measure-a/)
+
+Join the Zoom: [https://us06web.zoom.us/j/82291822916?pwd=UqTRBvV1fnr5IPDEAx2gZVBhnUlu8Q.1/](https://us06web.zoom.us/j/82291822916?pwd=UqTRBvV1fnr5IPDEAx2gZVBhnUlu8Q.1/)

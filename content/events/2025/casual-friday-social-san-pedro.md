@@ -14,8 +14,8 @@ categories:
   - SV DSA
 ---
 
-<p>Join your comrades for a casual Friday night social at San Pedro in downtown San José! Come eat and drink with us, plus the Warriors and Sharks play at 7:00pm.</p>
-<p>&nbsp;</p>
-<p>San Pedro Square Market</p>
-<p>87 N San Pedro St, San Jose, CA 95110</p>
-<p>&nbsp;</p>
+Join your comrades for a casual Friday night social at San Pedro in downtown San José! Come eat and drink with us, plus the Warriors and Sharks play at 7:00pm.
+
+San Pedro Square Market
+
+87 N San Pedro St, San Jose, CA 95110

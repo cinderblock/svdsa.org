@@ -21,7 +21,10 @@ categories:
   - WG - Political Education
 ---
 
-<p>At DSA, we believe a better world is possible. But the only way it can happen is if we organize together as members of the working class to restructure society based on human needs. DSA is the largest socialist organization in the United States, but we have to grow even larger to change our society. One barrier to growth is lack of knowledge about socialism in general and DSA as an organization specifically.</p>
-<p>What is socialism? How can we achieve it? What projects does Silicon Valley DSA work on? How is our chapter structured to do work? How can I get involved? We are running a DSA 101 event where we will answer these questions and any others that you bring. This event is open to the public, and we encourage non-members to get involved and come with any questions.</p>
-<p>The event will be held at SEIU 521 Union Hall on Saturday October 25 at 12:15-1 PM, right before our monthly General Chapter Meeting.</p>
-<p>A hybrid Zoom option is available. Register at this link: <a href="https://us02web.zoom.us/meeting/register/Dkzcam-2SjerPLuBlEGQOQ" target="_blank">https://us02web.zoom.us/meeting/register/Dkzcam-2SjerPLuBlEGQOQ</a></p>
+At DSA, we believe a better world is possible. But the only way it can happen is if we organize together as members of the working class to restructure society based on human needs. DSA is the largest socialist organization in the United States, but we have to grow even larger to change our society. One barrier to growth is lack of knowledge about socialism in general and DSA as an organization specifically.
+
+What is socialism? How can we achieve it? What projects does Silicon Valley DSA work on? How is our chapter structured to do work? How can I get involved? We are running a DSA 101 event where we will answer these questions and any others that you bring. This event is open to the public, and we encourage non-members to get involved and come with any questions.
+
+The event will be held at SEIU 521 Union Hall on Saturday October 25 at 12:15-1 PM, right before our monthly General Chapter Meeting.
+
+A hybrid Zoom option is available. Register at this link: [https://us02web.zoom.us/meeting/register/Dkzcam-2SjerPLuBlEGQOQ](https://us02web.zoom.us/meeting/register/Dkzcam-2SjerPLuBlEGQOQ)

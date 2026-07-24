@@ -19,5 +19,6 @@ categories:
   - External
 ---
 
-<p>The San Jose Peace and Justice Center is holding a resource fair in celebration of our 68th birthday!</p>
-<p>This year&#8217;s theme will about climate justice and ending militarism. We are particularly interested in organizations that are committed to creating a green, sustainable economy, and are fighting for a world based on peace and justice.</p>
+The San Jose Peace and Justice Center is holding a resource fair in celebration of our 68th birthday!
+
+This year’s theme will about climate justice and ending militarism. We are particularly interested in organizations that are committed to creating a green, sustainable economy, and are fighting for a world based on peace and justice.

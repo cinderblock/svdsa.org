@@ -17,7 +17,10 @@ categories:
   - External
 ---
 
-<p>Comrades Jake Ephros and Joel Brooks are heading to a crucial runoff for Jersey City Council and they need our help! Winning will strengthen socialist representation in the tri-state area and build momentum for our entire movement. Join the DSA National Electoral Commission by phonebanking comrades to fundraise for Jake and Joel!</p>
-<p>RSVP here: <a href="https://actionnetwork.org/events/socialist-cash-takes-out-capitalist-trash-runoff-edition/">https://actionnetwork.org/events/socialist-cash-takes-out-capitalist-trash-runoff-edition/</a></p>
-<p>About Jake Ephros: <a href="https://jakeforjc.com/">https://jakeforjc.com/</a></p>
-<p>About Joel Brooks: <a href="https://joelforjc.com/">https://joelforjc.com/</a></p>
+Comrades Jake Ephros and Joel Brooks are heading to a crucial runoff for Jersey City Council and they need our help! Winning will strengthen socialist representation in the tri-state area and build momentum for our entire movement. Join the DSA National Electoral Commission by phonebanking comrades to fundraise for Jake and Joel!
+
+RSVP here: [https://actionnetwork.org/events/socialist-cash-takes-out-capitalist-trash-runoff-edition/](https://actionnetwork.org/events/socialist-cash-takes-out-capitalist-trash-runoff-edition/)
+
+About Jake Ephros: [https://jakeforjc.com/](https://jakeforjc.com/)
+
+About Joel Brooks: [https://joelforjc.com/](https://joelforjc.com/)

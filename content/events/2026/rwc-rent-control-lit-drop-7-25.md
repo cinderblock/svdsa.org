@@ -18,5 +18,6 @@ categories:
   - WG - Electoral
 ---
 
-<p>Rent control is officially on the ballot in Redwood City! Join Silicon Valley DSA and the Affordable Redwood City campaign for a lit drop to help spread the word to RWC voters to vote &#8220;yes&#8221; on tenants&#8217; rights this November.</p>
-<p>RSVP here: <a href="https://actionnetwork.org/events/lit-drop-for-redwood-city-rent-control-725?source=calendar&amp;">https://actionnetwork.org/events/lit-drop-for-redwood-city-rent-control-725</a></p>
+Rent control is officially on the ballot in Redwood City! Join Silicon Valley DSA and the Affordable Redwood City campaign for a lit drop to help spread the word to RWC voters to vote “yes” on tenants’ rights this November.
+
+RSVP here: [https://actionnetwork.org/events/lit-drop-for-redwood-city-rent-control-725](https://actionnetwork.org/events/lit-drop-for-redwood-city-rent-control-725?source=calendar&)

@@ -16,5 +16,6 @@ categories:
   - SV DSA
 ---
 
-<p class="p1">Every month our Working Group leaders meet with Steering and other Committees to provide updates, ask for support, and report on coalition building work.</p>
-<p class="p1">Register on Zoom: <a href="https://us02web.zoom.us/meeting/register/pP5BIdvzQMKTuXGL-d-ohw">https://us02web.zoom.us/meeting/register/pP5BIdvzQMKTuXGL-d-ohw</a></p>
+Every month our Working Group leaders meet with Steering and other Committees to provide updates, ask for support, and report on coalition building work.
+
+Register on Zoom: [https://us02web.zoom.us/meeting/register/pP5BIdvzQMKTuXGL-d-ohw](https://us02web.zoom.us/meeting/register/pP5BIdvzQMKTuXGL-d-ohw)

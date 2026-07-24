@@ -19,6 +19,8 @@ categories:
   - WG - Community Safety
 ---
 
-<p>Join us Tuesday 6/30 from 1-4pm for watch party flyering to KICK ICE OUT! ⚽️ Scan the QR code for more info, see you there!</p>
-<p>Acompáñanos el martes 30 de junio, de 1 a 4 p. m., a repartir volantes durante la transmisión del partido para ¡SACAR A ICE! ⚽️ Escanea el código QR para más información. ¡Nos vemos allí!</p>
-<p><img loading="lazy" decoding="async" class="alignnone size-medium wp-image-16215" src="https://siliconvalleydsa.org/wp-content/uploads/2026/06/Gilroy-IceOut-External-Actions-2026-06-30-16.32.56-240x300.jpg" alt="" width="240" height="300" srcset="https://siliconvalleydsa.org/wp-content/uploads/2026/06/Gilroy-IceOut-External-Actions-2026-06-30-16.32.56-240x300.jpg 240w, https://siliconvalleydsa.org/wp-content/uploads/2026/06/Gilroy-IceOut-External-Actions-2026-06-30-16.32.56-819x1024.jpg 819w, https://siliconvalleydsa.org/wp-content/uploads/2026/06/Gilroy-IceOut-External-Actions-2026-06-30-16.32.56-768x960.jpg 768w, https://siliconvalleydsa.org/wp-content/uploads/2026/06/Gilroy-IceOut-External-Actions-2026-06-30-16.32.56.jpg 1080w" sizes="auto, (max-width: 240px) 100vw, 240px" /></p>
+Join us Tuesday 6/30 from 1-4pm for watch party flyering to KICK ICE OUT! ⚽️ Scan the QR code for more info, see you there!
+
+Acompáñanos el martes 30 de junio, de 1 a 4 p. m., a repartir volantes durante la transmisión del partido para ¡SACAR A ICE! ⚽️ Escanea el código QR para más información. ¡Nos vemos allí!
+
+![](https://siliconvalleydsa.org/wp-content/uploads/2026/06/Gilroy-IceOut-External-Actions-2026-06-30-16.32.56-240x300.jpg)

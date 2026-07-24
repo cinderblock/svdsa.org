@@ -13,5 +13,6 @@ categories:
   - Social
 ---
 
-<p>Details to come!</p>
-<p>Please direct any questions to <em>info@siliconvalleydsa.org</em>!</p>
+Details to come!
+
+Please direct any questions to *info@siliconvalleydsa.org*!

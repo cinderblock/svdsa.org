@@ -20,10 +20,12 @@ categories:
   - SV DSA
 ---
 
-<p>​Grab your Christmas sweaters and join us for Silicon Valley DSA&#8217;s Holiday Party! Socialize with comrades and acknowledge the work we&#8217;ve done this year. Food and beverages provided. We suggest a Christmas sweater or semi-formal/business casual attire. We will have a limited number of Santa hats available as well.</p>
-<p>Hope you can make it!</p>
-<p>&nbsp;</p>
-<p>RSVP Here:</p>
-<p><a href="https://actionnetwork.org/events/silicon-valley-dsa-holiday-party?source=direct_link&amp;">https://actionnetwork.org/events/silicon-valley-dsa-holiday-party</a></p>
-<p>&nbsp;</p>
-<p><iframe loading="lazy" title="DSA Holiday Party 2025 Flyer" src="https://www.canva.com/design/DAG4pegzex4/aUdQPhJwbtZy-uvuHaMGPA/view?embed&amp;meta" height="1000" width="773" style="border: none; border-radius: 8px; width: 773px; height: 1000px;" allowfullscreen="allowfullscreen" allow="fullscreen"></iframe></p>
+​Grab your Christmas sweaters and join us for Silicon Valley DSA’s Holiday Party! Socialize with comrades and acknowledge the work we’ve done this year. Food and beverages provided. We suggest a Christmas sweater or semi-formal/business casual attire. We will have a limited number of Santa hats available as well.
+
+Hope you can make it!
+
+RSVP Here:
+
+[https://actionnetwork.org/events/silicon-valley-dsa-holiday-party](https://actionnetwork.org/events/silicon-valley-dsa-holiday-party?source=direct_link&)
+
+<iframe loading="lazy" title="DSA Holiday Party 2025 Flyer" src="https://www.canva.com/design/DAG4pegzex4/aUdQPhJwbtZy-uvuHaMGPA/view?embed&amp;meta" height="1000" width="773" style="border: none; border-radius: 8px; width: 773px; height: 1000px;" allowfullscreen="allowfullscreen" allow="fullscreen"></iframe>

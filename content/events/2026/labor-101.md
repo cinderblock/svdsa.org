@@ -21,6 +21,8 @@ categories:
   - WG - Political Education
 ---
 
-<p>Come join the Political Education working group for our monthly Socialist Night School. This month we&#8217;ll be joining with the Labor working group to present <strong>Labor 101</strong>. You’ll leave understanding <strong>why a strong labor movement is essential to a successful socialist movement, and why DSA puts workers at the center of our organizing</strong>. We&#8217;ll discuss who is &#8220;working class&#8221; in a socialist framework (and why it matters), union basics, and cover some important moments in U.S. labor history. As always, we&#8217;ll share ways to take what you&#8217;ve learned and put it into action. No pre-reading or prior knowledge necessary, just show up, in person or on Zoom!</p>
-<p><a href="https://tinyurl.com/20260723labor101"><strong>RSVP HERE</strong></a></p>
-<p><a href="https://us02web.zoom.us/meeting/register/Z6s_K7jPQC62v1yrl4G7Gw">https://us02web.zoom.us/meeting/register/Z6s_K7jPQC62v1yrl4G7Gw</a></p>
+Come join the Political Education working group for our monthly Socialist Night School. This month we’ll be joining with the Labor working group to present **Labor 101**. You’ll leave understanding **why a strong labor movement is essential to a successful socialist movement, and why DSA puts workers at the center of our organizing**. We’ll discuss who is “working class” in a socialist framework (and why it matters), union basics, and cover some important moments in U.S. labor history. As always, we’ll share ways to take what you’ve learned and put it into action. No pre-reading or prior knowledge necessary, just show up, in person or on Zoom!
+
+[**RSVP HERE**](https://tinyurl.com/20260723labor101)
+
+[https://us02web.zoom.us/meeting/register/Z6s\_K7jPQC62v1yrl4G7Gw](https://us02web.zoom.us/meeting/register/Z6s_K7jPQC62v1yrl4G7Gw)

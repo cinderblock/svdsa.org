@@ -23,6 +23,7 @@
 import { mkdir, rm, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import matter from "gray-matter";
+import { htmlToMarkdown, looksLikeHtml } from "./html-to-md";
 
 const SITE = "https://siliconvalleydsa.org";
 const CONTENT = join(import.meta.dirname, "..", "content");
@@ -79,15 +80,17 @@ function clean<T extends Record<string, unknown>>(obj: T): Partial<T> {
   return out as Partial<T>;
 }
 
-/** Write a Markdown file (frontmatter + body), creating parent dirs. */
+/** Write a Markdown file (frontmatter + body), creating parent dirs. WP hands
+ * us rendered HTML; store real Markdown (see html-to-md.ts). */
 async function writeMd(
   relPath: string,
   data: Record<string, unknown>,
   body: string,
 ) {
+  const md = looksLikeHtml(body) ? htmlToMarkdown(body) : body.trim();
   const full = join(CONTENT, relPath);
   await mkdir(dirname(full), { recursive: true });
-  await writeFile(full, matter.stringify(`\n${body.trim()}\n`, clean(data)));
+  await writeFile(full, matter.stringify(`\n${md}\n`, clean(data)));
 }
 
 async function writeRaw(name: string, value: unknown) {

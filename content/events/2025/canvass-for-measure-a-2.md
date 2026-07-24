@@ -20,5 +20,6 @@ categories:
   - SV DSA
 ---
 
-<p>Join Silicon Valley DSA and the Yes on Measure A campaign to knock on doors and build support to pass Measure A! We will meet at Cuesta Park in Mountain View at 10AM.</p>
-<p>RSVP here: https://actionnetwork.org/campaigns/sv-dsa-measure-a/</p>
+Join Silicon Valley DSA and the Yes on Measure A campaign to knock on doors and build support to pass Measure A! We will meet at Cuesta Park in Mountain View at 10AM.
+
+RSVP here: https://actionnetwork.org/campaigns/sv-dsa-measure-a/

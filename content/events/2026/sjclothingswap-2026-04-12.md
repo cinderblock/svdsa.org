@@ -21,11 +21,11 @@ categories:
   - WG - Mutual Aid
 ---
 
-<div class="tribe-events-single-event-description tribe-events-content">
-<p>SJ Clothing Swap is mutual aid for our community through clothing and fabric, with an emphasis on sustainability, queer expression, intersectional community care, accessibility, and community organizing. We’re focused on:</p>
-<p>– Quality clothes for all<br />
-– Being a safe space for exploring your style and gender expression<br />
-– Building local community and making new friends<br />
-– Combating fast fashion, clothing overproduction &amp; overconsumption, and textile waste (keeping clothes out of landfills)</p>
-<p>We want to help you clear your closet of clothes, shoes and accessories that you don’t wear, and take home amazing new styles for free!  We stop taking donations at 3:30 PM!</p>
-</div>
+SJ Clothing Swap is mutual aid for our community through clothing and fabric, with an emphasis on sustainability, queer expression, intersectional community care, accessibility, and community organizing. We’re focused on:
+
+– Quality clothes for all  
+– Being a safe space for exploring your style and gender expression  
+– Building local community and making new friends  
+– Combating fast fashion, clothing overproduction & overconsumption, and textile waste (keeping clothes out of landfills)
+
+We want to help you clear your closet of clothes, shoes and accessories that you don’t wear, and take home amazing new styles for free!  We stop taking donations at 3:30 PM!

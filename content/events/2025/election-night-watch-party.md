@@ -19,7 +19,7 @@ categories:
   - SV DSA
 ---
 
-<p>Join us as we watch results of CA Prop 50 and Santa Clara County Measure A come in on election night with the      South Bay Labor Council!</p>
-<p>&nbsp;</p>
-<p>Where: 2302 Zanker Road, San Jose, CA, 95131<br />
-When: 8:00pm</p>
+Join us as we watch results of CA Prop 50 and Santa Clara County Measure A come in on election night with the      South Bay Labor Council!
+
+Where: 2302 Zanker Road, San Jose, CA, 95131  
+When: 8:00pm
