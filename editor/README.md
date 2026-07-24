@@ -2,24 +2,40 @@
 
 A **separate** Cloudflare Worker from the production `svdsa` site (which stays
 pure static). It lets chapter editors — signed in via **Cloudflare Access**, no
-git account needed — edit content in the browser; each save commits to a
-**draft branch** (authored as the editor via a bot credential), whose Workers
-Builds preview _is_ the draft preview; **publish** merges to `red` or opens an
-MR. Git stays the single source of truth. Full design:
-`plans/svdsa-wysiwyg-phase0.md`.
+git account needed — edit content in the browser. Git stays the single source
+of truth. Full design: `plans/svdsa-wysiwyg-phase0.md` +
+`plans/svdsa-editor-rich-ui.md`.
 
-## Status
+## How editing works
 
-- **Done:** deployed Worker (`src/index.ts`, Access-aware) with the content API
-  (`/api/me`, `/api/branches`, `/api/list`, `/api/item`, `/api/save`,
-  `/api/health`); GitHub App auth (`src/git/github.ts`); shared frontmatter
-  (de)serialization (`src/content/serialize.ts`); and the **rich editing UI** —
-  a Vite-built SPA (`web/`) served by the Worker's Static Assets binding, with
-  two interchangeable body editors (Milkdown WYSIWYG ↔ Monaco raw), a
-  frontmatter form, and a folder-aware branch selector. Save → draft branch →
-  the branch's Workers Build preview.
-- **Next:** publish (merge to base / open MR via `PublishTarget`), full Access
-  JWT verification, structured event fields, GitLab adapter for the gitlab.com move.
+- Content bodies are **real Markdown** (converted from the WP migration's HTML);
+  the WYSIWYG edits structure, not raw `<p>` soup. Embeds Markdown can't express
+  (scripts, iframes, styled divs) survive as raw HTML blocks.
+- Each editor gets **one draft workspace branch per base** —
+  `draft/<who>/<base>` — so single- AND multi-file edits accumulate together.
+  Every save is a commit authored as the editor (bot credential signs it).
+- The draft branch's **Workers Build is the live preview** (link in the draft
+  bar and after each save).
+- **Publish opens a PR** from the draft into its base; review + merge happen on
+  GitHub, so nothing lands on `red` unreviewed. **Discard** deletes the draft
+  branch. The App needs "Pull requests: Read & write" for publish.
+- **+ branch** creates real branches (e.g. `theme/…`) to edit against.
+
+## UI
+
+Vite-built SPA (`web/`) served by the Worker's Static Assets binding (Worker
+keeps `/api/*`): grouped file browser (sections + year buckets, draft-edit
+dots), prominent title + typed metadata widgets (toggles, date pickers, comma
+lists; WP legacy `id`/`slug`/`path` collapsed under _advanced_), two lossless
+body-editing modes (Milkdown WYSIWYG ↔ Monaco Markdown, lazy-loaded), and full
+system dark mode.
+
+## API
+
+`/api/me` · `/api/health` · `/api/branches` · `/api/list?base=` ·
+`/api/item?path=&base=` (serves the drafted version when one exists) ·
+`/api/status?base=` (changed files + open PR) · `POST /api/save` ·
+`POST /api/publish` · `POST /api/discard` · `POST /api/branch`
 
 ## Layout
 
@@ -29,16 +45,23 @@ editor/
   vite.config.ts        # builds web/ → dist/
   tsconfig.json         # SPA + Worker types
   src/index.ts          # Worker entry — owns /api/* (assets serve the SPA)
-  src/git/github.ts     # GitHub App auth + REST (read/write/branch/commit)
+  src/git/github.ts     # GitHub App auth + REST (read/write/branch/commit/compare/PR)
   src/content/
     types.ts            # Editor, EditableItem, Draft, GitHostAdapter, PublishTarget
     serialize.ts        # parse/serialize .md + slug/branch helpers (host-agnostic)
   web/                  # the editor SPA (React)
-    app.tsx             # list + base picker + frontmatter form + mode toggle + save
+    app.tsx             # shell: base picker, draft bar, publish/discard, save
+    filelist.tsx        # grouped content browser
+    frontmatter.tsx     # typed metadata form (touched-fields-only round-trip)
     editors/            # wysiwyg.tsx (Milkdown), raw.tsx (Monaco), monaco-setup.ts
     api.ts, main.tsx, index.html, styles.css
   dist/                 # Vite build output (git-ignored)
 ```
+
+## Next
+
+Full Access JWT verification, new-file creation, structured event fields,
+config (.json) editing, GitLab adapter for the gitlab.com move.
 
 ## Develop
 

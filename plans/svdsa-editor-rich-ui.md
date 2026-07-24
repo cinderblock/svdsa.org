@@ -4,6 +4,41 @@ Plan doc for upgrading the `svdsa-edit` Worker's placeholder textarea into a rea
 editing surface. Companion to `plans/svdsa-wysiwyg-phase0.md` (the backend/auth
 design, already built + deployed).
 
+## 2026-07-24 overhaul (round 2) — SHIPPED
+
+User feedback: "MAJOR overhaul" — `<p>` visible in WYSIWYG, giant file list, no
+dark mode, mystery `id`s, what does Save draft even do, need PRs not pushes.
+All addressed, committed (545a9f6 content conversion, cb44e51 editor), deployed:
+
+1. **Content converted to real Markdown** — root cause of the `<p>` problem was
+   WP HTML stored in .md bodies. `scripts/html-to-md.ts` (turndown) +
+   `scripts/convert-html-to-md.ts` (one-time, text-fidelity-verified, 1065
+   files) + `scripts/render-markdown.ts` (remark-gfm + rehype-raw) wired into
+   build-content.ts. fetch-wp-content converts future pulls. Two pages had
+   broken WP markup (unclosed `<a>`) — hand-repaired.
+2. **Draft model** — ONE workspace branch per editor+base (`draft/<who>/<base>`,
+   serialize.branchName lost its per-file segment). Multi-file drafts, one
+   preview, one PR. `/api/status` (changed files + PR), `/api/publish` (opens
+   PR; merge on GitHub), `/api/discard`, `/api/branch` (+ UI). `/api/item`
+   serves the drafted version when it exists (`fromDraft` chip).
+3. **UI** — grouped file browser (`filelist.tsx`: sections + year buckets,
+   draft dots, filter), smart metadata (`frontmatter.tsx`: toggles, datetime
+   pickers, comma lists, advanced-collapsed WP plumbing, id read-only,
+   modified auto-stamped, touched-fields-only round-trip), full system dark
+   mode (CSS vars + media-scoped Crepe frame/frame-dark + Monaco vs-dark),
+   draft bar with preview/PR/discard.
+4. Stale old-scheme branch `draft/cameron/red/2025-07-26-chapter-meeting`
+   (a "test change") deleted from origin.
+
+**Watch out:** publish needs the GitHub App to have "Pull requests: Read &
+write" — if the App was created with only Contents R/W, grant it in the App
+settings and accept on the installation; the API error message walks through it.
+
+**Not yet verified by a human:** the full in-browser flow post-overhaul
+(machine-local firefox/GFX breakage made headless UI verification impossible;
+chromium API+shell smoke passed, tsc/build clean). The 2 firefox Playwright
+failures pre-date this work (reproduced on unmodified baseline).
+
 ## Goal
 
 Give chapter editors a polished editing experience with **two interchangeable
