@@ -6,6 +6,8 @@ export interface Me {
 export interface ItemDetail {
   path: string;
   ref: string;
+  base: string;
+  fromDraft: boolean;
   frontmatter: Record<string, unknown>;
   body: string;
   sha: string;
@@ -15,39 +17,61 @@ export interface SaveResult {
   commitSha: string;
   previewUrl: string;
 }
+export interface ChangedFile {
+  path: string;
+  status: string;
+}
+export interface Pr {
+  number: number;
+  url: string;
+  title?: string;
+}
+export interface DraftStatus {
+  base: string;
+  draft: string;
+  exists: boolean;
+  changed: ChangedFile[];
+  pr: Pr | null;
+  previewUrl?: string;
+}
 
-async function get<T>(url: string): Promise<T> {
-  const r = await fetch(url);
+async function req<T>(url: string, init?: RequestInit): Promise<T> {
+  const r = await fetch(url, init);
   const d = (await r.json()) as T & { error?: string };
   if (!r.ok || d.error) throw new Error(d.error || `${r.status} ${url}`);
   return d;
 }
 
+const post = <T>(url: string, payload: unknown) =>
+  req<T>(url, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
 export const api = {
-  me: () => get<Me>("/api/me"),
-  branches: () => get<{ branches: string[] }>("/api/branches"),
+  me: () => req<Me>("/api/me"),
+  branches: () => req<{ branches: string[] }>("/api/branches"),
   list: (base: string) =>
-    get<{ base: string; items: string[] }>(
+    req<{ base: string; items: string[] }>(
       `/api/list?base=${encodeURIComponent(base)}`,
     ),
-  item: (path: string, ref: string) =>
-    get<ItemDetail>(
-      `/api/item?path=${encodeURIComponent(path)}&ref=${encodeURIComponent(ref)}`,
+  item: (path: string, base: string) =>
+    req<ItemDetail>(
+      `/api/item?path=${encodeURIComponent(path)}&base=${encodeURIComponent(base)}`,
     ),
-  save: async (payload: {
+  status: (base: string) =>
+    req<DraftStatus>(`/api/status?base=${encodeURIComponent(base)}`),
+  save: (payload: {
     base: string;
     path: string;
     frontmatter: Record<string, unknown>;
     body: string;
-  }): Promise<SaveResult> => {
-    const r = await fetch("/api/save", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    const d = (await r.json()) as SaveResult & { error?: string };
-    if (!r.ok || d.error)
-      throw new Error(d.error || `save failed (${r.status})`);
-    return d;
-  },
+  }) => post<SaveResult>("/api/save", payload),
+  createBranch: (name: string, from: string) =>
+    post<{ branch: string }>("/api/branch", { name, from }),
+  publish: (base: string, title?: string) =>
+    post<{ pr: Pr; alreadyOpen: boolean }>("/api/publish", { base, title }),
+  discard: (base: string) =>
+    post<{ discarded: string }>("/api/discard", { base }),
 };

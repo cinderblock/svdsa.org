@@ -36,17 +36,23 @@ export function slugify(input: string): string {
     .slice(0, 60);
 }
 
-/** Draft branch: draft/<editor>/<base>/<item>, e.g. draft/jane/red/posts-2026-…. */
-export function branchName(
-  editorEmail: string,
-  base: string,
-  itemPath: string,
-): string {
+/**
+ * Draft workspace branch: one per (editor, base) — e.g. draft/jane/red.
+ * Every save for that base lands here, so multi-file drafts accumulate on ONE
+ * branch, preview together on ONE Workers Build, and publish as ONE PR.
+ * (Short segments keep the preview alias under the 63-char DNS-label limit.)
+ */
+export function branchName(editorEmail: string, base: string): string {
   const who = slugify(editorEmail.split("@")[0] || "editor");
-  const b = slugify(base);
-  // Basename only (not the full path) so the Workers Builds preview alias stays
-  // under the 63-char DNS-label limit and the preview URL is predictable.
-  const file = itemPath.split("/").pop() ?? itemPath;
-  const what = slugify(file.replace(/\.md$/, ""));
-  return `draft/${who}/${b}/${what}`;
+  return `draft/${who}/${slugify(base)}`;
+}
+
+/** Only allow sane git branch names from user input. */
+export function validBranchName(name: string): boolean {
+  return (
+    /^[A-Za-z0-9][A-Za-z0-9._/-]{0,80}$/.test(name) &&
+    !name.includes("..") &&
+    !name.endsWith("/") &&
+    !name.endsWith(".lock")
+  );
 }

@@ -5,9 +5,8 @@
  * `initial` markdown; the current value is pulled imperatively via the ref
  * (see app.tsx — the App owns `body`, editors hand it back on save/toggle).
  */
+// Crepe theme CSS is imported in styles.css (media-scoped for dark mode).
 import { Crepe } from "@milkdown/crepe";
-import "@milkdown/crepe/theme/common/style.css";
-import "@milkdown/crepe/theme/frame.css";
 import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
 
 export interface EditorHandle {

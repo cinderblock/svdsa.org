@@ -15,6 +15,7 @@ import {
   branchName,
   parseMarkdown,
   serializeMarkdown,
+  validBranchName,
 } from "./content/serialize";
 
 export interface Env {
@@ -98,11 +99,52 @@ async function handleApi(
 
   if (path === "/api/item") {
     const p = url.searchParams.get("path");
-    const ref = url.searchParams.get("ref") || env.EDITOR_DEFAULT_BASE || "red";
+    const base =
+      url.searchParams.get("base") || env.EDITOR_DEFAULT_BASE || "red";
     if (!p) return json({ error: "path required" }, 400);
+    // Serve the editor's drafted version when one exists, else the base copy.
+    const draft = branchName(editor(request).email, base);
+    let ref = base;
+    let fromDraft = false;
+    if (await gh.branchExists(draft)) {
+      const changed = await gh.changedFiles(base, draft);
+      if (changed.some((f) => f.path === p)) {
+        ref = draft;
+        fromDraft = true;
+      }
+    }
     const raw = await gh.readItem(p, ref);
     const { frontmatter, body } = parseMarkdown(raw.text);
-    return json({ path: p, ref, frontmatter, body, sha: raw.sha });
+    return json({
+      path: p,
+      ref,
+      base,
+      fromDraft,
+      frontmatter,
+      body,
+      sha: raw.sha,
+    });
+  }
+
+  // Draft workspace state for this editor+base: branch, changed files, open PR.
+  if (path === "/api/status") {
+    const base =
+      url.searchParams.get("base") || env.EDITOR_DEFAULT_BASE || "red";
+    const draft = branchName(editor(request).email, base);
+    if (!(await gh.branchExists(draft)))
+      return json({ base, draft, exists: false, changed: [], pr: null });
+    const [changed, pr] = await Promise.all([
+      gh.changedFiles(base, draft),
+      gh.findPull(draft, base),
+    ]);
+    return json({
+      base,
+      draft,
+      exists: true,
+      changed,
+      pr,
+      previewUrl: previewUrl(request, draft),
+    });
   }
 
   if (path === "/api/save" && request.method === "POST") {
@@ -119,7 +161,7 @@ async function handleApi(
     };
     if (!p || !base) return json({ error: "base and path required" }, 400);
     const who = editor(request);
-    const branch = branchName(who.email, base, p);
+    const branch = branchName(who.email, base);
     await gh.ensureBranch(branch, base);
     const text = serializeMarkdown(frontmatter, body);
     const { commitSha } = await gh.commit({
@@ -130,6 +172,62 @@ async function handleApi(
       author: who,
     });
     return json({ branch, commitSha, previewUrl: previewUrl(request, branch) });
+  }
+
+  // Create a real (non-draft) branch, e.g. a new theme/ experiment.
+  if (path === "/api/branch" && request.method === "POST") {
+    const { name, from } = (await request.json()) as {
+      name: string;
+      from: string;
+    };
+    if (!name || !from) return json({ error: "name and from required" }, 400);
+    if (!validBranchName(name) || name.startsWith("draft/"))
+      return json({ error: "invalid branch name" }, 400);
+    await gh.ensureBranch(name, from);
+    return json({ branch: name });
+  }
+
+  // Publish = open a PR from the draft workspace into its base. Review/merge
+  // happens on GitHub (protects red from unreviewed direct pushes).
+  if (path === "/api/publish" && request.method === "POST") {
+    const { base, title } = (await request.json()) as {
+      base: string;
+      title?: string;
+    };
+    if (!base) return json({ error: "base required" }, 400);
+    const who = editor(request);
+    const draft = branchName(who.email, base);
+    if (!(await gh.branchExists(draft)))
+      return json({ error: "no draft to publish" }, 400);
+    const changed = await gh.changedFiles(base, draft);
+    if (!changed.length)
+      return json({ error: "draft has no changes vs base" }, 400);
+    const existing = await gh.findPull(draft, base);
+    if (existing) return json({ pr: existing, alreadyOpen: true });
+    const pr = await gh.createPull({
+      head: draft,
+      base,
+      title:
+        title ||
+        `Content edits: ${changed
+          .map((f) => f.path.split("/").pop())
+          .join(", ")
+          .slice(0, 60)}`,
+      body:
+        `Opened by **${who.email}** via the SVDSA editor.\n\n` +
+        changed.map((f) => `- ${f.status}: \`${f.path}\``).join("\n") +
+        `\n\nPreview: ${previewUrl(request, draft)}`,
+    });
+    return json({ pr, alreadyOpen: false });
+  }
+
+  // Throw the draft away (delete the workspace branch). UI confirms first.
+  if (path === "/api/discard" && request.method === "POST") {
+    const { base } = (await request.json()) as { base: string };
+    if (!base) return json({ error: "base required" }, 400);
+    const draft = branchName(editor(request).email, base);
+    if (await gh.branchExists(draft)) await gh.deleteBranch(draft);
+    return json({ discarded: draft });
   }
 
   return json({ error: "not found" }, 404);

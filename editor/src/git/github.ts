@@ -206,6 +206,7 @@ export async function createGitHub(env: GhEnv) {
       )) as { content: string; sha: string };
       return { path, sha: r.sha, text: b64decodeUtf8(r.content) };
     },
+    branchExists,
     /** Create `branch` off `fromRef` if it doesn't exist. */
     async ensureBranch(branch: string, fromRef: string): Promise<void> {
       if (await branchExists(branch)) return;
@@ -214,6 +215,63 @@ export async function createGitHub(env: GhEnv) {
         method: "POST",
         body: JSON.stringify({ ref: `refs/heads/${branch}`, sha }),
       });
+    },
+    async deleteBranch(branch: string): Promise<void> {
+      await api(`${base}/git/refs/heads/${encPath(branch)}`, {
+        method: "DELETE",
+      });
+    },
+    /** Files changed on `head` since it diverged from `baseRef`. */
+    async changedFiles(
+      baseRef: string,
+      head: string,
+    ): Promise<{ path: string; status: string }[]> {
+      const r = (await api(
+        `${base}/compare/${encodeURIComponent(baseRef)}...${encodeURIComponent(head)}`,
+      )) as { files?: { filename: string; status: string }[] };
+      return (r.files ?? []).map((f) => ({
+        path: f.filename,
+        status: f.status,
+      }));
+    },
+    /** The open PR from `head` into `baseRef`, if any. */
+    async findPull(
+      head: string,
+      baseRef: string,
+    ): Promise<{ number: number; url: string; title: string } | null> {
+      const prs = (await api(
+        `${base}/pulls?state=open&head=${encodeURIComponent(`${owner}:${head}`)}&base=${encodeURIComponent(baseRef)}`,
+      )) as { number: number; html_url: string; title: string }[];
+      const pr = prs[0];
+      return pr
+        ? { number: pr.number, url: pr.html_url, title: pr.title }
+        : null;
+    },
+    /** Open a PR from `head` into `baseRef`. Requires the GitHub App to have
+     * "Pull requests: Read & write" permission. */
+    async createPull(args: {
+      head: string;
+      base: string;
+      title: string;
+      body: string;
+    }): Promise<{ number: number; url: string }> {
+      try {
+        const pr = (await api(`${base}/pulls`, {
+          method: "POST",
+          body: JSON.stringify(args),
+        })) as { number: number; html_url: string };
+        return { number: pr.number, url: pr.html_url };
+      } catch (e) {
+        const msg = (e as Error).message;
+        if (/403|Resource not accessible/i.test(msg)) {
+          throw new Error(
+            "The GitHub App can't open pull requests — grant it 'Pull requests: Read & write' " +
+              "in the App's permissions and accept the update on the installation, then retry. " +
+              `(${msg})`,
+          );
+        }
+        throw e;
+      }
     },
     /** Commit `text` to `path` on `branch`, authored by the editor. */
     async commit(args: {
