@@ -21,6 +21,7 @@
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import matter from "gray-matter";
+import { expandSeries } from "./expand-recurring";
 import { renderMarkdown } from "./render-markdown";
 
 const CONTENT = join(import.meta.dirname, "..", "content");
@@ -109,7 +110,18 @@ interface Venue {
   zip: string | null;
 }
 
+// Expand recurring series (repeats: frontmatter) into dated instances over a
+// rolling window; the daily cron rebuild keeps the window moving.
+const HORIZON_DAYS = 180;
+const nowDate = new Date().toISOString().slice(0, 10);
+const horizon = new Date(Date.now() + HORIZON_DAYS * 86_400_000)
+  .toISOString()
+  .slice(0, 10);
+
 const events = eventDocs
+  .flatMap(({ data, body }) =>
+    expandSeries(data, nowDate, horizon).map((d) => ({ data: d, body })),
+  )
   .map(({ data, body }) => {
     const v = data.venue as Partial<Venue> | undefined;
     return {
