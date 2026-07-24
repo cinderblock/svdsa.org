@@ -18,5 +18,6 @@ categories:
   - WG - Community Safety
 ---
 
-<p>Silicon Valley DSA is a partner organization with the Santa Clara County Rapid Response Network and have trained many of our members as responders. We stand in opposition to the proposed detention center ICE wants to build in Gilroy. There is a protest in Gilroy on Sunday June 14 from 1-3 PM as part of the national No Kings movement. Come stand in solidarity with our fellow residents as we say no to ICE in the Bay area.</p>
-<p>The protest is at 7500 Arroyo Circle in Gilroy. Park across the street at Valley Health Center and walk to 7240 Holsclaw Road.</p>
+Silicon Valley DSA is a partner organization with the Santa Clara County Rapid Response Network and have trained many of our members as responders. We stand in opposition to the proposed detention center ICE wants to build in Gilroy. There is a protest in Gilroy on Sunday June 14 from 1-3 PM as part of the national No Kings movement. Come stand in solidarity with our fellow residents as we say no to ICE in the Bay area.
+
+The protest is at 7500 Arroyo Circle in Gilroy. Park across the street at Valley Health Center and walk to 7240 Holsclaw Road.

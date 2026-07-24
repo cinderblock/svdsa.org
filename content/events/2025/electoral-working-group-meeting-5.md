@@ -16,5 +16,6 @@ categories:
   - WG - Electoral
 ---
 
-<p>The electoral working group will meet to discuss and plan for current and future electoral projects. All are welcome.</p>
-<p>Register for the Zoom here: <a href="https://us06web.zoom.us/meeting/register/93euGRASSRiN3DiUDTCx1w">https://us06web.zoom.us/meeting/register/93euGRASSRiN3DiUDTCx1w</a></p>
+The electoral working group will meet to discuss and plan for current and future electoral projects. All are welcome.
+
+Register for the Zoom here: [https://us06web.zoom.us/meeting/register/93euGRASSRiN3DiUDTCx1w](https://us06web.zoom.us/meeting/register/93euGRASSRiN3DiUDTCx1w)

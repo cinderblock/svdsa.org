@@ -23,15 +23,22 @@ categories:
   - WG - Mutual Aid
 ---
 
-<p>Join the International Solidarity Working Group, Community Safety, and the Mutual Aid Working Group protect our neighbors by asking business to hang the Rapid Response Network poster, informing community members of their rights if approached by ICE, and distributing whistle kits! There will be a short training and community building before the canvas!</p>
-<p>RSVP Here</p>
-<p><b>Location Details</b><br />
-<b>Goodwill Blossom Hill</b><br />
-461 Blossom Hill Rd<br />
-San Jose CA 95123</p>
-<p><b>Parking</b></p>
-<p>There is street parking nearby</p>
-<p><b>Public Transportation<br />
-</b></p>
-<p>Bus: Snell &amp; Giuffrida (Line 66), Blossom Hill &amp; Entrada Cedros (Line 27)</p>
-<p><strong>RSVP here:</strong> <a href="https://actionnetwork.org/events/immigrant-rights-canvas-2/">https://actionnetwork.org/events/immigrant-rights-canvas-2/</a></p>
+Join the International Solidarity Working Group, Community Safety, and the Mutual Aid Working Group protect our neighbors by asking business to hang the Rapid Response Network poster, informing community members of their rights if approached by ICE, and distributing whistle kits! There will be a short training and community building before the canvas!
+
+RSVP Here
+
+**Location Details**  
+**Goodwill Blossom Hill**  
+461 Blossom Hill Rd  
+San Jose CA 95123
+
+**Parking**
+
+There is street parking nearby
+
+**Public Transportation  
+**
+
+Bus: Snell & Giuffrida (Line 66), Blossom Hill & Entrada Cedros (Line 27)
+
+**RSVP here:** [https://actionnetwork.org/events/immigrant-rights-canvas-2/](https://actionnetwork.org/events/immigrant-rights-canvas-2/)

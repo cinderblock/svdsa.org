@@ -15,7 +15,8 @@ categories:
   - SV DSA
 ---
 
-<p>Interested in building community and camaraderie? Looking for more opportunities to blow off steam and connect with people who share your values?</p>
-<p>Join us to contribute to organizing and facilitating social events!</p>
-<p>&nbsp;</p>
-<p>Use this link to join the meeting: <a href="https://us06web.zoom.us/j/82472231831?pwd=dXleMZVqNodTeuqFRpwGwnTs0h2oOQ.1">https://us06web.zoom.us/socialcommitteemeeting</a></p>
+Interested in building community and camaraderie? Looking for more opportunities to blow off steam and connect with people who share your values?
+
+Join us to contribute to organizing and facilitating social events!
+
+Use this link to join the meeting: [https://us06web.zoom.us/socialcommitteemeeting](https://us06web.zoom.us/j/82472231831?pwd=dXleMZVqNodTeuqFRpwGwnTs0h2oOQ.1)

@@ -14,5 +14,6 @@ categories:
   - SV DSA
 ---
 
-<p>Curious about socialism but don’t know where to start? In need of some comradely time to unwind? Want to connect with other local comrades and build community? Join us in Mountain View for our July Last Friday Social!</p>
-<p>This month we’ll be in Mountain View at Olympus Caffe &amp; Bakery. This location is near the Caltrain station, so come eat, drink, and spend time with comrades!</p>
+Curious about socialism but don’t know where to start? In need of some comradely time to unwind? Want to connect with other local comrades and build community? Join us in Mountain View for our July Last Friday Social!
+
+This month we’ll be in Mountain View at Olympus Caffe & Bakery. This location is near the Caltrain station, so come eat, drink, and spend time with comrades!

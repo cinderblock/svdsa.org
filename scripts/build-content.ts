@@ -21,6 +21,7 @@
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import matter from "gray-matter";
+import { renderMarkdown } from "./render-markdown";
 
 const CONTENT = join(import.meta.dirname, "..", "content");
 const GENERATED = join(CONTENT, "generated");
@@ -41,7 +42,8 @@ const excerptFrom = (html: string, len: number) => {
   return text.length > len ? text.slice(0, len) : text;
 };
 
-/** Read + parse every .md under content/<dir>. */
+/** Read + parse every .md under content/<dir>; bodies are Markdown, rendered
+ * to HTML here so the app keeps consuming ready-to-inject HTML. */
 async function readCollection(dir: string) {
   const root = join(CONTENT, dir);
   let entries: string[] = [];
@@ -56,7 +58,7 @@ async function readCollection(dir: string) {
       const parsed = matter(await readFile(join(root, f), "utf8"));
       return {
         data: parsed.data as Record<string, unknown>,
-        body: parsed.content.trim(),
+        body: await renderMarkdown(parsed.content.trim()),
       };
     }),
   );

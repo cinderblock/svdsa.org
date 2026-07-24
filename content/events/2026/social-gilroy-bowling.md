@@ -20,10 +20,12 @@ categories:
   - SV DSA
 ---
 
-<p class="p1">Join us for a Silicon Valley DSA social in Gilroy! We will be at Gilroy Bowl on Saturday, 5/16 at 7:00pm for bowling with comrades. First 10 comrades who arrive bowl for free! Hope to see you there.</p>
-<p class="p1"><strong>Gilroy Bowl<br />
-</strong>7554 Monterey St.<br />
-Gilroy, CA 95020</p>
-<p><a href="https://forms.gle/h9CWbtgs7DJMTQ5aA">RSVP HERE PLEASE</a></p>
-<p>&nbsp;</p>
-<p><iframe loading="lazy" title="Untitled" src="https://www.canva.com/design/DAHJkXVJoo8/MH11Vrk4wnPK0CxdFfUbwA/view?embed&amp;meta" height="1000" width="773" style="border: none; border-radius: 8px; width: 773px; height: 1000px;" allowfullscreen="allowfullscreen" allow="fullscreen"></iframe></p>
+Join us for a Silicon Valley DSA social in Gilroy! We will be at Gilroy Bowl on Saturday, 5/16 at 7:00pm for bowling with comrades. First 10 comrades who arrive bowl for free! Hope to see you there.
+
+**Gilroy Bowl  
+**7554 Monterey St.  
+Gilroy, CA 95020
+
+[RSVP HERE PLEASE](https://forms.gle/h9CWbtgs7DJMTQ5aA)
+
+<iframe loading="lazy" title="Untitled" src="https://www.canva.com/design/DAHJkXVJoo8/MH11Vrk4wnPK0CxdFfUbwA/view?embed&amp;meta" height="1000" width="773" style="border: none; border-radius: 8px; width: 773px; height: 1000px;" allowfullscreen="allowfullscreen" allow="fullscreen"></iframe>

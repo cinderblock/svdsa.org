@@ -21,6 +21,8 @@ categories:
   - WG - Electoral
 ---
 
-<p>Last month we opened ballots for our Brew &amp; Chew Ranked Choice Voting social event at Strike Brewing in San Jose. We will be closing ballots and announcing the winners at Strike on Friday, July 25! Come join us to socialize with comrades, hear the election results, and spread the word about ranked choice voting in our community. Ballots remain open until this final event, so be sure to head to Strike Brewing and bring your friends in the interim to get higher turnout. There is also a &#8216;ballot box&#8217; at Strike where you can share reasons why you support ranked choice voting. When we announce the winners, we will randomly choose one of the contributors and they will be awarded a $100 gift card. You have to be present when the winners are called to be eligible for the gift card.</p>
-<p>We invite you to Strike Brewing on July 25 at 6 pm.</p>
-<p><strong>RSVP here: <a href='https://www.mobilize.us/calrcv/event/815416/'>https://www.mobilize.us/calrcv/event/815416/</a></strong></p>
+Last month we opened ballots for our Brew & Chew Ranked Choice Voting social event at Strike Brewing in San Jose. We will be closing ballots and announcing the winners at Strike on Friday, July 25! Come join us to socialize with comrades, hear the election results, and spread the word about ranked choice voting in our community. Ballots remain open until this final event, so be sure to head to Strike Brewing and bring your friends in the interim to get higher turnout. There is also a ‘ballot box’ at Strike where you can share reasons why you support ranked choice voting. When we announce the winners, we will randomly choose one of the contributors and they will be awarded a $100 gift card. You have to be present when the winners are called to be eligible for the gift card.
+
+We invite you to Strike Brewing on July 25 at 6 pm.
+
+**RSVP here: [https://www.mobilize.us/calrcv/event/815416/](https://www.mobilize.us/calrcv/event/815416/)**

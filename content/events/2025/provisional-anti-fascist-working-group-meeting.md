@@ -14,5 +14,6 @@ categories:
   - SV DSA
 ---
 
-<p>With the attacks from the Trump administration and the continued descent into fascism, the organized left is a necessary force to maintain human dignity and empower the working class. Members of Silicon Valley DSA are considering the formation of an official anti-fascist working group to help fill that role. We will discuss the results from the resolution to oppose Automated License Plate Readers discussed at our August chapter meeting, work towards the creation of an official working group charter, and decide on future projects and organizing efforts.</p>
-<p>We will meet Wednesday September 3 from 6-7 pm on Zoom. Register for the meeting here: <a href="https://us02web.zoom.us/meeting/register/cUjz63EvTT6JmdkRq5uSxw">https://us02web.zoom.us/meeting/register/cUjz63EvTT6JmdkRq5uSxw</a></p>
+With the attacks from the Trump administration and the continued descent into fascism, the organized left is a necessary force to maintain human dignity and empower the working class. Members of Silicon Valley DSA are considering the formation of an official anti-fascist working group to help fill that role. We will discuss the results from the resolution to oppose Automated License Plate Readers discussed at our August chapter meeting, work towards the creation of an official working group charter, and decide on future projects and organizing efforts.
+
+We will meet Wednesday September 3 from 6-7 pm on Zoom. Register for the meeting here: [https://us02web.zoom.us/meeting/register/cUjz63EvTT6JmdkRq5uSxw](https://us02web.zoom.us/meeting/register/cUjz63EvTT6JmdkRq5uSxw)

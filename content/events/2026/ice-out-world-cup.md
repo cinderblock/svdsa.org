@@ -21,8 +21,10 @@ categories:
   - WG - Community Safety
 ---
 
-<p>Join SVDSA and other anti-ICE coalition members, like Bay Resistance, as we demand that ICE leave the place we call home, and leave our neighbors in peace.</p>
-<p>The federal government plans to build ICE detention centers in Gilroy and Dublin. If this happens, operations in the bay area will increase and our neighbors will be put at risk. We must speak out against these dangerous and cruel detention centers. We must demand that ICE leaves and stays out of the Bay Area. We must demand that ICE be abolished.</p>
-<p>&nbsp;</p>
-<p>This event will start at 3PM and we will meet at Lick Mill Station (2221 Tasman Drive, Santa Clara 95054). This location is accessible from VTA&#8217;s green and orange lines.</p>
-<p>Stay tuned to this page for more information.</p>
+Join SVDSA and other anti-ICE coalition members, like Bay Resistance, as we demand that ICE leave the place we call home, and leave our neighbors in peace.
+
+The federal government plans to build ICE detention centers in Gilroy and Dublin. If this happens, operations in the bay area will increase and our neighbors will be put at risk. We must speak out against these dangerous and cruel detention centers. We must demand that ICE leaves and stays out of the Bay Area. We must demand that ICE be abolished.
+
+This event will start at 3PM and we will meet at Lick Mill Station (2221 Tasman Drive, Santa Clara 95054). This location is accessible from VTA’s green and orange lines.
+
+Stay tuned to this page for more information.

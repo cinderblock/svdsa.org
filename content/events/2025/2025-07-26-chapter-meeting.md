@@ -20,8 +20,12 @@ categories:
   - SV DSA
 ---
 
-<p>Join Silicon Valley DSA for our July General Meeting! This meeting will feature a lively discussion on DSA&#8217;s National Convention resolutions, updates from our working groups and ongoing projects, as well as a space to connect with comrades and discuss our current and future work as a Chapter.</p>
-<p>We welcome everyone to our meetings, whether you&#8217;ve been involved for a long time or are curious to learn more. To take part in Chapter decisions as a voting member, please sign up with National DSA at <a href="https://dsausa.org/join" target="_blank" rel="noopener">https://dsausa.org/join</a>.</p>
-<p>This meeting will be held in person, with the option to participate virtually via Zoom.</p>
-<p><strong>Register for the Zoom at <a href="https://us02web.zoom.us/meeting/register/t9AcC_a4SaiP0aYRccxSDA#/registration" target="_blank" rel="noopener">https://us02web.zoom.us/meeting/register/t9AcC_a4SaiP0aYRccxSDA#/registration</a></strong></p>
-<p><strong>RSVP HERE: <a href="https://actionnetwork.org/events/2025-07-26-chapter-meeting/" target="_blank" rel="noopener">https://actionnetwork.org/events/2025-07-26-chapter-meeting/</a></strong></p>
+Join Silicon Valley DSA for our July General Meeting! This meeting will feature a lively discussion on DSA’s National Convention resolutions, updates from our working groups and ongoing projects, as well as a space to connect with comrades and discuss our current and future work as a Chapter.
+
+We welcome everyone to our meetings, whether you’ve been involved for a long time or are curious to learn more. To take part in Chapter decisions as a voting member, please sign up with National DSA at [https://dsausa.org/join](https://dsausa.org/join).
+
+This meeting will be held in person, with the option to participate virtually via Zoom.
+
+**Register for the Zoom at [https://us02web.zoom.us/meeting/register/t9AcC\_a4SaiP0aYRccxSDA#/registration](https://us02web.zoom.us/meeting/register/t9AcC_a4SaiP0aYRccxSDA#/registration)**
+
+**RSVP HERE: [https://actionnetwork.org/events/2025-07-26-chapter-meeting/](https://actionnetwork.org/events/2025-07-26-chapter-meeting/)**

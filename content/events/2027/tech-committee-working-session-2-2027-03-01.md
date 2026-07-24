@@ -16,5 +16,6 @@ categories:
   - SV DSA
 ---
 
-<p>The Tech Committee has bi-weekly working session where folks can start an up-for-grabs item or make progress on current items. Co-chairs are available for office-hours assistance for any questions that come up or for help finding something to contribute to.</p>
-<p>Register for the Zoom: <a href="https://us02web.zoom.us/meeting/register/XbMFPFzMQVGH1sXutjLxRg">https://us02web.zoom.us/meeting/register/XbMFPFzMQVGH1sXutjLxRg</a></p>
+The Tech Committee has bi-weekly working session where folks can start an up-for-grabs item or make progress on current items. Co-chairs are available for office-hours assistance for any questions that come up or for help finding something to contribute to.
+
+Register for the Zoom: [https://us02web.zoom.us/meeting/register/XbMFPFzMQVGH1sXutjLxRg](https://us02web.zoom.us/meeting/register/XbMFPFzMQVGH1sXutjLxRg)

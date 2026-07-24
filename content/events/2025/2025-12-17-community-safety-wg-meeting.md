@@ -16,6 +16,6 @@ categories:
   - SV DSA
 ---
 
-<p>Join the community safety working group to help support efforts to improve the safety of our communities in the South Bay! No experience is required and everyone has something to contribute! We will be meeting via Zoom, please register with the link below, from 6:30 pm – 7:30 pm.</p>
-<p>&nbsp;</p>
-<p>Register for Zoom: <a href="https://us06web.zoom.us/meeting/register/33Ti1dehTzOblxmkrwLH5Q">https://us06web.zoom.us/meeting/register/33Ti1dehTzOblxmkrwLH5Q</a></p>
+Join the community safety working group to help support efforts to improve the safety of our communities in the South Bay! No experience is required and everyone has something to contribute! We will be meeting via Zoom, please register with the link below, from 6:30 pm – 7:30 pm.
+
+Register for Zoom: [https://us06web.zoom.us/meeting/register/33Ti1dehTzOblxmkrwLH5Q](https://us06web.zoom.us/meeting/register/33Ti1dehTzOblxmkrwLH5Q)

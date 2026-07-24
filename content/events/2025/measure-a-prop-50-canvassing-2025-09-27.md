@@ -20,5 +20,6 @@ categories:
   - SV DSA
 ---
 
-<p>Join the Silicon Valley DSA and the South Bay Labor Council for canvassing to build the support we need to pass Measure A and Proposition 50! We&#8217;ll depart from SEIU Local 521 Union Hall.</p>
-<p>RSVP here: <a href="https://actionnetwork.org/campaigns/sv-dsa-measure-a/" target="_blank">https://actionnetwork.org/campaigns/sv-dsa-measure-a/</a></p>
+Join the Silicon Valley DSA and the South Bay Labor Council for canvassing to build the support we need to pass Measure A and Proposition 50! We’ll depart from SEIU Local 521 Union Hall.
+
+RSVP here: [https://actionnetwork.org/campaigns/sv-dsa-measure-a/](https://actionnetwork.org/campaigns/sv-dsa-measure-a/)

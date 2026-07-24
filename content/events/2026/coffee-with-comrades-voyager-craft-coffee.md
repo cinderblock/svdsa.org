@@ -14,7 +14,8 @@ categories:
   - SV DSA
 ---
 
-<p>Join us at the Voyager on Alameda for some coffee with comrades!</p>
-<p>&nbsp;</p>
-<p>Address: 2221 The Alameda Santa Clara, CA 95050</p>
-<p><iframe loading="lazy" title="Coffee w/ Comrades July 2026 social media draft" src="https://www.canva.com/design/DAHNmRsi4eA/EgFUSiwxK-vPT0WP9P8-Jw/view?embed&amp;meta" height="1000" width="800" style="border: none; border-radius: 8px; width: 800px; height: 1000px;" allowfullscreen="allowfullscreen" allow="fullscreen"></iframe></p>
+Join us at the Voyager on Alameda for some coffee with comrades!
+
+Address: 2221 The Alameda Santa Clara, CA 95050
+
+<iframe loading="lazy" title="Coffee w/ Comrades July 2026 social media draft" src="https://www.canva.com/design/DAHNmRsi4eA/EgFUSiwxK-vPT0WP9P8-Jw/view?embed&amp;meta" height="1000" width="800" style="border: none; border-radius: 8px; width: 800px; height: 1000px;" allowfullscreen="allowfullscreen" allow="fullscreen"></iframe>

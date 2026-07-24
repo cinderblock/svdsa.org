@@ -14,9 +14,14 @@ categories:
   - newbie-friendly
 ---
 
-<p>ICE is trying to move to build a facility in South County — and our community is fighting back.</p>
-<p>Although there is not definitive information about the future use for this land, our community will be vigilant and organized to ensure ICE can not expand deportation operations in the Bay at this site.</p>
-<p>On May 22, join us for a community briefing to get the full picture: what we know, what&#8217;s at stake, and how we stop it. This is your chance to hear directly from community leaders, ask questions, and plug into the campaign.</p>
-<p>This facility would threaten the safety and well being of immigrant families across the entire region. Research has consistently shown that communities located near ICE detention centers experience increased enforcement activity and higher rates of arrests—a pattern that puts immigrant families, mixed-status households, and entire neighborhoods at greater risk.</p>
-<p>Santa Clara County is home to one of the largest immigrant populations in California. For years, county leaders and community organizations have fought to pass and defend strong sanctuary protections because they know that the safety of immigrant residents is inseparable from the safety and well being of the whole county. A new ICE detention center in Gilroy would be a direct threat to everything those protections stand for.</p>
-<p>Sign up here for a link to join: https://actionnetwork.org/events/community-briefing-no-to-the-proposed-gilroy-ice-facility</p>
+ICE is trying to move to build a facility in South County — and our community is fighting back.
+
+Although there is not definitive information about the future use for this land, our community will be vigilant and organized to ensure ICE can not expand deportation operations in the Bay at this site.
+
+On May 22, join us for a community briefing to get the full picture: what we know, what’s at stake, and how we stop it. This is your chance to hear directly from community leaders, ask questions, and plug into the campaign.
+
+This facility would threaten the safety and well being of immigrant families across the entire region. Research has consistently shown that communities located near ICE detention centers experience increased enforcement activity and higher rates of arrests—a pattern that puts immigrant families, mixed-status households, and entire neighborhoods at greater risk.
+
+Santa Clara County is home to one of the largest immigrant populations in California. For years, county leaders and community organizations have fought to pass and defend strong sanctuary protections because they know that the safety of immigrant residents is inseparable from the safety and well being of the whole county. A new ICE detention center in Gilroy would be a direct threat to everything those protections stand for.
+
+Sign up here for a link to join: https://actionnetwork.org/events/community-briefing-no-to-the-proposed-gilroy-ice-facility

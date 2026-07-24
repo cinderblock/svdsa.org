@@ -16,6 +16,8 @@ categories:
   - WG - Liberation and Justice
 ---
 
-<p class="p1">Join us for our Liberation and Justice Working Group Meeting to connect, organize, and build collective power around areas like law enforcement, racial justice, and mass-incarceration. We meet on the 2nd and 4th Wednesday of every month @ 7:30-8:30pm on Zoom.</p>
-<p class="p1">If you&#8217;re interested in contributing to this effort and organizing for real change, join the Zoom and the #wg-liberation-justice Slack channel.</p>
-<p class="p1">Register for the Zoom: <a href="https://us02web.zoom.us/meeting/register/zdqyGqXgS42vBZTxl2BPQA">https://us02web.zoom.us/meeting/register/zdqyGqXgS42vBZTxl2BPQA</a></p>
+Join us for our Liberation and Justice Working Group Meeting to connect, organize, and build collective power around areas like law enforcement, racial justice, and mass-incarceration. We meet on the 2nd and 4th Wednesday of every month @ 7:30-8:30pm on Zoom.
+
+If you’re interested in contributing to this effort and organizing for real change, join the Zoom and the #wg-liberation-justice Slack channel.
+
+Register for the Zoom: [https://us02web.zoom.us/meeting/register/zdqyGqXgS42vBZTxl2BPQA](https://us02web.zoom.us/meeting/register/zdqyGqXgS42vBZTxl2BPQA)

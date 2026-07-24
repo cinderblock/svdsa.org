@@ -14,8 +14,8 @@ categories:
   - SV DSA
 ---
 
-<p>Curious about socialism but don’t know where to start? In need of some comradely time to unwind? Want to connect with other local comrades and build community? Join us for our November Last Friday Social!</p>
-<p>&nbsp;</p>
-<p>This month we will be meeting at Olympus Caffe &amp; Bakery in Mountain View at 6:30pm for a casual gathering to get to know our comrades. Hope you can make it!</p>
-<p>&nbsp;</p>
-<p><span class="w8qArf FoJoyf">Address: </span><span class="LrzXr">135 Castro St, Mountain View, CA 94041</span></p>
+Curious about socialism but don’t know where to start? In need of some comradely time to unwind? Want to connect with other local comrades and build community? Join us for our November Last Friday Social!
+
+This month we will be meeting at Olympus Caffe & Bakery in Mountain View at 6:30pm for a casual gathering to get to know our comrades. Hope you can make it!
+
+Address: 135 Castro St, Mountain View, CA 94041

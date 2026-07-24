@@ -13,7 +13,8 @@ categories:
   - newbie-friendly
 ---
 
-<p>Interested in building community and camaraderie? Looking for more opportunities to blow off steam and connect with people who share your values?</p>
-<p>Join us to help organize and facilitate social events for our comrades!</p>
-<p>&nbsp;</p>
-<p>Meeting link: <a href="https://us02web.zoom.us/j/83127508469">https://us02web.zoom.us/j/83127508469</a></p>
+Interested in building community and camaraderie? Looking for more opportunities to blow off steam and connect with people who share your values?
+
+Join us to help organize and facilitate social events for our comrades!
+
+Meeting link: [https://us02web.zoom.us/j/83127508469](https://us02web.zoom.us/j/83127508469)

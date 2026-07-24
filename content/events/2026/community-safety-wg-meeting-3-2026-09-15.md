@@ -15,6 +15,8 @@ categories:
   - WG - Community Safety
 ---
 
-<p>Join the <a href="https://siliconvalleydsa.org/community-safety/"><strong>Community Safety Working Group</strong></a> as we discuss our ongoing work to fight back against the American police state.</p>
-<p>Currently, our group is most actively engaged in efforts against automated license plate readers (ALPRs), ICE, and data centers.</p>
-<p>Register here: <strong><a href="https://us02web.zoom.us/meeting/register/bBzLyNmkRauJPCbd_63MYg">https://us02web.zoom.us/meeting/register/bBzLyNmkRauJPCbd_63MYg</a></strong></p>
+Join the [**Community Safety Working Group**](https://siliconvalleydsa.org/community-safety/) as we discuss our ongoing work to fight back against the American police state.
+
+Currently, our group is most actively engaged in efforts against automated license plate readers (ALPRs), ICE, and data centers.
+
+Register here: **[https://us02web.zoom.us/meeting/register/bBzLyNmkRauJPCbd\_63MYg](https://us02web.zoom.us/meeting/register/bBzLyNmkRauJPCbd_63MYg)**

@@ -21,19 +21,26 @@ categories:
   - WG - Mutual Aid
 ---
 
-<div class="xt0psk2">
-<p dir="auto">Bring up to 10 clean good condition garments in the morning and come back in the afternoon to exchange them!  Nothing is stored and everything must find a home</p>
-<p dir="auto">Clothes Drop Off: 10 AM &#8211; 12 PM</p>
-<p dir="auto">Exchange: 5 PM to 7 PM</p>
-<p><b>Location Details</b><br />
-<b>Centro Aztlan Chicomoztoc</b><br />
-47 E William Street<br />
-San Jose CA 95112</p>
-<p><b>Parking</b></p>
-<p>There is street parking and parking garages close by on 3rd Street.</p>
-<p><b>Public Transportation<br />
-</b></p>
-<p>Bus: 7th &amp; Santa Clara (Rapid 523, 64), San Carlos / 7th (22, 23, 66), San Fernando &amp; 7th (72,73)</p>
-<p>Light Rail: Santa Clara Station – Blue and Green Line</p>
-<p>Train: San Jose Diridon Station – take Rapid 500 to Santa Clara / 6th or 22 to San Carlos / 7th</p>
-</div>
+Bring up to 10 clean good condition garments in the morning and come back in the afternoon to exchange them!  Nothing is stored and everything must find a home
+
+Clothes Drop Off: 10 AM – 12 PM
+
+Exchange: 5 PM to 7 PM
+
+**Location Details**  
+**Centro Aztlan Chicomoztoc**  
+47 E William Street  
+San Jose CA 95112
+
+**Parking**
+
+There is street parking and parking garages close by on 3rd Street.
+
+**Public Transportation  
+**
+
+Bus: 7th & Santa Clara (Rapid 523, 64), San Carlos / 7th (22, 23, 66), San Fernando & 7th (72,73)
+
+Light Rail: Santa Clara Station – Blue and Green Line
+
+Train: San Jose Diridon Station – take Rapid 500 to Santa Clara / 6th or 22 to San Carlos / 7th

@@ -14,5 +14,6 @@ categories:
   - SV DSA
 ---
 
-<p>The recently chartered Community Safety Working Group will have a meeting on Thursday October 9 at 6 pm on Zoom. We will elect working group co-chairs and continue our discussions of ongoing projects.</p>
-<p>Register for the zoom link here: <a href="https://us06web.zoom.us/meeting/register/HwzhOLEJRxuMtqGAcDklEA">https://us06web.zoom.us/meeting/register/HwzhOLEJRxuMtqGAcDklEA</a></p>
+The recently chartered Community Safety Working Group will have a meeting on Thursday October 9 at 6 pm on Zoom. We will elect working group co-chairs and continue our discussions of ongoing projects.
+
+Register for the zoom link here: [https://us06web.zoom.us/meeting/register/HwzhOLEJRxuMtqGAcDklEA](https://us06web.zoom.us/meeting/register/HwzhOLEJRxuMtqGAcDklEA)

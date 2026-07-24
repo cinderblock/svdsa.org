@@ -14,50 +14,22 @@ categories:
 tags: []
 ---
 
-<p><em>At our March 2026 chapter meeting, SV DSA member Stacey delivered a statement of our chapter’s position on the allegations against Cesar Chavez. The <a href="https://www.instagram.com/p/DWk2lFVEgWs/">recording</a> is available on Instagram.</em></p>
+*At our March 2026 chapter meeting, SV DSA member Stacey delivered a statement of our chapter’s position on the allegations against Cesar Chavez. The [recording](https://www.instagram.com/p/DWk2lFVEgWs/) is available on Instagram.*
 
+The Labor Working Group’s Statement in response to the Cesar Chavez investigation results:
 
+1.  SV DSA stands in solidarity with the women who were abused by Mr. Chavez.
+2.  SV DSA recognizes and applauds these women’s strength and courage to come forward as well as their resilience living with this for 60+ years.
+3.  SV DSA stands in solidarity with the United Farm Workers movement and state that this news absolutely does not define the movement in the past or present. SV DSA acknowledges the damage and grief this news will cause within the Latino community.
+4.  SV DSA condemns sexual assault, harassment, and abuse in all forms.
+5.  SV DSA stands with women, children, and other vulnerable groups who need protection from abuse of power.
 
-<p>The Labor Working Group’s Statement in response to the Cesar Chavez investigation results:</p>
+This news will affect each person differently, for some it is the loss of a heroic figure regardless of the accuracy of that description.
 
+This movement historically provided an opportunity for migrant workers and their families to fight for rights and against exploitation.
 
+A movement should not be defined by its leader, too much power for one person without much oversight.
 
-<ol class="wp-block-list">
-<li>SV DSA stands in solidarity with the women who were abused by Mr. Chavez.</li>
+This gives us an opportunity to become more aware of how power imbalances can lead to horrible abuses.
 
-
-
-<li>SV DSA recognizes and applauds these women’s strength and courage to come forward as well as their resilience living with this for 60+ years.</li>
-
-
-
-<li>SV DSA stands in solidarity with the United Farm Workers movement and state that this news absolutely does not define the movement in the past or present. SV DSA acknowledges the damage and grief this news will cause within the Latino community.</li>
-
-
-
-<li>SV DSA condemns sexual assault, harassment, and abuse in all forms.</li>
-
-
-
-<li>SV DSA stands with women, children, and other vulnerable groups who need protection from abuse of power.</li>
-</ol>
-
-
-
-<p>This news will affect each person differently, for some it is the loss of a heroic figure regardless of the accuracy of that description.</p>
-
-
-
-<p>This movement historically provided an opportunity for migrant workers and their families to fight for rights and against exploitation.</p>
-
-
-
-<p>A movement should not be defined by its leader, too much power for one person without much oversight.</p>
-
-
-
-<p>This gives us an opportunity to become more aware of how power imbalances can lead to horrible abuses.</p>
-
-
-
-<p>It is important for us to keep this in mind when we are working in our communities and with our partners to promote safety, respect, and dignity for all people.</p>
+It is important for us to keep this in mind when we are working in our communities and with our partners to promote safety, respect, and dignity for all people.

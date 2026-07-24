@@ -15,8 +15,8 @@ categories:
 tags: []
 ---
 
-<p>SV DSA is holding a picnic for our August Chapter Meeting! If you are a Member or just want to learn more about DSA, come join us for a delicious summer picnic!<br />
-We will be voting on an anti-zionist resolution and discussing upcoming events including a Black August Brake Light Clinic and canvassing for our endorsed candidates!<br />
-Date: Saturday, August 24th<br />
-Time: 1:00pm &#8211; 3:00pm<br />
-Place: Sylvan Park, 600 Sylvan Ave</p>
+SV DSA is holding a picnic for our August Chapter Meeting! If you are a Member or just want to learn more about DSA, come join us for a delicious summer picnic!  
+We will be voting on an anti-zionist resolution and discussing upcoming events including a Black August Brake Light Clinic and canvassing for our endorsed candidates!  
+Date: Saturday, August 24th  
+Time: 1:00pm – 3:00pm  
+Place: Sylvan Park, 600 Sylvan Ave

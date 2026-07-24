@@ -17,5 +17,6 @@ categories:
   - SV DSA
 ---
 
-<p>The Tech Committee meets bi-weekly to organize and maintain our chapter’s tech infrastructure: the chapter website (<a href="https://svdsa.org">https://svdsa.org</a>), automations, and more! If you’re curious about how we use technology for good or if you want to build systems that attract and empower DSA members, join #cmte-tech-data on Slack or swing by the Zoom!</p>
-<p>Register for the Zoom: <a href="https://us02web.zoom.us/meeting/register/XbMFPFzMQVGH1sXutjLxRg">https://us02web.zoom.us/meeting/register/XbMFPFzMQVGH1sXutjLxRg</a></p>
+The Tech Committee meets bi-weekly to organize and maintain our chapter’s tech infrastructure: the chapter website ([https://svdsa.org](https://svdsa.org)), automations, and more! If you’re curious about how we use technology for good or if you want to build systems that attract and empower DSA members, join #cmte-tech-data on Slack or swing by the Zoom!
+
+Register for the Zoom: [https://us02web.zoom.us/meeting/register/XbMFPFzMQVGH1sXutjLxRg](https://us02web.zoom.us/meeting/register/XbMFPFzMQVGH1sXutjLxRg)

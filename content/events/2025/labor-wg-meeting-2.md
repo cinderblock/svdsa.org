@@ -11,7 +11,6 @@ isVirtual: false
 categories: []
 ---
 
-<p>Join SVDSA&#8217;s Labor Working group for our monthly meeting as we begin a discussion of how to help in unionization, and contract issues and grow our power in the South Bay. Meeting will be held virtually on zoom.</p>
-<p>&nbsp;</p>
-<p>Zoom info will be sent after registering-register here <a href="https://us02web.zoom.us/meeting/register/UqVBNxKkRIK8DZHfLnacnw">https://us02web.zoom.us/meeting/register/UqVBNxKkRIK8DZHfLnacnw</a></p>
-<p>&nbsp;</p>
+Join SVDSA’s Labor Working group for our monthly meeting as we begin a discussion of how to help in unionization, and contract issues and grow our power in the South Bay. Meeting will be held virtually on zoom.
+
+Zoom info will be sent after registering-register here [https://us02web.zoom.us/meeting/register/UqVBNxKkRIK8DZHfLnacnw](https://us02web.zoom.us/meeting/register/UqVBNxKkRIK8DZHfLnacnw)

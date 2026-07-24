@@ -20,5 +20,6 @@ categories:
   - SV DSA
 ---
 
-<p>Join the Silicon Valley DSA and the South Bay Labor Council for in-person phonebanking to build the support we need to pass Measure A and Proposition 50! Bring a laptop if able and consider wearing red or DSA swag!</p>
-<p>RSVP here: <a href="https://actionnetwork.org/campaigns/sv-dsa-measure-a/" target="_blank" rel="noopener">https://actionnetwork.org/campaigns/sv-dsa-measure-a/</a></p>
+Join the Silicon Valley DSA and the South Bay Labor Council for in-person phonebanking to build the support we need to pass Measure A and Proposition 50! Bring a laptop if able and consider wearing red or DSA swag!
+
+RSVP here: [https://actionnetwork.org/campaigns/sv-dsa-measure-a/](https://actionnetwork.org/campaigns/sv-dsa-measure-a/)

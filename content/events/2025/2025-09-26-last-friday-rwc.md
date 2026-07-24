@@ -21,10 +21,13 @@ categories:
   - SV DSA
 ---
 
-<p>Curious about socialism but don&#8217;t know where to start? In need of some comradely time to unwind? Want to connect with other local comrades and build community?</p>
-<p>Join us for a special edition of our monthly Last Friday Social, this time in Redwood City! All ages are welcome. The venue is owned by a Palestinian ally, Ali, who has shown up alongside us to demand a ceasefire at Redwood City&#8217;s City Council back in 2023-24. It has food and drinks (including one alcoholic beer option), and is right next to the Redwood City Caltrain station.</p>
-<p>Rockn Wraps<br />
-2053 Broadway<br />
-Redwood City, CA 94063</p>
-<p>September 26, 2025<br />
-6-9 PM</p>
+Curious about socialism but don’t know where to start? In need of some comradely time to unwind? Want to connect with other local comrades and build community?
+
+Join us for a special edition of our monthly Last Friday Social, this time in Redwood City! All ages are welcome. The venue is owned by a Palestinian ally, Ali, who has shown up alongside us to demand a ceasefire at Redwood City’s City Council back in 2023-24. It has food and drinks (including one alcoholic beer option), and is right next to the Redwood City Caltrain station.
+
+Rockn Wraps  
+2053 Broadway  
+Redwood City, CA 94063
+
+September 26, 2025  
+6-9 PM

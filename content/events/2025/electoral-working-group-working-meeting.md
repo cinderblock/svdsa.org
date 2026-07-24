@@ -19,4 +19,4 @@ categories:
   - WG - Electoral
 ---
 
-<p>We will meet in person to work on electoral WG tasks, such as our questionnaire for candidates seeking an SVDSA endorsement in the 2026 elections.</p>
+We will meet in person to work on electoral WG tasks, such as our questionnaire for candidates seeking an SVDSA endorsement in the 2026 elections.

@@ -19,6 +19,8 @@ categories:
   - WG - Labor
 ---
 
-<p>A timely and powerful film about the struggle of the workers of Amazon on Staten Island to form a union. The Amazon Labor Union now exists! Check them out here: <a href="https://www.amazonlaborunion.org/">amazonlaborunion.org</a></p>
-<p>Join us to see and learn from this documentary. There will be a special call-in guest,<strong> current ALU President Connor Spence</strong>, to talk about more recent developments, and to answer questions.</p>
-<p>Hosted at the SEIU521 Labor Hall, 2302 Zanker Road, by SEIU and the Labor Working Group of Silicon Valley DSA. The film starts at 7, on Thursday evening, October 16th. Snacks and drinks will be provided too! Tell your friends; spread the word!</p>
+A timely and powerful film about the struggle of the workers of Amazon on Staten Island to form a union. The Amazon Labor Union now exists! Check them out here: [amazonlaborunion.org](https://www.amazonlaborunion.org/)
+
+Join us to see and learn from this documentary. There will be a special call-in guest, **current ALU President Connor Spence**, to talk about more recent developments, and to answer questions.
+
+Hosted at the SEIU521 Labor Hall, 2302 Zanker Road, by SEIU and the Labor Working Group of Silicon Valley DSA. The film starts at 7, on Thursday evening, October 16th. Snacks and drinks will be provided too! Tell your friends; spread the word!

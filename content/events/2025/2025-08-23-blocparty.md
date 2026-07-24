@@ -21,12 +21,18 @@ categories:
   - WG - Mutual Aid
 ---
 
-<p>AND WE ARE BACK WITH THE 2025 SAN JOSE MUTUAL AID BLOC PARTY!!!</p>
-<p>Saturday August 23<br />
-1pm-6pm<br />
-Backesto Park</p>
-<p>Live Music by *top secret guests*. Free Stuff from our friends at Art Pocket San Jose San Jose Clothing Swap, South Bay Mutual Aid, and San Jose Food Not Bombs!</p>
-<p>Our besties from Love Letters 2 San Jose will be joining us!!</p>
-<p>Rent Raffle???? Drop a couple dollars and see if you win!</p>
-<p>Let&#8217;s hang out and swap our summer finds and share the love for San Jose 💥💃</p>
-<p><img loading="lazy" decoding="async" class="alignnone size-full wp-image-14238" src="https://siliconvalleydsa.org/wp-content/uploads/2025/07/8.5-x-11_Color_page-0001.jpg" alt="" width="10625" height="13750" /></p>
+AND WE ARE BACK WITH THE 2025 SAN JOSE MUTUAL AID BLOC PARTY!!!
+
+Saturday August 23  
+1pm-6pm  
+Backesto Park
+
+Live Music by \*top secret guests\*. Free Stuff from our friends at Art Pocket San Jose San Jose Clothing Swap, South Bay Mutual Aid, and San Jose Food Not Bombs!
+
+Our besties from Love Letters 2 San Jose will be joining us!!
+
+Rent Raffle???? Drop a couple dollars and see if you win!
+
+Let’s hang out and swap our summer finds and share the love for San Jose 💥💃
+
+![](https://siliconvalleydsa.org/wp-content/uploads/2025/07/8.5-x-11_Color_page-0001.jpg)

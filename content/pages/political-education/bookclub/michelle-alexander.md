@@ -7,4 +7,4 @@ modified: '2019-06-17T23:32:09'
 parent: 3231
 ---
 
-<h2><em><a href="https://siliconvalleydsa.org/political-education/bookclub/michelle-alexander/the-new-jim-crow">The New Jim Crow</a></em></h2>
+## *[The New Jim Crow](https://siliconvalleydsa.org/political-education/bookclub/michelle-alexander/the-new-jim-crow)*

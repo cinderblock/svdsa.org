@@ -16,5 +16,6 @@ categories:
   - WG - Political Education
 ---
 
-<p>This is our once monthly working session, where we collaborate on developing curriculum, curating educational content, building presentations, performing other tasks related to our strategic plan.</p>
-<p>Zoom registration: <a href="https://us02web.zoom.us/meeting/register/-a_sj_ABR5SLix0Rm9AWtw">https://us02web.zoom.us/meeting/register/-a_sj_ABR5SLix0Rm9AWtw</a></p>
+This is our once monthly working session, where we collaborate on developing curriculum, curating educational content, building presentations, performing other tasks related to our strategic plan.
+
+Zoom registration: [https://us02web.zoom.us/meeting/register/-a\_sj\_ABR5SLix0Rm9AWtw](https://us02web.zoom.us/meeting/register/-a_sj_ABR5SLix0Rm9AWtw)

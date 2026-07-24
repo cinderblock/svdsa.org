@@ -20,5 +20,6 @@ categories:
   - SV DSA
 ---
 
-<p>Join the Silicon Valley DSA and the South Bay Labor Council for in-person phonebanking to build the support we need to pass Measure A and Proposition 50! We&#8217;ll meet in person at SEIU Local 521 Union Hall. October 14th-16th are high-turnout/focus days for SV DSA. Bring a laptop if able and consider wearing red or DSA swag! We’ll get drinks at Jacks after, if interested!</p>
-<p>RSVP here: <a href="https://actionnetwork.org/campaigns/sv-dsa-measure-a/" target="_blank">https://actionnetwork.org/campaigns/sv-dsa-measure-a/</a></p>
+Join the Silicon Valley DSA and the South Bay Labor Council for in-person phonebanking to build the support we need to pass Measure A and Proposition 50! We’ll meet in person at SEIU Local 521 Union Hall. October 14th-16th are high-turnout/focus days for SV DSA. Bring a laptop if able and consider wearing red or DSA swag! We’ll get drinks at Jacks after, if interested!
+
+RSVP here: [https://actionnetwork.org/campaigns/sv-dsa-measure-a/](https://actionnetwork.org/campaigns/sv-dsa-measure-a/)

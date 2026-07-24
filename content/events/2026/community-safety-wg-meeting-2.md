@@ -17,7 +17,8 @@ categories:
   - WG - Community Safety
 ---
 
-<p>Join the Community Safety Working Group as we discuss our ongoing work to push back against increasing surveillance and organizations that target our neighbors, like ICE.</p>
-<p>Currently, our group is most actively engaged in efforts against automated license plate readers.</p>
-<p>Register here: <a href="https://us02web.zoom.us/meeting/register/YA9YBNAAThCCKrM4aL_k3A">https://us02web.zoom.us/meeting/register/YA9YBNAAThCCKrM4aL_k3A </a></p>
-<p>&nbsp;</p>
+Join the Community Safety Working Group as we discuss our ongoing work to push back against increasing surveillance and organizations that target our neighbors, like ICE.
+
+Currently, our group is most actively engaged in efforts against automated license plate readers.
+
+Register here: [https://us02web.zoom.us/meeting/register/YA9YBNAAThCCKrM4aL\_k3A](https://us02web.zoom.us/meeting/register/YA9YBNAAThCCKrM4aL_k3A)

@@ -21,16 +21,24 @@ categories:
   - WG - Mutual Aid
 ---
 
-<p>Join the International Solidarity Working Group and the Mutual Aid Working Group to ask business to hang the Rapid Response Network poster and inform community members of their rights if approached by ICE.</p>
-<p><b>Meeting Location Details</b><br />
-<b>Sunnyvale Caltrain Station</b><br />
-121 W Evelyn Ave<br />
-Sunnyvale CA 94086</p>
-<p><b>Parking</b></p>
-<p>There is street parking and paid parking in the Caltrain station.</p>
-<p><b>Public Transportation<br />
-</b></p>
-<p><strong>Bus Stops</strong>: Evelyn &amp; Frances (VTA Line 21), Sunnyvale &amp; Evelyn (VTA Line 55)</p>
-<p><strong>Train Stop</strong>: Sunnyvale Caltrain Station (Caltrain)</p>
-<p><b>Guidelines</b></p>
-<p>Masks are optional for this event.</p>
+Join the International Solidarity Working Group and the Mutual Aid Working Group to ask business to hang the Rapid Response Network poster and inform community members of their rights if approached by ICE.
+
+**Meeting Location Details**  
+**Sunnyvale Caltrain Station**  
+121 W Evelyn Ave  
+Sunnyvale CA 94086
+
+**Parking**
+
+There is street parking and paid parking in the Caltrain station.
+
+**Public Transportation  
+**
+
+**Bus Stops**: Evelyn & Frances (VTA Line 21), Sunnyvale & Evelyn (VTA Line 55)
+
+**Train Stop**: Sunnyvale Caltrain Station (Caltrain)
+
+**Guidelines**
+
+Masks are optional for this event.
