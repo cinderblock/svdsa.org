@@ -45,10 +45,10 @@ editor/
   vite.config.ts        # builds web/ → dist/
   tsconfig.json         # SPA + Worker types
   src/index.ts          # Worker entry — owns /api/* (assets serve the SPA)
-  src/git/github.ts     # GitHub App auth + REST (read/write/branch/commit/compare/PR)
+  src/git/github.ts     # GitHub App auth + REST/GraphQL (read/write/branch/commit/compare/PR/titles)
   src/content/
-    types.ts            # Editor, EditableItem, Draft, GitHostAdapter, PublishTarget
     serialize.ts        # parse/serialize .md + slug/branch helpers (host-agnostic)
+    lint.ts             # style-rule engine (shared with scripts/lint-content.ts)
   web/                  # the editor SPA (React)
     app.tsx             # shell: base picker, draft bar, publish/discard, save
     filelist.tsx        # grouped content browser

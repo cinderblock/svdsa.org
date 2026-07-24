@@ -38,6 +38,10 @@ playwright/.cache/
 # Migration cache (raw WP API responses)
 content/.raw/
 
+# Generated at build by scripts/build-content.ts — never hand-edited
+public/sitemap.xml
+public/robots.txt
+
 # Wrangler / Cloudflare
 .wrangler/
 .dev.vars
