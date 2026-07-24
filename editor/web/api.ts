@@ -26,6 +26,7 @@ export interface SaveResult {
   commitSha: string;
   previewUrl: string;
   lint: LintFinding[];
+  autofixed: number;
 }
 export interface ChangedFile {
   path: string;

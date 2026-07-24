@@ -88,8 +88,11 @@ export function FileList({
     const g = groupItems(items);
     for (const section of Object.keys(g)) {
       const subs = Object.keys(g[section]).sort().reverse();
-      if (subs[0] === "") ensureTitles(`content/${section}`);
-      else if (subs[0]) ensureTitles(`content/${section}/${subs[0]}`);
+      // Flat entries (pages, config, recurring-event series) always show, so
+      // always load their titles; plus the newest year bucket (expanded).
+      if (subs.includes("")) ensureTitles(`content/${section}`);
+      const newestYear = subs.find((s) => s !== "");
+      if (newestYear) ensureTitles(`content/${section}/${newestYear}`);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items, base]);
@@ -127,8 +130,12 @@ export function FileList({
         onChange={(e) => setFilter(e.target.value)}
       />
       {sections.map((section) => {
-        const subs = Object.keys(groups[section]).sort().reverse();
+        // Flat entries (recurring series, pages) first, then years newest-first.
+        const subs = Object.keys(groups[section]).sort((a, b) =>
+          a === "" ? -1 : b === "" ? 1 : b.localeCompare(a),
+        );
         const total = subs.reduce((n, s) => n + groups[section][s].length, 0);
+        const firstYear = subs.find((s) => s !== "");
         return (
           <details key={section} open>
             <summary>
@@ -143,7 +150,7 @@ export function FileList({
                 <details
                   key={sub}
                   className="year"
-                  open={i === 0 || !!filter}
+                  open={sub === firstYear || !!filter}
                   onToggle={(e) => {
                     if ((e.target as HTMLDetailsElement).open)
                       ensureTitles(`content/${section}/${sub}`);

@@ -152,7 +152,12 @@ export function App() {
       });
       setMsg({
         ok: true,
-        text: `saved to ${r.branch} — preview builds in ~1–2 min`,
+        text:
+          `saved to ${r.branch}` +
+          (r.autofixed
+            ? ` (auto-fixed ${r.autofixed} style issue${r.autofixed === 1 ? "" : "s"})`
+            : "") +
+          ` — preview builds in ~1–2 min`,
         href: r.previewUrl,
       });
       setLint(r.lint ?? []);

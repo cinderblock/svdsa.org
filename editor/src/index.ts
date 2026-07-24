@@ -17,7 +17,7 @@ import {
   serializeMarkdown,
   validBranchName,
 } from "./content/serialize";
-import { lintText, type StyleRule } from "./content/lint";
+import { fixText, lintText, type StyleRule } from "./content/lint";
 
 export interface Env {
   GIT_HOST?: "github" | "gitlab";
@@ -174,7 +174,26 @@ async function handleApi(
     const who = editor(request);
     const branch = branchName(who.email, base);
     await gh.ensureBranch(branch, base);
-    const text = serializeMarkdown(frontmatter, body);
+    // Normalize (serializeMarkdown), then AUTO-FIX every style rule with a
+    // deterministic suggestion before committing; only unfixable findings are
+    // returned as warnings. Rules are chapter-owned content — if the rules
+    // file is missing or broken, saves still succeed, just unlinted.
+    let text = serializeMarkdown(frontmatter, body);
+    let lint: ReturnType<typeof lintText> = [];
+    let autofixed = 0;
+    try {
+      const rulesRaw = await gh.readItem(
+        "content/config/style-rules.json",
+        base,
+      );
+      const rules = JSON.parse(rulesRaw.text) as StyleRule[];
+      const before = lintText(text, rules).length;
+      text = fixText(text, rules);
+      lint = lintText(text, rules);
+      autofixed = before - lint.length;
+    } catch {
+      /* no rules — no findings */
+    }
     const { commitSha } = await gh.commit({
       branch,
       path: p,
@@ -182,23 +201,12 @@ async function handleApi(
       message: `edit ${p} (via editor)`,
       author: who,
     });
-    // Style check the saved text (rules are chapter-owned content; if the
-    // rules file is missing or broken, saves must still succeed).
-    let lint: ReturnType<typeof lintText> = [];
-    try {
-      const rulesRaw = await gh.readItem(
-        "content/config/style-rules.json",
-        base,
-      );
-      lint = lintText(text, JSON.parse(rulesRaw.text) as StyleRule[]);
-    } catch {
-      /* no rules — no findings */
-    }
     return json({
       branch,
       commitSha,
       previewUrl: previewUrl(request, branch),
       lint,
+      autofixed,
     });
   }
 
