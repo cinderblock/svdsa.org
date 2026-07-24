@@ -16,5 +16,6 @@ categories:
   - WG - Political Education
 ---
 
-<p>This is a meeting to review planned curriculum (DSA 101) and work on codifying a process and timeline for collaborative curriculum development</p>
-<p>Zoom registration: <a href="https://us02web.zoom.us/meeting/register/MbjQS2kaRcaUOOII9jOK6A">https://us02web.zoom.us/meeting/register/MbjQS2kaRcaUOOII9jOK6A</a></p>
+This is a meeting to review planned curriculum (DSA 101) and work on codifying a process and timeline for collaborative curriculum development
+
+Zoom registration: [https://us02web.zoom.us/meeting/register/MbjQS2kaRcaUOOII9jOK6A](https://us02web.zoom.us/meeting/register/MbjQS2kaRcaUOOII9jOK6A)

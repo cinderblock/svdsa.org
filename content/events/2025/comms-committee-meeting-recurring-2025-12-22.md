@@ -16,10 +16,6 @@ categories:
   - SV DSA
 ---
 
-<div>
-<p><span style="font-size: 16px;">A lot of work goes into keeping our chapter running behind the scenes. The Comms Committee focuses on outreach and communication, including the monthly newsletter and social media acounts. Please feel free to join and learn about what it takes to reach out to our community.</span></p>
-</div>
-<div>
-<p>Register for the Zoom here: <a href="https://us06web.zoom.us/meeting/register/hrOxMwbATKilZorbWwoytg">https://us06web.zoom.us/meeting/register/hrOxMwbATKilZorbWwoytg</a></p>
-<p>&nbsp;</p>
-</div>
+<span style="font-size: 16px;">A lot of work goes into keeping our chapter running behind the scenes. The Comms Committee focuses on outreach and communication, including the monthly newsletter and social media acounts. Please feel free to join and learn about what it takes to reach out to our community.</span>
+
+Register for the Zoom here: [https://us06web.zoom.us/meeting/register/hrOxMwbATKilZorbWwoytg](https://us06web.zoom.us/meeting/register/hrOxMwbATKilZorbWwoytg)

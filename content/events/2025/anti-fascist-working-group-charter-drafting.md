@@ -14,4 +14,4 @@ categories:
   - SV DSA
 ---
 
-<p>The provisional Anti-Fascist Working Group will have a working meeting to draft a charter for submission and approval by the general membership at our September monthly meeting. We will meet on Zoom to contribute and complete what we have been working on asynchronously beforehand on Wednesday September 10 from 6-7 pm. Register for the Zoom here: <a href="https://us06web.zoom.us/meeting/register/A_JwsixNTpm7NhMx7u_QdQ">https://us06web.zoom.us/meeting/register/A_JwsixNTpm7NhMx7u_QdQ</a></p>
+The provisional Anti-Fascist Working Group will have a working meeting to draft a charter for submission and approval by the general membership at our September monthly meeting. We will meet on Zoom to contribute and complete what we have been working on asynchronously beforehand on Wednesday September 10 from 6-7 pm. Register for the Zoom here: [https://us06web.zoom.us/meeting/register/A\_JwsixNTpm7NhMx7u\_QdQ](https://us06web.zoom.us/meeting/register/A_JwsixNTpm7NhMx7u_QdQ)

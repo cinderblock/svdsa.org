@@ -19,12 +19,17 @@ categories:
   - SV DSA
 ---
 
-<p>Join Silicon Valley DSA for our November General Meeting! This meeting will feature updates from our working groups and ongoing projects, as well as a space to connect with comrades and discuss our current and future work as a Chapter.</p>
-<p>We welcome everyone to our meetings, whether you’ve been involved for a long time or are curious to learn more. To take part in Chapter decisions as a voting member, please sign up with National DSA at <a href="https://dsausa.org/join">https://dsausa.org/join</a>.</p>
-<p>This meeting will be held in person, with the option to participate virtually via Zoom.</p>
-<p><strong>Register for the Zoom <a href="https://us02web.zoom.us/meeting/register/3OYHfnDYTyqw1FwF2VlRJg">https://us02web.zoom.us/meeting/register/3OYHfnDYTyqw1FwF2VlRJg</a></strong></p>
-<p><strong>RSVP here: <a href="https://actionnetwork.org/events/2025-11-15-chapter-meeting/">https://actionnetwork.org/events/2025-11-15-chapter-meeting/</a></strong></p>
-<p>2302 Zanker Rd<br />
-San Jose, CA 95131<br />
-Saturday, November 15<br />
-1–3:30 PM (we expect most business to be complete by 3 PM)</p>
+Join Silicon Valley DSA for our November General Meeting! This meeting will feature updates from our working groups and ongoing projects, as well as a space to connect with comrades and discuss our current and future work as a Chapter.
+
+We welcome everyone to our meetings, whether you’ve been involved for a long time or are curious to learn more. To take part in Chapter decisions as a voting member, please sign up with National DSA at [https://dsausa.org/join](https://dsausa.org/join).
+
+This meeting will be held in person, with the option to participate virtually via Zoom.
+
+**Register for the Zoom [https://us02web.zoom.us/meeting/register/3OYHfnDYTyqw1FwF2VlRJg](https://us02web.zoom.us/meeting/register/3OYHfnDYTyqw1FwF2VlRJg)**
+
+**RSVP here: [https://actionnetwork.org/events/2025-11-15-chapter-meeting/](https://actionnetwork.org/events/2025-11-15-chapter-meeting/)**
+
+2302 Zanker Rd  
+San Jose, CA 95131  
+Saturday, November 15  
+1–3:30 PM (we expect most business to be complete by 3 PM)

@@ -17,6 +17,8 @@ categories:
   - WG - Housing
 ---
 
-<p class="p1">Join the Housing Working Groyp via Zoom as we try to make housing more affordable in Silicon Valley and build the Silicon Valley Tenant Union. We focus on displacement, affordability, habitability, and more. We need your help!</p>
-<p class="p1">Register here!</p>
-<p>https://us02web.zoom.us/meeting/register/mgqeJNgGTDeQrNf0gzmFbA</p>
+Join the Housing Working Groyp via Zoom as we try to make housing more affordable in Silicon Valley and build the Silicon Valley Tenant Union. We focus on displacement, affordability, habitability, and more. We need your help!
+
+Register here!
+
+https://us02web.zoom.us/meeting/register/mgqeJNgGTDeQrNf0gzmFbA

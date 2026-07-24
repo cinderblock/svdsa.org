@@ -18,13 +18,14 @@ categories:
   - WG - Labor
 ---
 
-<div id="event_desc">
-<p>Join us for Silicon Valley DSA&#8217;s Pride Labor Movie Night! Where we will be showing <em>Pride (2014)</em>, a film based on a true story of lesbian and gay activists who supported the British miners&#8217; strike in 1984. Food, snacks, and drinks will be provided!</p>
-<p><strong>RSVP:<br />
-</strong>Link: <a href="https://actionnetwork.org/events/silicon-valley-dsa-presents-pride-labor-movie-night">https://actionnetwork.org/events/silicon-valley-dsa-presents-pride-labor-movie-night</a></p>
-<p><strong>AGENDA:</strong><br />
-<em>6:30pm</em> — Social ½ hour<br />
-<em>7:00pm</em> — Showtime (movie starts)<br />
-<em>9:00pm</em> — Movie ends, wrap-up</p>
-<p>Please direct any questions to labor@siliconvalleydsa.org!</p>
-</div>
+Join us for Silicon Valley DSA’s Pride Labor Movie Night! Where we will be showing *Pride (2014)*, a film based on a true story of lesbian and gay activists who supported the British miners’ strike in 1984. Food, snacks, and drinks will be provided!
+
+**RSVP:  
+**Link: [https://actionnetwork.org/events/silicon-valley-dsa-presents-pride-labor-movie-night](https://actionnetwork.org/events/silicon-valley-dsa-presents-pride-labor-movie-night)
+
+**AGENDA:**  
+*6:30pm* — Social ½ hour  
+*7:00pm* — Showtime (movie starts)  
+*9:00pm* — Movie ends, wrap-up
+
+Please direct any questions to labor@siliconvalleydsa.org!

@@ -16,5 +16,6 @@ categories:
   - SV DSA
 ---
 
-<p class="p1">The elected officers (Steering Committee) meet every week on Zoom to check in on our Chapter&#8217;s administration, make decisions on behalf of the Chapter in between general meetings, and collaborate on urgent tasks. If you&#8217;re interested in the nuts and bolts of Chapter administration or have questions for the officers, you&#8217;re welcome to attend.</p>
-<p class="p1">Register on Zoom: <a href="https://us02web.zoom.us/meeting/register/pP5BIdvzQMKTuXGL-d-ohw">https://us02web.zoom.us/meeting/register/pP5BIdvzQMKTuXGL-d-ohw</a></p>
+The elected officers (Steering Committee) meet every week on Zoom to check in on our Chapter’s administration, make decisions on behalf of the Chapter in between general meetings, and collaborate on urgent tasks. If you’re interested in the nuts and bolts of Chapter administration or have questions for the officers, you’re welcome to attend.
+
+Register on Zoom: [https://us02web.zoom.us/meeting/register/pP5BIdvzQMKTuXGL-d-ohw](https://us02web.zoom.us/meeting/register/pP5BIdvzQMKTuXGL-d-ohw)

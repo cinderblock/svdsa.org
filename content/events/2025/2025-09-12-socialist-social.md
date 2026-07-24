@@ -21,10 +21,13 @@ categories:
   - SV DSA
 ---
 
-<p>Curious about socialism but don’t know where to start? In need of some comradely time to unwind? Want to connect with other local comrades and build community? Join us for a chill, relaxing social!</p>
-<p>All ages welcome! This venue has food, snacks, and drinks (alcoholic and non-alcoholic). This venue is also located right next to the Mountain View Caltrain station and is accessible via VTA.</p>
-<p>Olympus Caffe &amp; Bakery<br />
-135 Castro St.<br />
-Mountain View, CA</p>
-<p>Friday, Sept 12, 2025<br />
-6pm</p>
+Curious about socialism but don’t know where to start? In need of some comradely time to unwind? Want to connect with other local comrades and build community? Join us for a chill, relaxing social!
+
+All ages welcome! This venue has food, snacks, and drinks (alcoholic and non-alcoholic). This venue is also located right next to the Mountain View Caltrain station and is accessible via VTA.
+
+Olympus Caffe & Bakery  
+135 Castro St.  
+Mountain View, CA
+
+Friday, Sept 12, 2025  
+6pm

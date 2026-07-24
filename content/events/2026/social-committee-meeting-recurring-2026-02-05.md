@@ -17,6 +17,8 @@ categories:
   - SV DSA
 ---
 
-<p>Interested in building community and camaraderie? Looking for more opportunities to blow off steam and connect with people who share your values?</p>
-<p>Join the Social Committee for our monthly meeting to help organize and facilitate social events for our comrades!</p>
-<p>Register for the Zoom: <a href="https://us02web.zoom.us/meeting/register/LWghXCCVSh29sc6AtS4Zqg">https://us02web.zoom.us/meeting/register/LWghXCCVSh29sc6AtS4Zqg</a></p>
+Interested in building community and camaraderie? Looking for more opportunities to blow off steam and connect with people who share your values?
+
+Join the Social Committee for our monthly meeting to help organize and facilitate social events for our comrades!
+
+Register for the Zoom: [https://us02web.zoom.us/meeting/register/LWghXCCVSh29sc6AtS4Zqg](https://us02web.zoom.us/meeting/register/LWghXCCVSh29sc6AtS4Zqg)

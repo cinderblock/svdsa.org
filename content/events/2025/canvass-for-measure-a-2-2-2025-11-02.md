@@ -20,5 +20,6 @@ categories:
   - SV DSA
 ---
 
-<p>Join Silicon Valley DSA and the Yes on Measure A campaign to knock on doors and build support to pass Measure A! We will meet at Cuesta Park in Mountain View at 10AM, at the picnic tables next to the smaller (east) parking lot &#8211; look for the green &#8220;Yes on Measure A&#8221; signs.</p>
-<p>RSVP here: <a href="https://actionnetwork.org/campaigns/sv-dsa-measure-a/" target="_blank">https://actionnetwork.org/campaigns/sv-dsa-measure-a/</a></p>
+Join Silicon Valley DSA and the Yes on Measure A campaign to knock on doors and build support to pass Measure A! We will meet at Cuesta Park in Mountain View at 10AM, at the picnic tables next to the smaller (east) parking lot – look for the green “Yes on Measure A” signs.
+
+RSVP here: [https://actionnetwork.org/campaigns/sv-dsa-measure-a/](https://actionnetwork.org/campaigns/sv-dsa-measure-a/)

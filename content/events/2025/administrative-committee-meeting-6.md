@@ -14,6 +14,8 @@ image: >-
   https://siliconvalleydsa.org/wp-content/uploads/2020/03/sv_dsa_logo_text_red.png
 ---
 
-<p><img decoding="async" src="https://siliconvalleydsa.org/wp-content/uploads/2025/07/sv_dsa_logo_text_red-300x69.png" /></p>
-<p>A lot of work goes into keeping our chapter running behind the scenes. We need to communicate with members through our newsletters and social media, and perform many necessary administrative tasks. The Administrative Committee will have a meeting that is open to all interested in helping keep the Chapter running smoothly.</p>
-<p>Register for the Zoom here: <a href="https://us02web.zoom.us/meeting/register/_lN5KAb_Q6SOipbX5JYb-A">https://us02web.zoom.us/meeting/register/_lN5KAb_Q6SOipbX5JYb-A</a></p>
+![](https://siliconvalleydsa.org/wp-content/uploads/2025/07/sv_dsa_logo_text_red-300x69.png)
+
+A lot of work goes into keeping our chapter running behind the scenes. We need to communicate with members through our newsletters and social media, and perform many necessary administrative tasks. The Administrative Committee will have a meeting that is open to all interested in helping keep the Chapter running smoothly.
+
+Register for the Zoom here: [https://us02web.zoom.us/meeting/register/\_lN5KAb\_Q6SOipbX5JYb-A](https://us02web.zoom.us/meeting/register/_lN5KAb_Q6SOipbX5JYb-A)

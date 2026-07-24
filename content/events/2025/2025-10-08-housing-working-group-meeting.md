@@ -15,5 +15,6 @@ categories:
   - WG - Housing
 ---
 
-<p>Join the Housing Working Group for our inaugural meeting, where we&#8217;ll discuss how to organize for affordable housing, tenants&#8217; rights, and a humane response to homelessness!</p>
-<p>Please register for the Zoom meeting here: <a href="https://us02web.zoom.us/meeting/register/15POm9lyRO24UBMvVHYSHw" target="_blank">https://us02web.zoom.us/meeting/register/15POm9lyRO24UBMvVHYSHw</a></p>
+Join the Housing Working Group for our inaugural meeting, where we’ll discuss how to organize for affordable housing, tenants’ rights, and a humane response to homelessness!
+
+Please register for the Zoom meeting here: [https://us02web.zoom.us/meeting/register/15POm9lyRO24UBMvVHYSHw](https://us02web.zoom.us/meeting/register/15POm9lyRO24UBMvVHYSHw)

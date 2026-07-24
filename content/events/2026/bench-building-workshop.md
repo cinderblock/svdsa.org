@@ -17,9 +17,14 @@ venue:
 categories: []
 ---
 
-<p>Join the transit working group for its first ever bench building event! We&#8217;ll be constructing and installing 5 benches over the course of 8 hours. Benches will be installed at nearby bench-less bus stops. Our goal with this project is to make transit more accessible to all riders. These small quality of life improvements to the transit experience can add up and make the difference to whether someone chooses to drive or take the bus.</p>
-<p><strong>Please RSVP</strong> <a href="https://docs.google.com/forms/d/e/1FAIpQLSeBg3sHH3Mrmj0RFjeedx78lD68tk-qGrpS0YSFh6nqDRk8pQ/viewform?usp=header">here</a>.</p>
-<p><strong>Date</strong>: 6/06, 9:00 AM &#8211; 5:00 PM</p>
-<p><strong>Address</strong>: 48 S 7th St #101, San Jose, CA 95112</p>
-<p><strong>Parking Info</strong>: Do not park at the grocery outlet &#8211; there is a high likelihood of being towed.</p>
-<p><a href="https://calendar.app.google/PrJPnYkNaSkwb3hV7">Calendar Invite</a></p>
+Join the transit working group for its first ever bench building event! We’ll be constructing and installing 5 benches over the course of 8 hours. Benches will be installed at nearby bench-less bus stops. Our goal with this project is to make transit more accessible to all riders. These small quality of life improvements to the transit experience can add up and make the difference to whether someone chooses to drive or take the bus.
+
+**Please RSVP** [here](https://docs.google.com/forms/d/e/1FAIpQLSeBg3sHH3Mrmj0RFjeedx78lD68tk-qGrpS0YSFh6nqDRk8pQ/viewform?usp=header).
+
+**Date**: 6/06, 9:00 AM – 5:00 PM
+
+**Address**: 48 S 7th St #101, San Jose, CA 95112
+
+**Parking Info**: Do not park at the grocery outlet – there is a high likelihood of being towed.
+
+[Calendar Invite](https://calendar.app.google/PrJPnYkNaSkwb3hV7)

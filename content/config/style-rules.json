@@ -1,0 +1,41 @@
+[
+  {
+    "id": "san-jose-accent",
+    "level": "error",
+    "pattern": "San Jose\\b",
+    "message": "City style: use the accented name — San José",
+    "suggest": "San José"
+  },
+  {
+    "id": "gendered-address",
+    "level": "error",
+    "pattern": "ladies and gentlemen",
+    "flags": "i",
+    "message": "Use an inclusive greeting (everyone, folks, comrades)",
+    "suggest": "everyone"
+  },
+  {
+    "id": "gendered-chairman",
+    "level": "warn",
+    "pattern": "\\bchairman\\b",
+    "flags": "i",
+    "message": "Prefer 'chair'",
+    "suggest": "chair"
+  },
+  {
+    "id": "gendered-you-guys",
+    "level": "warn",
+    "pattern": "\\byou guys\\b",
+    "flags": "i",
+    "message": "Prefer 'you all' / 'folks'",
+    "suggest": "folks"
+  },
+  {
+    "id": "manpower",
+    "level": "warn",
+    "pattern": "\\bmanpower\\b",
+    "flags": "i",
+    "message": "Prefer 'labor', 'staffing', or 'people power'",
+    "suggest": "labor"
+  }
+]

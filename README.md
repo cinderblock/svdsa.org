@@ -7,6 +7,9 @@ that can be hosted cheaply on Cloudflare's free CDN with per-branch previews.
 Built on [`ssg-base`](https://github.com/cinderblock/ssg-base) (React Router 7 +
 Vite + Bun, prerendered).
 
+**Want to change something on the site?** See **[docs/editing.md](docs/editing.md)**
+— one flowchart from "I only want a WYSIWYG" to full git workflows.
+
 ## Why
 
 The current site is WordPress + The Events Calendar. Almost none of it needs a

@@ -16,6 +16,8 @@ categories:
   - WG - Liberation and Justice
 ---
 
-<p class="p1">Join us for our Liberation and Justice Working Group Meeting to connect, organize, and build collective power around areas like policing, racial justice, ICE, incarceration, and accountability.</p>
-<p class="p1">If you&#8217;re interested in contributing to this effort and organizing for real change, join the Zoom and the #wg-liberation-justice Slack channel.</p>
-<p class="p1">Join the Zoom: <a href="https://us02web.zoom.us/meeting/register/zdqyGqXgS42vBZTxl2BPQA">https://us02web.zoom.us/meeting/register/zdqyGqXgS42vBZTxl2BPQA</a></p>
+Join us for our Liberation and Justice Working Group Meeting to connect, organize, and build collective power around areas like policing, racial justice, ICE, incarceration, and accountability.
+
+If you’re interested in contributing to this effort and organizing for real change, join the Zoom and the #wg-liberation-justice Slack channel.
+
+Join the Zoom: [https://us02web.zoom.us/meeting/register/zdqyGqXgS42vBZTxl2BPQA](https://us02web.zoom.us/meeting/register/zdqyGqXgS42vBZTxl2BPQA)

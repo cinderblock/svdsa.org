@@ -9,6 +9,13 @@
   // gray-matter (frontmatter serialize) needs Node Buffer at runtime.
   "compatibility_flags": ["nodejs_compat"],
   "observability": { "enabled": true },
+  // The editor SPA (web/ → dist/, built by Vite). The Worker owns /api/* via
+  // run_worker_first; static assets serve the SPA for every other path.
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"],
+  },
   // Non-secret config — plain variables, safe to commit. Filled per deployment
   // by `bun run setup:editor`. The ONLY secret is GH_PRIVATE_KEY (and, for the
   // GitLab host, GITLAB_TOKEN), set via `wrangler secret put` — never committed.

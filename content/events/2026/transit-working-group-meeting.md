@@ -16,5 +16,6 @@ categories:
   - WG - Transit
 ---
 
-<p class="p1">Come join us for the transit working group meeting, where we&#8217;ll discuss ongoing projects and strategies for SVDSA to build power in this space.</p>
-<p class="p1">Register for the Zoom: <a href="https://us02web.zoom.us/meeting/register/KPNJzh9XRD6tttrjrK1nOw">https://us02web.zoom.us/meeting/register/KPNJzh9XRD6tttrjrK1nOw</a></p>
+Come join us for the transit working group meeting, where we’ll discuss ongoing projects and strategies for SVDSA to build power in this space.
+
+Register for the Zoom: [https://us02web.zoom.us/meeting/register/KPNJzh9XRD6tttrjrK1nOw](https://us02web.zoom.us/meeting/register/KPNJzh9XRD6tttrjrK1nOw)

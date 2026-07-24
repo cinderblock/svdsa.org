@@ -21,6 +21,8 @@
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import matter from "gray-matter";
+import { expandSeries } from "./expand-recurring";
+import { renderMarkdown } from "./render-markdown";
 
 const CONTENT = join(import.meta.dirname, "..", "content");
 const GENERATED = join(CONTENT, "generated");
@@ -41,7 +43,8 @@ const excerptFrom = (html: string, len: number) => {
   return text.length > len ? text.slice(0, len) : text;
 };
 
-/** Read + parse every .md under content/<dir>. */
+/** Read + parse every .md under content/<dir>; bodies are Markdown, rendered
+ * to HTML here so the app keeps consuming ready-to-inject HTML. */
 async function readCollection(dir: string) {
   const root = join(CONTENT, dir);
   let entries: string[] = [];
@@ -56,7 +59,7 @@ async function readCollection(dir: string) {
       const parsed = matter(await readFile(join(root, f), "utf8"));
       return {
         data: parsed.data as Record<string, unknown>,
-        body: parsed.content.trim(),
+        body: await renderMarkdown(parsed.content.trim()),
       };
     }),
   );
@@ -107,7 +110,18 @@ interface Venue {
   zip: string | null;
 }
 
+// Expand recurring series (repeats: frontmatter) into dated instances over a
+// rolling window; the daily cron rebuild keeps the window moving.
+const HORIZON_DAYS = 180;
+const nowDate = new Date().toISOString().slice(0, 10);
+const horizon = new Date(Date.now() + HORIZON_DAYS * 86_400_000)
+  .toISOString()
+  .slice(0, 10);
+
 const events = eventDocs
+  .flatMap(({ data, body }) =>
+    expandSeries(data, nowDate, horizon).map((d) => ({ data: d, body })),
+  )
   .map(({ data, body }) => {
     const v = data.venue as Partial<Venue> | undefined;
     return {

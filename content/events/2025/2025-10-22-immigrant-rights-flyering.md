@@ -11,18 +11,24 @@ isVirtual: false
 categories: []
 ---
 
-<div class="tribe-events-single-event-description tribe-events-content">
-<p>Join the International Solidarity Working Group and the Mutual Aid Working Group to ask business to hang the Rapid Response Network poster and inform community members of their rights if approached by ICE.</p>
-<p><b>Meeting Location Details</b><br />
-<b>Mission College</b><br />
-3000 Mission College Blvd<br />
-Santa Clara, CA 95054</p>
-<p><b>Parking</b></p>
-<p>There is street parking and paid parking.</p>
-<p><b>Public Transportation<br />
-</b></p>
-<p><strong>Bus Stops</strong>: Lawrence and Oakmead (VTA Line 55), Duanne &amp; Lawrence (VTA Line 55)</p>
-<p><strong>Train Stop</strong>: Old Iron Sides (VTA Light Rail)</p>
-<p><b>Guidelines</b></p>
-<p>Masks are optional for this event.</p>
-</div>
+Join the International Solidarity Working Group and the Mutual Aid Working Group to ask business to hang the Rapid Response Network poster and inform community members of their rights if approached by ICE.
+
+**Meeting Location Details**  
+**Mission College**  
+3000 Mission College Blvd  
+Santa Clara, CA 95054
+
+**Parking**
+
+There is street parking and paid parking.
+
+**Public Transportation  
+**
+
+**Bus Stops**: Lawrence and Oakmead (VTA Line 55), Duanne & Lawrence (VTA Line 55)
+
+**Train Stop**: Old Iron Sides (VTA Light Rail)
+
+**Guidelines**
+
+Masks are optional for this event.

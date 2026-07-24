@@ -16,5 +16,6 @@ categories:
   - WG - Community Safety
 ---
 
-<p>At our annual Chapter Convention, membership re-chartered the Community Safety Working Group and passed a strategic resolution to continue our opposition to Automated License Plate Readers and Flock Safety. Join us for the first meeting of the WG since its rechartering where we will strategize about how to get rid of mass surveillance and keep our communities safe. We will also elect new co-chairs at this meeting to help coordinate our ongoing work.</p>
-<p>We will meet on Zoom on Tuesday May 12 from 6-7 pm. Register for the meeting here: <a href="https://us02web.zoom.us/meeting/register/6E49UG-ASkaUUNStw6i50Q">https://us02web.zoom.us/meeting/register/6E49UG-ASkaUUNStw6i50Q</a></p>
+At our annual Chapter Convention, membership re-chartered the Community Safety Working Group and passed a strategic resolution to continue our opposition to Automated License Plate Readers and Flock Safety. Join us for the first meeting of the WG since its rechartering where we will strategize about how to get rid of mass surveillance and keep our communities safe. We will also elect new co-chairs at this meeting to help coordinate our ongoing work.
+
+We will meet on Zoom on Tuesday May 12 from 6-7 pm. Register for the meeting here: [https://us02web.zoom.us/meeting/register/6E49UG-ASkaUUNStw6i50Q](https://us02web.zoom.us/meeting/register/6E49UG-ASkaUUNStw6i50Q)

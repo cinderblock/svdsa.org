@@ -14,5 +14,6 @@ categories:
   - SV DSA
 ---
 
-<p>Silicon Valley DSA passed a resolution to fight back against the surveillance state and Automated License Plate Readers at our August Chapter meeting. To take on that project and other tasks to keep our communities safe in the face of rising fascism, the general membership discussed chartering an Anti-Fascist Working Group at our September chapter meeting. Come join us as we work to get that organizing off the ground, building our leadership structure, goals, and longer term organizing plans to combat the threats to our rights.</p>
-<p>We will meet on Zoom on Thursday October 2 from 6-7 pm. Register for the event here: <a href="https://us02web.zoom.us/meeting/register/wp43kKXhR5Cn0GObE-n-UQ">https://us02web.zoom.us/meeting/register/wp43kKXhR5Cn0GObE-n-UQ</a></p>
+Silicon Valley DSA passed a resolution to fight back against the surveillance state and Automated License Plate Readers at our August Chapter meeting. To take on that project and other tasks to keep our communities safe in the face of rising fascism, the general membership discussed chartering an Anti-Fascist Working Group at our September chapter meeting. Come join us as we work to get that organizing off the ground, building our leadership structure, goals, and longer term organizing plans to combat the threats to our rights.
+
+We will meet on Zoom on Thursday October 2 from 6-7 pm. Register for the event here: [https://us02web.zoom.us/meeting/register/wp43kKXhR5Cn0GObE-n-UQ](https://us02web.zoom.us/meeting/register/wp43kKXhR5Cn0GObE-n-UQ)

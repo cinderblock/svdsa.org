@@ -11,6 +11,8 @@ isVirtual: false
 categories: []
 ---
 
-<p>Join the Labor Working Group in organizing workers of Silicon Valley as we fight for the basic human dignity of all laborers! We will discuss the chapter&#8217;s involvement in local labor actions and our own programming. If you have topics you&#8217;d like to bring up, please share in the chapter Slack!</p>
-<p>Register for zoom meeting: <a href="https://us06web.zoom.us/meeting/register/XzrzeaAyQ8i7RVGGrhu8Yg">https://us06web.zoom.us/meeting/register/3iVDqRZfSeKaq3vl69my-A</a></p>
-<p>Read more about the Labor Working Group: <a href="https://siliconvalleydsa.org/labor/">https://siliconvalleydsa.org/labor/</a></p>
+Join the Labor Working Group in organizing workers of Silicon Valley as we fight for the basic human dignity of all laborers! We will discuss the chapter’s involvement in local labor actions and our own programming. If you have topics you’d like to bring up, please share in the chapter Slack!
+
+Register for zoom meeting: [https://us06web.zoom.us/meeting/register/3iVDqRZfSeKaq3vl69my-A](https://us06web.zoom.us/meeting/register/XzrzeaAyQ8i7RVGGrhu8Yg)
+
+Read more about the Labor Working Group: [https://siliconvalleydsa.org/labor/](https://siliconvalleydsa.org/labor/)

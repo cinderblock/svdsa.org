@@ -20,5 +20,6 @@ categories:
   - Social
 ---
 
-<p>Join our comrades from SF and Peninsula DSA for a transit social, where they&#8217;ll be screening <em>Who Framed Roger Rabbit</em> and giving a presentation on the General Motors streetcar conspiracy. Popcorn will be provided!</p>
-<p>Please note that the venue is not listed on Google Maps, but the entrance should be facing Fellows Wy.</p>
+Join our comrades from SF and Peninsula DSA for a transit social, where they’ll be screening *Who Framed Roger Rabbit* and giving a presentation on the General Motors streetcar conspiracy. Popcorn will be provided!
+
+Please note that the venue is not listed on Google Maps, but the entrance should be facing Fellows Wy.
