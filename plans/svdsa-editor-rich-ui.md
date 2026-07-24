@@ -39,6 +39,49 @@ settings and accept on the installation; the API error message walks through it.
 chromium API+shell smoke passed, tsc/build clean). The 2 firefox Playwright
 failures pre-date this work (reproduced on unmodified baseline).
 
+## 2026-07-24 round 3 — titles, live links, style checks (SHIPPED, 5818153)
+
+- **Pretty titles in the browser** — `/api/titles?dir&base` fetches a whole
+  directory's frontmatter titles in ONE GitHub GraphQL round-trip
+  (github.ts `titlesForDir`); filelist loads them lazily per expanded group,
+  caches per base, shows `date · Title` (date keeps recurring events
+  distinguishable), filter searches paths + titles.
+- **"view live ↗"** on every open item → production origin (host-derived:
+  svdsa-edit.X → svdsa.X) + frontmatter `path`.
+- **Content style checks** — rules are chapter-owned data:
+  `content/config/style-rules.json` (San José accent = error+autofix,
+  "ladies and gentlemen" = error, chairman/you-guys/manpower = warn).
+  Engine `editor/src/content/lint.ts` (shared Worker+CLI) masks inline code,
+  link targets, bare URLs, HTML tags before matching (slug "san-jose" never
+  false-positives; verified). Save responses include findings → listed under
+  the editor. CLI: `bun run lint:content` (exit 1 on errors) / `--fix`
+  (mask-aware). **1519 pre-existing "San Jose" errors in the corpus — user
+  decision pending on running --fix** (touches venue frontmatter too).
+
+## Findings (round 3)
+
+- **2027/2028 events are NOT an import bug**: WP's The Events Calendar
+  pre-generates recurring-series instances (~2yr out). Counts: 2025=262,
+  2026=500, 2027=203, 2028=11 (mawg + sjfreestore monthlies). User wants
+  these as RECURRING EVENTS instead — see next steps.
+- Remaining raw HTML after conversion: 20 files with block HTML
+  (7 Canva iframes, iatspayments AURA script, mailjet form, ActionNetwork
+  embed, 3 styles, ~11 styled divs) + 51 files with styled spans.
+  Decision: NO MDX (arbitrary JSX in member content = code execution +
+  unWYSIWYGable). Path forward = remark-directive shortcodes
+  (`::canva{id=…}`, `::action-network{form=…}`, `::donate-button[label]{url}`)
+  rendered to safe HTML at build; Milkdown can grow matching block widgets.
+
+## Next steps (agreed direction, not yet built)
+
+1. **Recurring events**: `repeats:` frontmatter (RRULE-ish: freq, byday,
+   until) on ONE file per series; build-content expands to instances at
+   build time (daily cron rebuild already exists). Migration: collapse
+   pre-generated series (sjfreestore, mawg, garden-day, ice-watch, FNB, …)
+   into single recurring files; delete the 900+ instance files.
+2. remark-directive shortcodes for the 20 raw-HTML files.
+3. New-file creation in the editor; config .json editing.
+
 ## Goal
 
 Give chapter editors a polished editing experience with **two interchangeable
