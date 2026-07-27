@@ -84,3 +84,101 @@ test.describe("Content routes", () => {
     );
   });
 });
+
+test.describe("Calendar subscription feeds", () => {
+  test("the all-events feed is valid iCalendar with recurring series", async ({
+    request,
+  }) => {
+    const res = await request.get("/calendar/all.ics");
+    expect(res.status()).toBe(200);
+    const body = await res.text();
+
+    expect(body.startsWith("BEGIN:VCALENDAR\r\n")).toBe(true);
+    expect(body.trimEnd().endsWith("END:VCALENDAR")).toBe(true);
+    // CRLF line endings are mandatory (RFC 5545 §3.1).
+    expect(body.split("\n").every((l) => l === "" || l.endsWith("\r"))).toBe(
+      true,
+    );
+    // Wall-clock times must carry the timezone, and it must be defined.
+    expect(body).toContain("BEGIN:VTIMEZONE");
+    expect(body).toContain("TZID:America/Los_Angeles");
+    expect(body).toContain("DTSTART;TZID=America/Los_Angeles:");
+    // Recurring meetings ship as RRULEs, not as hundreds of copies.
+    const events = body.match(/BEGIN:VEVENT/g)?.length ?? 0;
+    const rrules = body.match(/^RRULE:FREQ=(WEEKLY|MONTHLY)/gm)?.length ?? 0;
+    expect(events).toBeGreaterThan(20);
+    expect(rrules).toBeGreaterThan(10);
+    // No line may exceed 75 octets (folding).
+    for (const line of body.split("\r\n"))
+      expect(Buffer.byteLength(line, "utf8")).toBeLessThanOrEqual(75);
+  });
+
+  test("filtered feeds are served and are subsets of the full feed", async ({
+    request,
+  }) => {
+    const count = async (path: string) => {
+      const res = await request.get(path);
+      expect(res.status(), `${path} should exist`).toBe(200);
+      expect(res.headers()["content-type"]).toContain("text/calendar");
+      return (await res.text()).match(/BEGIN:VEVENT/g)?.length ?? 0;
+    };
+    const all = await count("/calendar/all.ics");
+    const wg = await count("/calendar/working-groups.ics");
+    const cat = await count("/calendar/category/committee-tech-and-data.ics");
+
+    expect(wg).toBeGreaterThan(0);
+    expect(wg).toBeLessThan(all);
+    expect(cat).toBeGreaterThan(0);
+    expect(cat).toBeLessThanOrEqual(all);
+  });
+
+  test("calendar page offers subscribe links for the active filter", async ({
+    page,
+  }) => {
+    await page.goto("/calendar");
+    // Subscribe is server-rendered as a plain .ics link and upgraded to
+    // webcal:// after hydration — assert the target feed either way, so this
+    // doesn't race hydration.
+    await expect(page.getByRole("link", { name: "Subscribe" })).toHaveAttribute(
+      "href",
+      /(^|\/)calendar\/all\.ics$/,
+    );
+    await expect(
+      page.getByRole("link", { name: "Download .ics" }),
+    ).toHaveAttribute("href", "/calendar/all.ics");
+
+    // Wait for hydration before interacting: the webcal:// upgrade only
+    // happens after mount, so it doubles as the hydration barrier (a click
+    // dispatched earlier would be dropped and the filter wouldn't change).
+    await expect(page.getByRole("link", { name: "Subscribe" })).toHaveAttribute(
+      "href",
+      /^webcal:\/\/.+\/calendar\/all\.ics$/,
+      { timeout: 15_000 },
+    );
+
+    // Switching the filter switches the feed.
+    await page.getByRole("button", { name: "Working Groups" }).click();
+    await expect(
+      page.getByRole("link", { name: "Download .ics" }),
+    ).toHaveAttribute("href", "/calendar/working-groups.ics");
+    await expect(page.getByRole("link", { name: "Subscribe" })).toHaveAttribute(
+      "href",
+      /(^|\/)calendar\/working-groups\.ics$/,
+    );
+  });
+
+  test("event page links to a single-event .ics that exists", async ({
+    page,
+    request,
+  }) => {
+    await page.goto("/calendar");
+    await page.locator("a.event-row").first().click();
+    const link = page.getByRole("link", { name: "Add to calendar" });
+    const href = await link.getAttribute("href");
+    expect(href).toMatch(/^\/calendar\/event\/.+\.ics$/);
+    const res = await request.get(href!);
+    expect(res.status()).toBe(200);
+    const body = await res.text();
+    expect(body.match(/BEGIN:VEVENT/g)?.length).toBe(1);
+  });
+});

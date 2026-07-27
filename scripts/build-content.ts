@@ -13,7 +13,8 @@
  *   posts-index.json     slim post metadata (home, blog)
  *   events-upcoming.json slim upcoming events (home, calendar)
  *   events-full.json     full upcoming events (event route)
- * Plus public/sitemap.xml + public/robots.txt.
+ * Plus public/sitemap.xml, public/robots.txt, and the public/calendar/*.ics
+ * subscription feeds (all / per-facet / per-category / per-event).
  *
  * Network-free. Safe to run any time.
  */
@@ -21,7 +22,9 @@
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import matter from "gray-matter";
-import { expandSeries } from "./expand-recurring";
+import { categorySlug, FACETS, matchesFacet } from "../app/lib/eventFacets";
+import { expandSeries, type Repeats } from "./expand-recurring";
+import { icalendar, rruleFor, utcStamp, type IcsEvent } from "./ics";
 import { renderMarkdown } from "./render-markdown";
 
 const CONTENT = join(import.meta.dirname, "..", "content");
@@ -196,6 +199,152 @@ await write("posts.json", posts);
 await write("posts-index.json", postsIndex);
 await write("events-upcoming.json", eventsUpcoming);
 await write("events-full.json", upcoming);
+
+// ---- Calendar subscription feeds (.ics) -------------------------------------
+//
+// Static feeds so members can subscribe in Apple Calendar / Google Calendar /
+// Outlook — matching (and slightly improving on) the WordPress site's
+// "Subscribe to calendar" feature, which offered the same thing filtered by
+// category. Recurring series become ONE VEVENT with an RRULE, so subscriptions
+// keep producing occurrences even if the site isn't rebuilt.
+
+/** Shared VEVENT mapper. `rrule` is set only for unexpanded series. */
+function toIcs(e: {
+  id: unknown;
+  path: string;
+  title: string;
+  start: string;
+  end?: string;
+  allDay?: boolean;
+  descriptionHtml: string;
+  isVirtual?: boolean;
+  virtualUrl?: string | null;
+  venue?: Partial<Venue> | null;
+  organizer?: string | null;
+  categories?: string[];
+  rrule?: string | null;
+}): IcsEvent {
+  const online = e.isVirtual || e.venue?.name === "Zoom";
+  const url = `${SITE_URL}${e.path}`;
+  const location = online
+    ? e.virtualUrl || "Online"
+    : [
+        e.venue?.name,
+        e.venue?.address,
+        e.venue?.city,
+        e.venue?.state,
+        e.venue?.zip,
+      ]
+        .filter(Boolean)
+        .join(", ");
+  const text = stripHtml(e.descriptionHtml);
+  return {
+    // Stable across rebuilds: derived from the item's own identity.
+    uid: `${e.id ?? e.path}@siliconvalleydsa.org`,
+    title: e.title || "Event",
+    start: e.start,
+    end: e.end || undefined,
+    allDay: e.allDay ?? false,
+    description: text
+      ? `${text.slice(0, 900)}${text.length > 900 ? "…" : ""}\n\n${url}`
+      : url,
+    location: location || undefined,
+    url,
+    categories: e.categories ?? [],
+    organizer: e.organizer ?? undefined,
+    rrule: e.rrule ?? null,
+  };
+}
+
+/**
+ * Aggregate feeds work from the UNEXPANDED docs: a series contributes one
+ * VEVENT with an RRULE (so a subscription keeps generating occurrences
+ * indefinitely), a one-off contributes itself while it's still upcoming.
+ */
+const feedEvents = eventDocs
+  .map(({ data, body }) => {
+    const rep = data.repeats as Repeats | undefined;
+    const start = String(data.start ?? "");
+    if (!start) return null;
+    // One-offs (incl. irregular-series instances) only matter while upcoming.
+    if (!rep && start.slice(0, 10) < today) return null;
+    const v = data.venue as Partial<Venue> | undefined;
+    return {
+      ics: toIcs({
+        id: data.id,
+        path: String(data.path ?? ""),
+        title: String(data.title ?? ""),
+        start,
+        end: data.end as string | undefined,
+        allDay: data.allDay as boolean | undefined,
+        descriptionHtml: body,
+        isVirtual: data.isVirtual as boolean | undefined,
+        virtualUrl: data.virtualUrl as string | null | undefined,
+        venue: v ?? null,
+        organizer: data.organizer as string | null | undefined,
+        categories: data.categories as string[] | undefined,
+        rrule: rep ? rruleFor(rep, start) : null,
+      }),
+      facetable: {
+        categories: (data.categories as string[]) ?? [],
+        isVirtual: (data.isVirtual as boolean) ?? false,
+        venue: v?.name ?? null,
+      },
+    };
+  })
+  .filter((x): x is NonNullable<typeof x> => x !== null)
+  .sort((a, b) => a.ics.start.localeCompare(b.ics.start));
+
+const CALENDAR_DIR = join(PUBLIC, "calendar");
+await mkdir(join(CALENDAR_DIR, "category"), { recursive: true });
+await mkdir(join(CALENDAR_DIR, "event"), { recursive: true });
+
+const dtstamp = utcStamp(buildDate);
+const writeFeed = (rel: string, name: string, list: IcsEvent[]) =>
+  writeFile(
+    join(CALENDAR_DIR, rel),
+    icalendar({
+      name,
+      description: `${name} — ${SITE_URL}/calendar`,
+      events: list,
+      dtstamp,
+    }),
+  );
+
+// Facet feeds — mirror the on-site filter buttons exactly (shared FACETS).
+for (const facet of FACETS) {
+  const list = feedEvents
+    .filter((e) => matchesFacet(e.facetable, facet.key))
+    .map((e) => e.ics);
+  await writeFeed(
+    `${facet.slug}.ics`,
+    facet.key === "all" ? "Silicon Valley DSA" : `SVDSA — ${facet.label}`,
+    list,
+  );
+}
+
+// Per-category feeds — subscribe to just your working group / committee.
+const categories = [
+  ...new Set(feedEvents.flatMap((e) => e.ics.categories ?? [])),
+].sort();
+for (const cat of categories) {
+  const list = feedEvents
+    .filter((e) => (e.ics.categories ?? []).includes(cat))
+    .map((e) => e.ics);
+  await writeFeed(`category/${categorySlug(cat)}.ics`, `SVDSA — ${cat}`, list);
+}
+
+// Per-event feeds — one per prerendered event page (so "Add to calendar" can
+// never 404). These come from the EXPANDED list, so a recurring instance page
+// downloads just that occurrence, not the whole series.
+for (const e of upcoming) {
+  const stem = e.path
+    .replace(/^\/event\//, "")
+    .replace(/\/$/, "")
+    .replace(/\//g, "-");
+  if (!stem) continue;
+  await writeFeed(`event/${stem}.ics`, e.title, [toIcs({ ...e, rrule: null })]);
+}
 
 // ---- sitemap.xml + robots.txt ----------------------------------------------
 

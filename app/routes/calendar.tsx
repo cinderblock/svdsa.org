@@ -1,7 +1,8 @@
 import type { MetaFunction } from "react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 import { upcomingEvents } from "~/lib/data";
+import { FACETS, matchesFacet, type FacetKey } from "~/lib/eventFacets";
 import { dateParts, isUpcoming, longDate, time } from "~/lib/format";
 import { useNow } from "~/lib/useNow";
 import { SITE } from "~/lib/site";
@@ -13,41 +14,28 @@ export const meta: MetaFunction = () => [
     content:
       "Upcoming Silicon Valley DSA meetings, actions, and social events.",
   },
+  // Feed autodiscovery for calendar clients.
+  {
+    tagName: "link",
+    rel: "alternate",
+    type: "text/calendar",
+    href: "/calendar/all.ics",
+    title: `${SITE.name} events`,
+  },
 ];
 
-type FilterKey = "all" | "wg" | "committee" | "social" | "newbie" | "online";
-
-const FILTERS: { key: FilterKey; label: string }[] = [
-  { key: "all", label: "All" },
-  { key: "wg", label: "Working Groups" },
-  { key: "committee", label: "Committees" },
-  { key: "social", label: "Social" },
-  { key: "newbie", label: "Newbie-friendly" },
-  { key: "online", label: "Online" },
-];
-
-function matches(ev: (typeof upcomingEvents)[number], key: FilterKey): boolean {
-  const cats = ev.categories.map((c) => c.toLowerCase());
-  switch (key) {
-    case "all":
-      return true;
-    case "wg":
-      return cats.some((c) => c.startsWith("wg"));
-    case "committee":
-      return cats.some((c) => c.includes("committee"));
-    case "social":
-      return cats.some((c) => c.includes("social"));
-    case "newbie":
-      return cats.some((c) => c.includes("newbie"));
-    case "online":
-      return ev.isVirtual || ev.venue === "Zoom";
-  }
+/** Absolute origin, available only after mount (keeps prerender/hydrate equal). */
+function useOrigin(): string | null {
+  const [origin, setOrigin] = useState<string | null>(null);
+  useEffect(() => setOrigin(window.location.origin), []);
+  return origin;
 }
 
 export default function Calendar() {
-  const [filter, setFilter] = useState<FilterKey>("all");
+  const [filter, setFilter] = useState<FacetKey>("all");
   const [q, setQ] = useState("");
   const now = useNow();
+  const origin = useOrigin();
 
   // Drop events that have already passed, relative to the *client's* current
   // day — so the list stays correct between deploys and as a left-open tab
@@ -64,10 +52,18 @@ export default function Calendar() {
     const needle = q.trim().toLowerCase();
     return upcoming.filter(
       (e) =>
-        matches(e, filter) &&
+        matchesFacet(e, filter) &&
         (!needle || e.title.toLowerCase().includes(needle)),
     );
   }, [upcoming, filter, q]);
+
+  // Subscription feed for whatever filter is active (search isn't part of it).
+  const facet = FACETS.find((f) => f.key === filter) ?? FACETS[0];
+  const feedPath = `/calendar/${facet.slug}.ics`;
+  const feedHttps = origin ? `${origin}${feedPath}` : null;
+  const feedWebcal = feedHttps
+    ? feedHttps.replace(/^https?:/, "webcal:")
+    : null;
 
   let lastMonth = "";
 
@@ -82,7 +78,7 @@ export default function Calendar() {
 
       <div className="container" style={{ paddingBottom: "3rem" }}>
         <div className="filters">
-          {FILTERS.map((f) => (
+          {FACETS.map((f) => (
             <button
               key={f.key}
               type="button"
@@ -112,6 +108,40 @@ export default function Calendar() {
             font: "inherit",
           }}
         />
+
+        <div className="subscribe">
+          <div>
+            <strong>Subscribe to this calendar</strong>
+            <p className="muted">
+              {facet.key === "all"
+                ? "All chapter events"
+                : `Only “${facet.label}”`}{" "}
+              — updates automatically in your calendar app. Repeating meetings
+              subscribe as real recurring events.
+            </p>
+          </div>
+          <div className="subscribe__links">
+            {/* Progressive enhancement: server-renders as a plain .ics link
+                (which most OSes hand to the calendar app), then upgrades to
+                webcal:// after mount so it subscribes instead of downloading.
+                Never depends on JS to exist. */}
+            <a className="btn btn-primary" href={feedWebcal ?? feedPath}>
+              Subscribe
+            </a>
+            {feedHttps && (
+              <a
+                href={`https://calendar.google.com/calendar/r?cid=${encodeURIComponent(feedHttps)}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Google Calendar
+              </a>
+            )}
+            <a href={feedPath} download>
+              Download .ics
+            </a>
+          </div>
+        </div>
 
         {shown.length === 0 && (
           <p className="muted">No events match that filter.</p>

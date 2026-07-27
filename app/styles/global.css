@@ -609,6 +609,32 @@ img {
   gap: 0.5rem;
   margin-bottom: 1.5rem;
 }
+
+/* Calendar subscription panel — feed matches the active filter. */
+.subscribe {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  margin-bottom: 2rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.subscribe p {
+  margin: 0.25rem 0 0;
+  font-size: 0.9rem;
+  max-width: 46ch;
+}
+.subscribe__links {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+  font-size: 0.9rem;
+}
 .filters button {
   font: inherit;
   font-size: 0.85rem;

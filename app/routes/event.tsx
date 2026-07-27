@@ -21,6 +21,32 @@ export const meta: MetaFunction = ({ location }) => {
   ];
 };
 
+/** '2026-08-15 14:00:00' → '20260815T140000' (local wall clock, for Google). */
+const stamp = (s: string) =>
+  s.slice(0, 19).replace(/[-:]/g, "").replace(" ", "T");
+
+/** The prerendered per-event .ics: /event/mawg/2026-07-28/ → mawg-2026-07-28. */
+const icsStem = (path: string) =>
+  path
+    .replace(/^\/event\//, "")
+    .replace(/\/$/, "")
+    .replace(/\//g, "-");
+
+function googleTemplate(
+  ev: NonNullable<ReturnType<typeof getEvent>>,
+  where: string,
+): string {
+  const p = new URLSearchParams({
+    action: "TEMPLATE",
+    text: ev.title,
+    dates: `${stamp(ev.start)}/${stamp(ev.end || ev.start)}`,
+    ctz: ev.timezone || "America/Los_Angeles",
+    details: ev.descriptionHtml.replace(/<[^>]*>/g, "").slice(0, 900),
+    location: where,
+  });
+  return `https://calendar.google.com/calendar/render?${p}`;
+}
+
 function locationLabel(ev: NonNullable<ReturnType<typeof getEvent>>): string {
   if (ev.isVirtual || ev.venue?.name === "Zoom") return "Online";
   if (!ev.venue) return "Location TBA";
@@ -98,13 +124,35 @@ export default function Event() {
           )}
         </div>
 
-        {registerLink && (
-          <p style={{ margin: "1.5rem 0" }}>
+        <p
+          style={{
+            margin: "1.5rem 0",
+            display: "flex",
+            gap: "0.75rem",
+            flexWrap: "wrap",
+            alignItems: "center",
+          }}
+        >
+          {registerLink && (
             <a className="btn btn-primary" href={registerLink}>
               {online ? "Join / register" : "RSVP"}
             </a>
-          </p>
-        )}
+          )}
+          <a
+            className="btn"
+            href={`/calendar/event/${icsStem(ev.path)}.ics`}
+            download
+          >
+            Add to calendar
+          </a>
+          <a
+            href={googleTemplate(ev, online ? "Online" : locationLabel(ev))}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Google Calendar
+          </a>
+        </p>
 
         {ev.descriptionHtml ? (
           <Prose html={ev.descriptionHtml} />

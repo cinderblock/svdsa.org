@@ -6,7 +6,9 @@
 import eventsFullData from "../../content/generated/events-full.json";
 
 export interface EventFull {
-  id: number;
+  /** WordPress numeric id for one-offs; `<seriesId>-<date>` for expanded
+   * recurring instances (see scripts/expand-recurring.ts). */
+  id: string | number;
   path: string;
   title: string;
   start: string;

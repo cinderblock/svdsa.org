@@ -41,6 +41,7 @@ content/.raw/
 # Generated at build by scripts/build-content.ts — never hand-edited
 public/sitemap.xml
 public/robots.txt
+public/calendar/
 
 # Wrangler / Cloudflare
 .wrangler/

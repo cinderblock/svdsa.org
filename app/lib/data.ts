@@ -21,7 +21,8 @@ export interface PostIndex {
 }
 
 export interface EventSlim {
-  id: number;
+  /** Numeric for one-offs; `<seriesId>-<date>` for recurring instances. */
+  id: string | number;
   path: string;
   title: string;
   start: string;

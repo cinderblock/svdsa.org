@@ -53,6 +53,27 @@ shared file.
 | `scripts/build-content.ts`    | `bun run build:content` | Network-free. Renders Markdown → HTML, expands recurring events, and assembles `content/generated/*.json` (full + slim splits) plus `sitemap.xml`/`robots.txt` (all git-ignored). Runs before dev/typecheck/build. |
 | `scripts/lint-content.ts`     | `bun run lint:content`  | Style checks from `content/config/style-rules.json` (San José accent, inclusive language, …). `--fix` applies suggestions. The in-browser editor runs the same rules on every save.                                |
 
+### Calendar subscription feeds
+
+`build-content.ts` also prerenders static iCalendar feeds (`scripts/ics.ts`), so
+members can subscribe in Apple Calendar / Google Calendar / Outlook — parity with
+the WordPress site's "Subscribe to calendar", including its per-category
+filtering:
+
+| Feed                                                                      | Contents                                   |
+| ------------------------------------------------------------------------- | ------------------------------------------ |
+| `/calendar/all.ics`                                                       | Every event                                |
+| `/calendar/{working-groups,committees,social,newbie-friendly,online}.ics` | One per on-site filter button              |
+| `/calendar/category/<slug>.ics`                                           | One per event category (e.g. `wg-housing`) |
+| `/calendar/event/<slug>.ics`                                              | One per event page ("Add to calendar")     |
+
+Facet feeds and the calendar UI share one definition (`app/lib/eventFacets.ts`),
+so a subscribed feed always matches what the equivalent filter shows.
+**Recurring series are emitted as a single `VEVENT` with an `RRULE`**, so
+subscriptions keep generating occurrences indefinitely rather than running out at
+the build's horizon. Times carry `TZID=America/Los_Angeles` with a `VTIMEZONE`
+block. Cloudflare serves `.ics` as `text/calendar` with no config needed.
+
 Data delivery is split for performance:
 
 - **`app/lib/data.ts`** — slim indexes (post metadata + upcoming events) for the
