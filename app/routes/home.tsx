@@ -1,6 +1,6 @@
 import type { MetaFunction } from "react-router";
 import { Link } from "react-router";
-import { postsIndex, upcomingEvents } from "~/lib/data";
+import { expandEvents, postsIndex, upcomingEvents } from "~/lib/data";
 import { dateParts, isUpcoming, shortDate, time } from "~/lib/format";
 import { useNow } from "~/lib/useNow";
 import { CHAPTER_PHOTOS, EXTERNAL, SITE, WORKING_GROUPS } from "~/lib/site";
@@ -23,7 +23,9 @@ export default function Home() {
   // hydration (now === null) render the build snapshot.
   const nextEvents = (
     now
-      ? upcomingEvents.filter((e) => isUpcoming(e.start, now))
+      ? expandEvents(now.toISOString().slice(0, 10), 120).filter((e) =>
+          isUpcoming(e.start, now),
+        )
       : upcomingEvents
   ).slice(0, 4);
   const latest = postsIndex.slice(0, 3);

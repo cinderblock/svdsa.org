@@ -15,9 +15,8 @@ categories:
   - Committee - Social
   - newbie-friendly
   - SV DSA
-repeats:
-  freq: monthly
-  byday: 1TH
+recurrence:
+  rrule: FREQ=MONTHLY;BYDAY=1TH
 ---
 
 Interested in building community and camaraderie? Looking for more opportunities to blow off steam and connect with people who share your values?

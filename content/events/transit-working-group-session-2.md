@@ -1,10 +1,10 @@
 ---
-id: 10003546
+id: '10003543'
 slug: transit-working-group-session-2
-path: /event/transit-working-group-session-2/2026-11-09/
+path: /event/transit-working-group-session-2/
 title: Transit Working Group Session
-start: '2026-11-09 18:30:00'
-end: '2026-11-09 19:30:00'
+start: '2026-08-17 18:30:00'
+end: '2026-08-17 19:30:00'
 allDay: false
 timezone: America/Los_Angeles
 isVirtual: false
@@ -14,6 +14,8 @@ organizer: Silicon Valley DSA
 categories:
   - SV DSA
   - WG - Transit
+recurrence:
+  rrule: FREQ=WEEKLY;INTERVAL=4;BYDAY=MO
 ---
 
 Come join us for an in-person transit working group session, where we’ll work on ongoing projects and discuss strategy. Locations for the in-person session will vary from a session-to-session basis and will be posted in slack at least one week in advance of the meeting. Zoom is still available for those unable to attend in-person.

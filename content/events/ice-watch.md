@@ -18,9 +18,8 @@ organizer: Silicon Valley DSA
 categories:
   - SV DSA
   - WG - Mutual Aid
-repeats:
-  freq: weekly
-  interval: 1
+recurrence:
+  rrule: FREQ=WEEKLY;BYDAY=TH
 ---
 
 Please join us every Thursday at the ISAP office on Blossom Hill Rd at any time between 8am-2pm to help protect your neighbors from ICE kidnappings, and get connected with more local organizing opportunities! We are especially in need of multilingual folks – Spanish, Hindi, Arabic, and Mandarin speakers especially!

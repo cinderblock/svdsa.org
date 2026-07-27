@@ -222,3 +222,39 @@ editor/
   the imperative getValue handoff.
 - Don't put frontmatter into the rich editor.
 - Don't add a CDN loader for Monaco (self-contained bundle only).
+
+## 2026-07-27 round 5 — recurring events become first-class
+
+Prompted by the .ics work: since a subscription's RRULE never runs dry, the
+site should derive occurrences the same way instead of baking them.
+
+- **Storage is now iCalendar-native**: `recurrence: {rrule, exdate, rdate}`
+  replaces the bespoke `repeats:`. `scripts/expand-recurring.ts` and
+  `scripts/ics.ts:rruleFor` are gone (no translation layer).
+- **`app/lib/recurrence.ts` is the one engine** — build, browser and feeds.
+  Hand-written to keep an RRULE library off the client; conformance-tested
+  against `rrule` (23 rule shapes incl. 5th-weekday, last-weekday, COUNT,
+  UNTIL, leap Feb) and the feeds cross-checked against Mozilla ICAL.js.
+- **All 21 series now have rules** — EXDATE/RDATE let the five holiday-shifted
+  WG series collapse at last (electoral, intl-solidarity, liberation & justice,
+  both transit ones). The two transit series turned out to be exactly 4-weekly;
+  the earlier inference just never tried a 28-day interval.
+- **Verified no published date moved**: all 267 previously-baked dates within
+  the old 180-day window are reproduced exactly (0 missing, 0 changed).
+- Prerender: 90-day window of dated pages + one page per series (390 → 255
+  pages). Dated URLs beyond the window render client-side from the rule.
+- **The decay risk is closed by design.** The browser expands rules against the
+  reader's clock, so the missing cron is now only a freshness optimization.
+  Regression test asserts the calendar still lists meetings with the clock set
+  to 2099.
+
+### Known gaps after round 5
+
+- The **editor shows `recurrence` as a read-only JSON blob** (the metadata form
+  only has widgets for primitives). A proper recurrence editor is the obvious
+  next editor slice.
+- The three phase-shifting series carry their known deviations as EXDATE/RDATE
+  through ~2027-04; **beyond that they generate clean biweekly dates that no WG
+  has confirmed.** Worth asking those WGs.
+- Still open from earlier rounds: directive shortcodes, socials regression
+  (3 of ~8 accounts), 857 unaccented "San Jose", scheduled rebuild.

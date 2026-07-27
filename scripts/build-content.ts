@@ -23,8 +23,8 @@ import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import matter from "gray-matter";
 import { categorySlug, FACETS, matchesFacet } from "../app/lib/eventFacets";
-import { expandSeries, type Repeats } from "./expand-recurring";
-import { icalendar, rruleFor, utcStamp, type IcsEvent } from "./ics";
+import { occurrences, type Recurrence } from "../app/lib/recurrence";
+import { icalendar, utcStamp, type IcsEvent } from "./ics";
 import { renderMarkdown } from "./render-markdown";
 
 const CONTENT = join(import.meta.dirname, "..", "content");
@@ -113,23 +113,52 @@ interface Venue {
   zip: string | null;
 }
 
-// Expand recurring series (repeats: frontmatter) into dated instances over a
-// rolling window; the daily cron rebuild keeps the window moving.
-const HORIZON_DAYS = 180;
+/**
+ * Recurring events are stored as ONE doc with a `recurrence:` rule and are
+ * expanded on demand — see app/lib/recurrence.ts. We prerender a bounded
+ * window of dated occurrence pages (for shareable, crawlable URLs); the
+ * calendar recomputes the full list in the browser from the rules, so it
+ * cannot go stale no matter how long ago the site was built.
+ */
+const PRERENDER_DAYS = 90;
 const nowDate = new Date().toISOString().slice(0, 10);
-const horizon = new Date(Date.now() + HORIZON_DAYS * 86_400_000)
+const horizon = new Date(Date.now() + PRERENDER_DAYS * 86_400_000)
   .toISOString()
   .slice(0, 10);
 
+/** Expand one doc into its concrete occurrences within [from, to]. */
+function expandDoc(
+  data: Record<string, unknown>,
+  from: string,
+  to: string,
+): Record<string, unknown>[] {
+  const rec = data.recurrence as Recurrence | undefined;
+  const start = String(data.start ?? "");
+  if (!rec || !start) return [data];
+  const basePath = String(data.path ?? "").replace(/\/$/, "");
+  const endTime = data.end ? String(data.end).slice(10) : "";
+  return occurrences(rec, start, from, to).map((date) => ({
+    ...data,
+    recurrence: undefined,
+    seriesSlug: basePath.split("/").pop(),
+    id: `${data.id}-${date}`,
+    path: `${basePath}/${date}/`,
+    start: date + start.slice(10),
+    end: endTime ? date + endTime : undefined,
+  }));
+}
+
 const events = eventDocs
   .flatMap(({ data, body }) =>
-    expandSeries(data, nowDate, horizon).map((d) => ({ data: d, body })),
+    expandDoc(data, nowDate, horizon).map((d) => ({ data: d, body })),
   )
   .map(({ data, body }) => {
     const v = data.venue as Partial<Venue> | undefined;
     return {
-      id: data.id as number,
+      id: data.id as string | number,
       path: data.path as string,
+      /** Set when this row was derived from a recurring series. */
+      seriesSlug: (data.seriesSlug as string) ?? null,
       title: data.title as string,
       start: data.start as string,
       end: data.end as string,
@@ -172,9 +201,10 @@ const postsIndex = posts.map((p) => ({
   featuredImage: p.featuredImage,
 }));
 
-const eventsUpcoming = upcoming.map((e) => ({
+const slim = (e: (typeof events)[number]) => ({
   id: e.id,
   path: e.path,
+  seriesSlug: e.seriesSlug,
   title: e.title,
   start: e.start,
   end: e.end,
@@ -183,7 +213,37 @@ const eventsUpcoming = upcoming.map((e) => ({
   venue: e.venue?.name ?? null,
   categories: e.categories,
   excerpt: excerptFrom(e.descriptionHtml, 280),
-}));
+});
+
+/** Prerendered snapshot: all upcoming one-offs + series occurrences ≤ horizon. */
+const eventsUpcoming = upcoming.map(slim);
+
+/**
+ * The recurring series themselves (rule + template), so the browser can extend
+ * the calendar past the prerendered horizon without a rebuild.
+ */
+const eventSeries = eventDocs
+  .filter(({ data }) => data.recurrence)
+  .map(({ data, body }) => {
+    const v = data.venue as Partial<Venue> | undefined;
+    const basePath = String(data.path ?? "").replace(/\/$/, "");
+    return {
+      id: String(data.id),
+      slug: basePath.split("/").pop() ?? "",
+      path: `${basePath}/`,
+      title: String(data.title ?? ""),
+      /** Anchor occurrence: supplies the wall-clock times. */
+      start: String(data.start ?? ""),
+      end: data.end ? String(data.end) : "",
+      allDay: (data.allDay as boolean) ?? false,
+      isVirtual: (data.isVirtual as boolean) ?? false,
+      venue: v?.name ?? null,
+      categories: (data.categories as string[]) ?? [],
+      excerpt: excerptFrom(body, 280),
+      recurrence: data.recurrence as Recurrence,
+    };
+  })
+  .sort((a, b) => a.slug.localeCompare(b.slug));
 
 await mkdir(GENERATED, { recursive: true });
 const write = (name: string, value: unknown) =>
@@ -198,7 +258,44 @@ await write("pages.json", pages);
 await write("posts.json", posts);
 await write("posts-index.json", postsIndex);
 await write("events-upcoming.json", eventsUpcoming);
-await write("events-full.json", upcoming);
+await write("events-series.json", eventSeries);
+// Full detail for the event route: upcoming occurrences (prerendered window)
+// plus one row per SERIES, so /event/<slug>/ and any far-future dated URL can
+// render from the rule without a prerendered page.
+const seriesFull = eventDocs
+  .filter(({ data }) => data.recurrence)
+  .map(({ data, body }) => {
+    const v = data.venue as Partial<Venue> | undefined;
+    return {
+      id: String(data.id),
+      path: `${String(data.path ?? "").replace(/\/$/, "")}/`,
+      seriesSlug: null,
+      title: String(data.title ?? ""),
+      start: String(data.start ?? ""),
+      end: data.end ? String(data.end) : "",
+      allDay: (data.allDay as boolean) ?? false,
+      timezone: (data.timezone as string) ?? "America/Los_Angeles",
+      descriptionHtml: body,
+      cost: (data.cost as string) ?? null,
+      website: (data.website as string) ?? null,
+      isVirtual: (data.isVirtual as boolean) ?? false,
+      virtualUrl: (data.virtualUrl as string) ?? null,
+      venue: v
+        ? {
+            name: v.name ?? "",
+            address: v.address ?? null,
+            city: v.city ?? null,
+            state: v.state ?? null,
+            zip: v.zip ?? null,
+          }
+        : null,
+      organizer: (data.organizer as string) ?? null,
+      categories: (data.categories as string[]) ?? [],
+      image: (data.image as string) ?? null,
+      recurrence: data.recurrence as Recurrence,
+    };
+  });
+await write("events-full.json", [...upcoming, ...seriesFull]);
 
 // ---- Calendar subscription feeds (.ics) -------------------------------------
 //
@@ -223,6 +320,8 @@ function toIcs(e: {
   organizer?: string | null;
   categories?: string[];
   rrule?: string | null;
+  exdate?: string[];
+  rdate?: string[];
 }): IcsEvent {
   const online = e.isVirtual || e.venue?.name === "Zoom";
   const url = `${SITE_URL}${e.path}`;
@@ -253,6 +352,8 @@ function toIcs(e: {
     categories: e.categories ?? [],
     organizer: e.organizer ?? undefined,
     rrule: e.rrule ?? null,
+    exdate: e.exdate,
+    rdate: e.rdate,
   };
 }
 
@@ -263,11 +364,11 @@ function toIcs(e: {
  */
 const feedEvents = eventDocs
   .map(({ data, body }) => {
-    const rep = data.repeats as Repeats | undefined;
+    const rec = data.recurrence as Recurrence | undefined;
     const start = String(data.start ?? "");
     if (!start) return null;
-    // One-offs (incl. irregular-series instances) only matter while upcoming.
-    if (!rep && start.slice(0, 10) < today) return null;
+    // One-offs only matter while upcoming; series always ship (they recur).
+    if (!rec && start.slice(0, 10) < today) return null;
     const v = data.venue as Partial<Venue> | undefined;
     return {
       ics: toIcs({
@@ -283,7 +384,11 @@ const feedEvents = eventDocs
         venue: v ?? null,
         organizer: data.organizer as string | null | undefined,
         categories: data.categories as string[] | undefined,
-        rrule: rep ? rruleFor(rep, start) : null,
+        // The stored rule IS iCalendar — pass it straight through, along with
+        // the schedule's exceptions.
+        rrule: rec?.rrule ?? null,
+        exdate: rec?.exdate,
+        rdate: rec?.rdate,
       }),
       facetable: {
         categories: (data.categories as string[]) ?? [],

@@ -50,16 +50,23 @@ test.describe("Content routes", () => {
     ).toBeVisible();
   });
 
-  test("calendar filters by the client's clock (past events drop)", async ({
+  test("the calendar does not decay: recurring meetings survive a stale build", async ({
     page,
   }) => {
-    // Fake only Date (not timers, so React still flushes) to far in the
-    // future: every shipped event is now in the past, so after hydration the
-    // calendar shows none.
+    // Fake only Date (not timers, so React still flushes) to far beyond any
+    // prerendered occurrence. One-off events are all in the past and drop off,
+    // but recurring series are derived from their rules in the browser — so the
+    // calendar must still list meetings. This is the property that makes the
+    // scheduled rebuild an optimization rather than a correctness requirement.
     await page.clock.setFixedTime(new Date("2099-01-01T12:00:00"));
     await page.goto("/calendar");
-    await expect(page.getByText("0 upcoming events")).toBeVisible();
-    await expect(page.getByText("No events match that filter.")).toBeVisible();
+
+    await expect(page.getByText(/^0 upcoming events/)).toHaveCount(0);
+    const rows = page.locator("a.event-row");
+    await expect(rows.first()).toBeVisible();
+    expect(await rows.count()).toBeGreaterThan(10);
+    // Dates shown must be in 2099, not the build's window.
+    await expect(rows.first()).toHaveAttribute("href", /\/2099-/);
   });
 
   test("join page embeds the dues + newsletter forms", async ({ page }) => {
@@ -81,6 +88,49 @@ test.describe("Content routes", () => {
     await page.goto("/this-page-does-not-exist");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(
       "Page not found",
+    );
+  });
+});
+
+test.describe("Recurring events", () => {
+  test("a series page shows the pattern and its upcoming dates", async ({
+    page,
+  }) => {
+    await page.goto("/event/sjfreestore/");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText(
+      "Free Store",
+    );
+    await expect(page.getByText("3rd Saturday monthly")).toBeVisible();
+    const dates = page.locator(".occurrences li a");
+    await expect(dates.first()).toBeVisible();
+    expect(await dates.count()).toBeGreaterThan(2);
+    // Each listed date links to that occurrence.
+    await expect(dates.first()).toHaveAttribute(
+      "href",
+      /\/event\/sjfreestore\/\d{4}-\d{2}-\d{2}\/$/,
+    );
+  });
+
+  test("an occurrence far beyond the prerendered window still renders", async ({
+    page,
+  }) => {
+    // 3rd Saturday of Nov 2027 — well past the 90-day prerender horizon, so
+    // this URL has no static page and must resolve from the rule client-side.
+    await page.goto("/event/sjfreestore/2027-11-20/");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText(
+      "Free Store",
+    );
+    await expect(page.getByRole("heading", { name: "When" })).toBeVisible();
+    await expect(page.getByText("November")).toBeVisible();
+  });
+
+  test("a date the series does not meet on is not invented", async ({
+    page,
+  }) => {
+    // A Tuesday — the Free Store is a 3rd-Saturday series.
+    await page.goto("/event/sjfreestore/2027-11-16/");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+      "This event isn't on the calendar",
     );
   });
 });

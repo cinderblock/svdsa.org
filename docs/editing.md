@@ -51,8 +51,19 @@ Style rules (the San José é, inclusive language, …) live in
 editor auto-fixes what it can on every save and warns about the rest;
 git users run `bun run lint:content` (`--fix` to apply).
 
-Recurring events are ONE file with a `repeats:` rule (see
-`scripts/expand-recurring.ts`); don't create per-date copies.
+Recurring meetings are **one file** with a `recurrence:` rule — never per-date
+copies. To skip a date (holiday) add it to `exdate:`; to move one, add the new
+date to `rdate:` as well:
+
+```yaml
+recurrence:
+  rrule: FREQ=WEEKLY;INTERVAL=2;BYDAY=WE # every other Wednesday
+  exdate: ["2026-11-25"] # skipped
+  rdate: ["2026-11-18"] # met here instead
+```
+
+Members subscribed to the calendar get the change automatically — see
+`app/lib/recurrence.ts`.
 
 ## Merge rights
 

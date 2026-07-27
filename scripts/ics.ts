@@ -12,10 +12,6 @@
  * stale between rebuilds the way the site's expanded instance list does.
  */
 
-import type { Repeats } from "./expand-recurring";
-
-const WEEKDAYS = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"];
-
 /** RFC 5545 §3.3.11 TEXT escaping. Order matters: backslash first. */
 function esc(s: string): string {
   return s
@@ -88,25 +84,6 @@ const VTIMEZONE = [
   "END:VTIMEZONE",
 ];
 
-/** Build an RRULE value from a series' `repeats:` rule. */
-export function rruleFor(rep: Repeats, anchorStart: string): string | null {
-  const parts: string[] = [];
-  if (rep.freq === "weekly") {
-    const [y, m, d] = anchorStart.slice(0, 10).split("-").map(Number);
-    const wd = WEEKDAYS[new Date(Date.UTC(y, m - 1, d)).getUTCDay()];
-    parts.push("FREQ=WEEKLY");
-    if ((rep.interval ?? 1) > 1) parts.push(`INTERVAL=${rep.interval}`);
-    parts.push(`BYDAY=${wd}`);
-  } else if (rep.freq === "monthly") {
-    if (!rep.byday) return null;
-    parts.push("FREQ=MONTHLY", `BYDAY=${rep.byday}`);
-  } else {
-    return null;
-  }
-  if (rep.until) parts.push(`UNTIL=${dateOnly(rep.until)}T235959Z`);
-  return parts.join(";");
-}
-
 export interface IcsEvent {
   /** Globally unique + STABLE across rebuilds (clients dedupe on this). */
   uid: string;
@@ -121,6 +98,9 @@ export interface IcsEvent {
   organizer?: string;
   /** RRULE value (without the `RRULE:` prefix) for recurring series. */
   rrule?: string | null;
+  /** Dates the series skips / extra one-off dates (YYYY-MM-DD). */
+  exdate?: string[];
+  rdate?: string[];
 }
 
 function vevent(ev: IcsEvent, dtstamp: string): string[] {
@@ -141,6 +121,18 @@ function vevent(ev: IcsEvent, dtstamp: string): string[] {
     );
   }
   if (ev.rrule) lines.push(`RRULE:${ev.rrule}`);
+  // Schedule exceptions. RFC 5545 permits several dates per property, but
+  // real-world parsers are inconsistent about multi-value RDATE (node-ical
+  // doesn't decode it at all), so emit ONE property per date — what Google and
+  // Apple both produce. Each carries the event's time-of-day so clients can
+  // match the occurrence being cancelled/moved.
+  const timeOfDay = ev.allDay ? "" : localStamp(ev.start).slice(8); // 'THHMMSS'
+  const exception = (name: "EXDATE" | "RDATE", date: string) =>
+    ev.allDay
+      ? `${name};VALUE=DATE:${dateOnly(date)}`
+      : `${name};TZID=America/Los_Angeles:${dateOnly(date) + timeOfDay}`;
+  for (const d of ev.exdate ?? []) lines.push(exception("EXDATE", d));
+  for (const d of ev.rdate ?? []) lines.push(exception("RDATE", d));
   lines.push(`SUMMARY:${esc(ev.title)}`);
   if (ev.location) lines.push(`LOCATION:${esc(ev.location)}`);
   if (ev.description) lines.push(`DESCRIPTION:${esc(ev.description)}`);

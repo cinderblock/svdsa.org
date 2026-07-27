@@ -2,6 +2,8 @@ import type { MetaFunction } from "react-router";
 import { Link, useLocation } from "react-router";
 import { getEvent } from "~/lib/events";
 import { longDate, time } from "~/lib/format";
+import { describeRecurrence } from "~/lib/recurrence";
+import { useNow } from "~/lib/useNow";
 import { Prose } from "~/components/Prose";
 import { SITE } from "~/lib/site";
 
@@ -56,7 +58,10 @@ function locationLabel(ev: NonNullable<ReturnType<typeof getEvent>>): string {
 
 export default function Event() {
   const { pathname } = useLocation();
-  const ev = getEvent(pathname);
+  const now = useNow();
+  // Resolve against the client's date once hydrated, so a series page shows the
+  // genuinely-next occurrence rather than the one that was next at build time.
+  const ev = getEvent(pathname, now?.toISOString().slice(0, 10));
 
   if (!ev) {
     return (
@@ -102,6 +107,11 @@ export default function Event() {
                 : `${time(ev.start)} – ${time(ev.end)}`}{" "}
               <span className="muted">Pacific</span>
             </p>
+            {ev.recurrence && (
+              <p className="muted" style={{ marginTop: "0.35rem" }}>
+                🔁 {describeRecurrence(ev.recurrence)}
+              </p>
+            )}
           </div>
           <div>
             <h4>Where</h4>
@@ -158,6 +168,19 @@ export default function Event() {
           <Prose html={ev.descriptionHtml} />
         ) : (
           <p className="muted">No description provided.</p>
+        )}
+
+        {ev.upcomingDates && ev.upcomingDates.length > 1 && (
+          <section style={{ marginTop: "2rem" }}>
+            <h2 style={{ fontSize: "1.1rem" }}>Upcoming dates</h2>
+            <ul className="occurrences">
+              {ev.upcomingDates.map((d) => (
+                <li key={d}>
+                  <Link to={`${ev.path}${d}/`}>{longDate(d)}</Link>
+                </li>
+              ))}
+            </ul>
+          </section>
         )}
 
         <div style={{ margin: "1.5rem 0" }}>

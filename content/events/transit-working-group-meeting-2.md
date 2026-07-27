@@ -1,10 +1,10 @@
 ---
-id: 10003181
+id: '10003179'
 slug: transit-working-group-meeting-2
-path: /event/transit-working-group-meeting-2/2026-08-31/
+path: /event/transit-working-group-meeting-2/
 title: Transit Working Group Meeting
-start: '2026-08-31 18:30:00'
-end: '2026-08-31 19:30:00'
+start: '2026-08-03 18:30:00'
+end: '2026-08-03 19:30:00'
 allDay: false
 timezone: America/Los_Angeles
 isVirtual: false
@@ -14,6 +14,8 @@ organizer: Silicon Valley DSA
 categories:
   - SV DSA
   - WG - Transit
+recurrence:
+  rrule: FREQ=WEEKLY;INTERVAL=4;BYDAY=MO
 ---
 
 Come join us for the transit working group meeting, where we’ll discuss ongoing projects and strategies for SVDSA to build power in this space.

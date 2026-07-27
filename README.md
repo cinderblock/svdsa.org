@@ -32,15 +32,46 @@ file (no merge conflicts, no unbounded growth):
 ```
 content/
   posts/<year>/<date>-<slug>.md      # bucketed by publish year
-  events/<slug>.md                    # RECURRING series (repeats: rule, expanded at build)
+  events/<slug>.md                    # RECURRING series (recurrence: rule — see below)
   events/<year>/<slug>-<date>.md      # one-off / irregular instances, bucketed by year
   pages/<url-path>.md                 # mirrors the page URL path
   config/*.json                       # site config + style-rules.json (content lint rules)
 ```
 
 Bodies are **Markdown** (things Markdown can't express — embeds, forms — are
-raw HTML islands, rendered via rehype-raw). Recurring events are ONE file with
-a `repeats:` rule; the daily rebuild expands a rolling window of instances.
+raw HTML islands, rendered via rehype-raw).
+
+### Recurring events
+
+A repeating meeting is **one file** carrying an iCalendar recurrence rule.
+Occurrences are **derived**, never stored:
+
+```yaml
+recurrence:
+  rrule: FREQ=MONTHLY;BYDAY=3SA # 3rd Saturday
+  exdate: ["2026-12-19"] # ...except this one
+  rdate: ["2026-12-12"] # ...which moved here
+```
+
+`app/lib/recurrence.ts` is the single engine, shared by the build, the browser
+and the `.ics` feeds. Consequences worth knowing:
+
+- **The calendar can't go stale.** The browser expands the rules against the
+  reader's own clock, so a site that hasn't been rebuilt in months still lists
+  correct upcoming dates. A scheduled rebuild is a freshness optimization, not a
+  correctness requirement.
+- The build prerenders a bounded window (`PRERENDER_DAYS`, 90) of dated
+  occurrence pages plus one page per series; dated URLs beyond the window render
+  client-side from the rule, so no `/event/<slug>/<date>/` link 404s.
+- `EXDATE`/`RDATE` express holiday skips and reschedules — several working
+  groups genuinely need them.
+- Unsupported rules **fail the build** rather than silently dropping meetings.
+  Supported: `FREQ=WEEKLY|MONTHLY` with `INTERVAL`, `BYDAY` (incl. `3SA`,
+  `-1SU`), `UNTIL`, `COUNT`.
+- The engine is hand-written (so the browser doesn't download an RRULE library)
+  and conformance-tested against the reference `rrule` package, with the feeds
+  cross-checked against Mozilla's ICAL.js — see `tests/recurrence.spec.ts` and
+  `tests/feeds.spec.ts`.
 
 These files are the **source of truth**. The aggregate JSON the app imports is
 a **generated, git-ignored build artifact** (`content/generated/`) — never

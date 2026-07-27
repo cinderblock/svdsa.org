@@ -19,9 +19,8 @@ categories:
   - newbie-friendly
   - SV DSA
   - WG - Mutual Aid
-repeats:
-  freq: monthly
-  byday: 2SU
+recurrence:
+  rrule: FREQ=MONTHLY;BYDAY=2SU
 ---
 
 SJ Clothing Swap is mutual aid for our community through clothing and fabric, with an emphasis on sustainability, queer expression, intersectional community care, accessibility, and community organizing. We’re focused on:

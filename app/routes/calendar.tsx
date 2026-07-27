@@ -1,7 +1,7 @@
 import type { MetaFunction } from "react-router";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
-import { upcomingEvents } from "~/lib/data";
+import { expandEvents, upcomingEvents } from "~/lib/data";
 import { FACETS, matchesFacet, type FacetKey } from "~/lib/eventFacets";
 import { dateParts, isUpcoming, longDate, time } from "~/lib/format";
 import { useNow } from "~/lib/useNow";
@@ -37,13 +37,16 @@ export default function Calendar() {
   const now = useNow();
   const origin = useOrigin();
 
-  // Drop events that have already passed, relative to the *client's* current
-  // day — so the list stays correct between deploys and as a left-open tab
-  // crosses midnight. Before hydration (now === null) show the build snapshot.
+  // Recompute the whole list from the recurrence rules against the *client's*
+  // clock: drops past events, and extends recurring series a year out — so the
+  // calendar is right even if the site hasn't been rebuilt in months. Before
+  // hydration (now === null) we show the build snapshot.
   const upcoming = useMemo(
     () =>
       now
-        ? upcomingEvents.filter((e) => isUpcoming(e.start, now))
+        ? expandEvents(now.toISOString().slice(0, 10)).filter((e) =>
+            isUpcoming(e.start, now),
+          )
         : upcomingEvents,
     [now],
   );
