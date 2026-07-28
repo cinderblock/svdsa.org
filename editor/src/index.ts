@@ -112,7 +112,17 @@ async function handleApi(
   if (path === "/api/list") {
     const base =
       url.searchParams.get("base") || env.EDITOR_DEFAULT_BASE || "red";
-    return json({ base, items: await gh.listContent(base) });
+    // Ship the site's own nav with the file list: the browser groups pages the
+    // way the real site does, so "where is the Housing page" has the same
+    // answer in both places. Navigation is content, so read it from this ref.
+    let nav: unknown = null;
+    try {
+      const raw = await gh.readItem("content/config/navigation.json", base);
+      nav = JSON.parse(raw.text);
+    } catch {
+      /* nav is optional — the browser falls back to plain sections */
+    }
+    return json({ base, items: await gh.listContent(base), nav });
   }
 
   if (path === "/api/item") {
@@ -144,14 +154,14 @@ async function handleApi(
     });
   }
 
-  // Frontmatter titles for one directory (pretty labels in the file browser).
-  if (path === "/api/titles") {
+  // Frontmatter metadata for one directory (labels, URLs, dates, recurrence).
+  if (path === "/api/meta") {
     const base =
       url.searchParams.get("base") || env.EDITOR_DEFAULT_BASE || "red";
     const dir = url.searchParams.get("dir") ?? "";
     if (!/^content\/(pages|posts|events|config)(\/\d{4})?$/.test(dir))
       return json({ error: "invalid dir" }, 400);
-    return json({ base, dir, titles: await gh.titlesForDir(base, dir) });
+    return json({ base, dir, meta: await gh.metaForDir(base, dir) });
   }
 
   // Draft workspace state for this editor+base: branch, changed files, open PR.

@@ -115,6 +115,17 @@ async function installationToken(env: GhEnv): Promise<string> {
 
 // ---- client -----------------------------------------------------------------
 
+/** What the file browser shows for one content item. */
+export interface ItemMeta {
+  title?: string;
+  /** The page's URL on the live site, from frontmatter `path`. */
+  url?: string;
+  /** Event start, post date, or last-modified — whichever the item has. */
+  date?: string;
+  /** True for a recurring event series. */
+  recurs?: boolean;
+}
+
 export interface RawItem {
   path: string;
   sha: string; // blob sha at the read ref (for optimistic concurrency)
@@ -240,12 +251,16 @@ export async function createGitHub(env: GhEnv) {
         body: JSON.stringify({ ref: `refs/heads/${branch}`, sha }),
       });
     },
-    /** Frontmatter titles for every .md directly inside `dir` at `ref` — ONE
-     * GraphQL round-trip for the whole directory (vs N Contents calls). */
-    async titlesForDir(
+    /**
+     * Frontmatter metadata for every .md directly inside `dir` at `ref` — ONE
+     * GraphQL round-trip for the whole directory (vs N Contents calls). Returns
+     * what the file browser needs to show and sort a useful list: the title, a
+     * date, and the page's URL on the site.
+     */
+    async metaForDir(
       ref: string,
       dir: string,
-    ): Promise<Record<string, string>> {
+    ): Promise<Record<string, ItemMeta>> {
       const data = await graphql<{
         repository: {
           object: {
@@ -278,23 +293,31 @@ export async function createGitHub(env: GhEnv) {
         `,
         { owner, repo, expr: `${ref}:${dir}` },
       );
-      const titles: Record<string, string> = {};
+      const out: Record<string, ItemMeta> = {};
       for (const e of data.repository.object?.entries ?? []) {
         if (e.type !== "blob" || !e.name.endsWith(".md")) continue;
         const text = e.object?.text ?? "";
         const fmEnd = text.indexOf("\n---", 3);
-        const fm = fmEnd === -1 ? text.slice(0, 2000) : text.slice(0, fmEnd);
-        const m = fm.match(/^title:\s*(.*)$/m);
-        if (!m) continue;
-        let t = m[1].trim();
-        if (
-          (t.startsWith("'") && t.endsWith("'")) ||
-          (t.startsWith('"') && t.endsWith('"'))
-        )
-          t = t.slice(1, -1).replace(/''/g, "'");
-        titles[`${dir}/${e.name}`] = t;
+        const fm = fmEnd === -1 ? text.slice(0, 4000) : text.slice(0, fmEnd);
+        const field = (name: string) => {
+          const m = fm.match(new RegExp(`^${name}:\\s*(.*)$`, "m"));
+          if (!m) return undefined;
+          let v = m[1].trim();
+          if (
+            (v.startsWith("'") && v.endsWith("'")) ||
+            (v.startsWith('"') && v.endsWith('"'))
+          )
+            v = v.slice(1, -1).replace(/''/g, "'");
+          return v || undefined;
+        };
+        out[`${dir}/${e.name}`] = {
+          title: field("title"),
+          url: field("path"),
+          date: field("start") ?? field("date") ?? field("modified"),
+          recurs: /^recurrence:/m.test(fm),
+        };
       }
-      return titles;
+      return out;
     },
     async deleteBranch(branch: string): Promise<void> {
       await api(`${base}/git/refs/heads/${encPath(branch)}`, {

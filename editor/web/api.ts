@@ -1,5 +1,20 @@
 /** Typed fetch client for the svdsa-edit Worker's /api/* routes. */
 
+/** Frontmatter facts the file browser shows. */
+export interface ItemMeta {
+  title?: string;
+  url?: string;
+  date?: string;
+  recurs?: boolean;
+}
+
+/** The site's own navigation (content/config/navigation.json). */
+export interface SiteNav {
+  workingGroups?: { label: string; to: string; icon?: string }[];
+  committees?: { label: string; to: string; icon?: string }[];
+  resources?: { label: string; to: string; icon?: string }[];
+}
+
 export interface Me {
   email: string;
   /** Origin of the production site Worker, derived server-side. */
@@ -66,7 +81,7 @@ export const api = {
   me: () => req<Me>("/api/me"),
   branches: () => req<{ branches: string[] }>("/api/branches"),
   list: (base: string) =>
-    req<{ base: string; items: string[] }>(
+    req<{ base: string; items: string[]; nav: SiteNav | null }>(
       `/api/list?base=${encodeURIComponent(base)}`,
     ),
   item: (path: string, base: string) =>
@@ -75,9 +90,9 @@ export const api = {
     ),
   status: (base: string) =>
     req<DraftStatus>(`/api/status?base=${encodeURIComponent(base)}`),
-  titles: (dir: string, base: string) =>
-    req<{ titles: Record<string, string> }>(
-      `/api/titles?dir=${encodeURIComponent(dir)}&base=${encodeURIComponent(base)}`,
+  meta: (dir: string, base: string) =>
+    req<{ meta: Record<string, ItemMeta> }>(
+      `/api/meta?dir=${encodeURIComponent(dir)}&base=${encodeURIComponent(base)}`,
     ),
   save: (payload: {
     base: string;

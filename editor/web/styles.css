@@ -133,12 +133,72 @@ header .ghost {
   border: 1px solid var(--line);
   border-radius: 4px;
 }
+#list .sortbar {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.72rem;
+  color: var(--muted);
+  margin-bottom: 0.6rem;
+}
+#list .sortbar select {
+  font: inherit;
+  font-size: 0.8rem;
+  flex: 1;
+  background: var(--bg);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.2rem 0.3rem;
+}
+/* Each section is a visually distinct card, so pages and events can't be
+   mistaken for one another at a glance. */
+#list .grp {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--bg);
+  margin-bottom: 0.5rem;
+  overflow: hidden;
+}
+#list .grp > summary {
+  background: var(--hover);
+  border-left: 3px solid var(--muted);
+}
+#list .grp--main > summary {
+  border-left-color: #c0141a;
+}
+#list .grp--wg > summary {
+  border-left-color: #1f7a4d;
+}
+#list .grp--cmte > summary {
+  border-left-color: #2b5fa8;
+}
+#list .grp--res > summary {
+  border-left-color: #8a5a1f;
+}
+#list .grp--series > summary {
+  border-left-color: #7a3fa8;
+}
+#list .grp--Events > summary {
+  border-left-color: #b8860b;
+}
+#list .grp--Blog > summary {
+  border-left-color: #a8324f;
+}
+#list .grp--config > summary {
+  border-left-color: #555;
+}
+#list .grp__icon {
+  margin-right: 0.4rem;
+}
 #list details > summary {
   cursor: pointer;
   font-weight: 600;
-  padding: 0.3rem 0.2rem;
-  text-transform: capitalize;
+  padding: 0.35rem 0.5rem;
   user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 #list details.year {
   margin-left: 0.75rem;
@@ -149,26 +209,45 @@ header .ghost {
 }
 #list .count {
   color: var(--muted);
-  font-weight: 400;
-  font-size: 0.75rem;
+  font-weight: 600;
+  font-size: 0.7rem;
+  margin-left: auto;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 99px;
+  padding: 0 0.4rem;
 }
 #list .entries {
   margin-left: 0.75rem;
 }
 #list .entry {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
   width: 100%;
   text-align: left;
   border: 0;
   background: none;
   font: inherit;
-  padding: 0.22rem 0.4rem;
-  font-size: 0.82rem;
+  padding: 0.3rem 0.45rem;
   border-radius: 4px;
   cursor: pointer;
-  word-break: break-all;
   color: var(--ink);
-  text-decoration: none;
+}
+#list .entry__title {
+  font-size: 0.85rem;
+  line-height: 1.25;
+}
+#list .entry__detail {
+  font-size: 0.7rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#list .entry__recurs {
+  margin-right: 0.25rem;
 }
 #list .entry:hover {
   background: var(--hover);

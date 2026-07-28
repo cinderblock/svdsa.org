@@ -12,6 +12,7 @@ import {
   type DraftStatus,
   type ItemDetail,
   type LintFinding,
+  type SiteNav,
 } from "./api";
 import { FileList } from "./filelist";
 import {
@@ -54,6 +55,7 @@ export function App() {
   const [branches, setBranches] = useState<string[]>([]);
   const [base, setBase] = useState("");
   const [items, setItems] = useState<string[]>([]);
+  const [nav, setNav] = useState<SiteNav | null>(null);
   const [status, setStatus] = useState<DraftStatus | null>(null);
 
   const [item, setItem] = useState<ItemDetail | null>(null);
@@ -99,12 +101,49 @@ export function App() {
     setItem(null);
     api
       .list(base)
-      .then((d) => setItems(d.items))
+      .then((d) => {
+        setItems(d.items);
+        setNav(d.nav ?? null);
+      })
       .catch((e) => setMsg({ ok: false, text: String(e) }));
     refreshStatus(base);
   }, [base, refreshStatus]);
 
   const grouped = useMemo(() => groupBranches(branches), [branches]);
+
+  /**
+   * Deep links. A reader on the live site can append `?edit` to any page and
+   * land here with that page already open — `?url=/about/` is resolved against
+   * the file list (the pages tree mirrors the site's URLs), and `?path=` opens
+   * a repo path directly.
+   */
+  const jumped = useRef(false);
+  useEffect(() => {
+    if (jumped.current || !items.length) return;
+    const q = new URLSearchParams(window.location.search);
+    const wantPath = q.get("path");
+    const wantUrl = q.get("url");
+    if (!wantPath && !wantUrl) return;
+    jumped.current = true;
+    const target =
+      (wantPath && items.find((p) => p === wantPath)) ||
+      (wantUrl &&
+        items.find(
+          (p) =>
+            p.startsWith("content/pages/") &&
+            "/" +
+              p.replace(/^content\/pages\//, "").replace(/\.md$/, "") +
+              "/" ===
+              (wantUrl.endsWith("/") ? wantUrl : wantUrl + "/"),
+        ));
+    if (target) void open(target);
+    else
+      setMsg({
+        ok: false,
+        text: `No editable file matches ${wantPath ?? wantUrl}`,
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items]);
 
   async function open(path: string) {
     setMsg(null);
@@ -282,6 +321,7 @@ export function App() {
         <FileList
           base={base}
           items={items}
+          nav={nav}
           selected={item?.path ?? null}
           changed={changed}
           onOpen={open}

@@ -45,7 +45,7 @@ async function mockEditor(
     r.fulfill(json({ branches: ["red"] })),
   );
   await page.route("**/api/list*", (r) =>
-    r.fulfill(json({ base: "red", items: [SERIES_PATH] })),
+    r.fulfill(json({ base: "red", items: [SERIES_PATH], nav: null })),
   );
   await page.route("**/api/status*", (r) =>
     r.fulfill(
@@ -58,8 +58,18 @@ async function mockEditor(
       }),
     ),
   );
-  await page.route("**/api/titles*", (r) =>
-    r.fulfill(json({ titles: { [SERIES_PATH]: String(frontmatter.title) } })),
+  await page.route("**/api/meta*", (r) =>
+    r.fulfill(
+      json({
+        meta: {
+          [SERIES_PATH]: {
+            title: String(frontmatter.title),
+            url: String(frontmatter.path ?? ""),
+            recurs: Boolean(frontmatter.recurrence),
+          },
+        },
+      }),
+    ),
   );
   await page.route("**/api/item*", (r) =>
     r.fulfill(
@@ -232,5 +242,134 @@ test.describe("editor: recurrence widget", () => {
     await expect(page.locator(".msg.ok")).toBeVisible();
     // The key is dropped, not set to null — the event becomes a one-off.
     expect(saved.frontmatter && "recurrence" in saved.frontmatter).toBe(false);
+  });
+});
+
+test.describe("editor: finding content", () => {
+  /** A richer stub: several pages, an event series, a post, and site nav. */
+  async function mockLibrary(page: Page) {
+    const json = (b: unknown) => ({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(b),
+    });
+    const items = [
+      "content/pages/about.md",
+      "content/pages/housing.md",
+      "content/pages/tech-and-data.md",
+      "content/pages/voters-guide.md",
+      "content/pages/some-old-page.md",
+      "content/events/sjfreestore.md",
+      "content/events/2026/2026-08-09-dsa-101.md",
+      "content/posts/2026/2026-05-02-convention.md",
+      "content/config/navigation.json.md",
+    ];
+    await page.route("**/api/me", (r) =>
+      r.fulfill(json({ email: "e@x", siteOrigin: "https://site.test" })),
+    );
+    await page.route("**/api/branches", (r) =>
+      r.fulfill(json({ branches: ["red"] })),
+    );
+    await page.route("**/api/status*", (r) =>
+      r.fulfill(
+        json({ base: "red", draft: "d", exists: false, changed: [], pr: null }),
+      ),
+    );
+    await page.route("**/api/list*", (r) =>
+      r.fulfill(
+        json({
+          base: "red",
+          items,
+          nav: {
+            workingGroups: [{ label: "Housing", to: "/housing/" }],
+            committees: [{ label: "Tech & Data", to: "/tech-and-data/" }],
+            resources: [{ label: "Voters' Guide", to: "/voters-guide/" }],
+          },
+        }),
+      ),
+    );
+    await page.route("**/api/meta*", (r) => {
+      const dir = new URL(r.request().url()).searchParams.get("dir") ?? "";
+      const meta: Record<string, unknown> = {};
+      for (const p of items.filter((p) => p.startsWith(dir + "/"))) {
+        const stem = p.split("/").pop()!.replace(".md", "");
+        meta[p] = {
+          title: stem.replace(/-/g, " ").replace(/^\d{4} \d{2} \d{2} /, ""),
+          url: p.startsWith("content/pages/") ? `/${stem}/` : undefined,
+          recurs: p === "content/events/sjfreestore.md",
+        };
+      }
+      return r.fulfill(json({ meta }));
+    });
+    await page.route("**/api/item*", (r) => {
+      const p = new URL(r.request().url()).searchParams.get("path");
+      return r.fulfill(
+        json({
+          path: p,
+          ref: "red",
+          base: "red",
+          fromDraft: false,
+          frontmatter: { title: "Opened", path: "/about/" },
+          body: "hi",
+          sha: "s",
+        }),
+      );
+    });
+  }
+
+  test("groups pages the way the site is organised", async ({ page }) => {
+    await mockLibrary(page);
+    await page.goto(EDITOR_URL);
+
+    // Site sections, not repo folders.
+    for (const label of [
+      "Main pages",
+      "Working groups",
+      "Committees",
+      "Resources",
+      "Recurring meetings",
+    ])
+      await expect(
+        page.locator("#list summary").filter({ hasText: label }),
+      ).toHaveCount(1);
+
+    // The Housing page sits under Working groups because the site's nav says so.
+    const wg = page.locator("details.grp--wg");
+    await expect(wg.getByRole("button", { name: /housing/i })).toBeVisible();
+    // Pages show their live URL as the detail line.
+    await expect(wg.locator(".entry__detail").first()).toHaveText("/housing/");
+  });
+
+  test("search matches titles and URLs, and sorting is offered", async ({
+    page,
+  }) => {
+    await mockLibrary(page);
+    await page.goto(EDITOR_URL);
+    await expect(page.getByLabel("Sort content")).toBeVisible();
+
+    await page.getByLabel("Search content").fill("voters");
+    await expect(
+      page.locator("#list .entry").filter({ hasText: /voters/i }),
+    ).toHaveCount(1);
+    await expect(
+      page.locator("#list .entry").filter({ hasText: /housing/i }),
+    ).toHaveCount(0);
+  });
+
+  test("?url= opens the file for a live-site page (the ?edit jump)", async ({
+    page,
+  }) => {
+    await mockLibrary(page);
+    await page.goto(`${EDITOR_URL}/?url=%2Fabout%2F`);
+    // Lands with that page already open for editing.
+    await expect(page.locator(".path")).toContainText("content/pages/about.md");
+  });
+
+  test("?path= opens a repo path directly", async ({ page }) => {
+    await mockLibrary(page);
+    await page.goto(`${EDITOR_URL}/?path=content%2Fevents%2Fsjfreestore.md`);
+    await expect(page.locator(".path")).toContainText(
+      "content/events/sjfreestore.md",
+    );
   });
 });
