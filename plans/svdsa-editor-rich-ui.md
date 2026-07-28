@@ -295,3 +295,32 @@ rule in the corpus) and `tests/editor-ui.spec.ts` (7 browser tests driving the
 widget with `/api/*` stubbed, asserting the exact frontmatter a save commits).
 The editor had **zero** browser coverage before this. playwright.config.ts now
 starts the editor SPA as a second webServer.
+
+## 2026-07-28 round 7 — site batch + editor navigation
+
+Site (066a892): home-page copy moved into content/pages/home.md (frontmatter,
+with code-side defaults) so casual editors can change the front page; WG and
+committee emoji from the chapter's list in navigation.json, rendered in menus,
+home cards and page headings; contact page branch sections removed and socials
+shown as red buttons; event categories coloured from a fixed hue table;
+online/in-person/HYBRID markers; agenda grouped by day so a date appears once.
+Also restored the socials the rebuild had dropped (3 of 6 were missing).
+
+Contact (01d013d): the "contact form" was the **HGO Grievance Form** — the live
+WP site links it only as such, and the chapter's contact method is an email
+address. Renamed to grievanceForm/grievancePolicy + email; the route now renders
+the editable page body instead of a mislabelled embed.
+
+Editor (0bfbe8d): content browsing now mirrors the site's own navigation
+(navigation.json ships with /api/list); /api/titles → /api/meta returning title,
+live URL, date and recurrence in the same single GraphQL call; two-line rows,
+sorting, colour-coded section cards; `?edit` on any live page jumps to the
+editor with that file open (?url= / ?path=).
+
+### Open for the chapter
+
+- Emoji: Ecosocialist/Healthcare/Socialist Feminist were NOT in the chapter's
+  list — placeholders chosen. Electoral is listed by the chapter as a working
+  group but sits under committees in navigation.json — unresolved.
+- No general contact form exists; only the email address. If the chapter wants
+  one, it needs creating.

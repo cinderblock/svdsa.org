@@ -36,6 +36,18 @@ rewrite its rule (`tests/recurrence-editor.spec.ts` checks every rule in the
 real corpus). `tests/editor-ui.spec.ts` drives the widget in a browser with the
 API stubbed and asserts the exact frontmatter a save would commit.
 
+## Finding content
+
+The browser groups content the way the **site** is organised — Main pages,
+Working groups, Committees, Resources, Recurring meetings, then events and posts
+by year — by reading the site's own `content/config/navigation.json` and
+matching pages to nav entries. Rows show the title plus the page's live URL (or
+the event's date), and are sortable by site order / A–Z / date / newest.
+
+**Jump from the live site:** append `?edit` to any page URL and you land here
+with that page open. The site redirects to `edit.<subdomain>` with
+`?url=<path>`; `?path=<repo path>` also works.
+
 ## UI
 
 Vite-built SPA (`web/`) served by the Worker's Static Assets binding (Worker
