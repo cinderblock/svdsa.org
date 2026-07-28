@@ -30,7 +30,11 @@ export interface External {
   localDues: string;
   donate: string;
   newsletter: string;
-  contactForm: string;
+  /** General enquiries. The chapter has no contact FORM — it uses email. */
+  email: string;
+  /** Harassment grievances (a distinct, sensitive flow) + the policy doc. */
+  grievanceForm: string;
+  grievancePolicy: string;
 }
 export const EXTERNAL = externalData as External;
 

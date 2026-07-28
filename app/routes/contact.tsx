@@ -1,5 +1,6 @@
 import type { MetaFunction } from "react-router";
-import { EmbedFrame } from "~/components/EmbedFrame";
+import { Prose } from "~/components/Prose";
+import { getPage } from "~/lib/content";
 import { EXTERNAL, SITE, SOCIALS } from "~/lib/site";
 
 export const meta: MetaFunction = () => [
@@ -10,23 +11,26 @@ export const meta: MetaFunction = () => [
   },
 ];
 
-const contactFormEmbed = EXTERNAL.contactForm.includes("?")
-  ? `${EXTERNAL.contactForm}&embedded=true`
-  : `${EXTERNAL.contactForm}?embedded=true`;
-
 export default function Contact() {
+  // The words are content (content/pages/contact.md), so chapter editors can
+  // change them; this route only adds the socials.
+  const page = getPage("/contact/");
+
   return (
     <main id="main">
       <div className="container page-head">
-        <h1>Get in touch</h1>
+        <h1>{page?.title ?? "Get in touch"}</h1>
         <p className="lead muted">
-          Questions, press, or want to plug into the work? Send us a note or
-          find us on social media.
+          Questions, press, or want to plug into the work? Email us at{" "}
+          <a href={`mailto:${EXTERNAL.email}`}>{EXTERNAL.email}</a>, or find us
+          on social media.
         </p>
       </div>
 
       <div className="container" style={{ paddingBottom: "3rem" }}>
-        <h2 style={{ fontSize: "1.25rem" }}>Follow us</h2>
+        {page?.html && <Prose html={page.html} />}
+
+        <h2 style={{ fontSize: "1.25rem", marginTop: "2.5rem" }}>Follow us</h2>
         {/* One list, matching the footer's (content/config/socials.json) —
             the per-branch accounts aren't maintained separately here. */}
         <div className="social-buttons">
@@ -36,11 +40,6 @@ export default function Contact() {
             </a>
           ))}
         </div>
-        <EmbedFrame
-          src={contactFormEmbed}
-          title="Contact Silicon Valley DSA"
-          height={900}
-        />
       </div>
     </main>
   );
