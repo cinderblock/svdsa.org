@@ -232,3 +232,68 @@ test.describe("Calendar subscription feeds", () => {
     expect(body.match(/BEGIN:VEVENT/g)?.length).toBe(1);
   });
 });
+
+test.describe("Calendar views", () => {
+  test("week view stacks weeks vertically with all seven days", async ({
+    page,
+  }) => {
+    await page.goto("/calendar?view=week");
+    await expect(page.getByRole("button", { name: "Week" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    const weeks = page.locator(".cal-week");
+    expect(await weeks.count()).toBeGreaterThan(4); // scrolls, doesn't page
+    // Every week block shows all 7 days, empty ones included.
+    await expect(weeks.first().locator(".cal-day")).toHaveCount(7);
+    // Today is marked, exactly once across the whole view.
+    await expect(page.locator(".cal-day.is-today")).toHaveCount(1);
+  });
+
+  test("month view is a 7-column grid per month, stacked", async ({ page }) => {
+    await page.goto("/calendar?view=month");
+    const months = page.locator("table.cal-month");
+    expect(await months.count()).toBeGreaterThan(2);
+    // Real table semantics: weekday column headers.
+    await expect(months.first().locator("thead th")).toHaveCount(7);
+    await expect(months.first().locator("thead th").first()).toContainText(
+      "Sun",
+    );
+    // Today is highlighted once — padding cells of the next month must not
+    // also light up (regression: is-today leaked into out-of-month cells).
+    await expect(page.locator("td.is-today")).toHaveCount(1);
+    // Out-of-month padding cells never carry events.
+    await expect(page.locator("td.is-outside .cal-chip")).toHaveCount(0);
+  });
+
+  test("the view is shareable via the URL and filters still apply", async ({
+    page,
+  }) => {
+    await page.goto("/calendar?view=month");
+    await expect(page.locator("table.cal-month").first()).toBeVisible();
+    // Wait for hydration before clicking: the webcal:// upgrade only happens
+    // after mount, so a click dispatched earlier would be dropped.
+    const hydrated = () =>
+      expect(page.getByRole("link", { name: "Subscribe" })).toHaveAttribute(
+        "href",
+        /^webcal:/,
+        { timeout: 15_000 },
+      );
+    await hydrated();
+
+    // Switching view updates the URL; switching back to List clears it.
+    await page.getByRole("button", { name: "Week" }).click();
+    await expect(page).toHaveURL(/\?view=week/);
+    await page.getByRole("button", { name: "List" }).click();
+    await expect(page).not.toHaveURL(/view=/);
+
+    // A facet filter narrows the calendar views too.
+    await page.goto("/calendar?view=week");
+    await hydrated();
+    const before = await page.locator(".cal-chip").count();
+    await page.getByRole("button", { name: "Committees" }).click();
+    const after = await page.locator(".cal-chip").count();
+    expect(after).toBeLessThan(before);
+    expect(after).toBeGreaterThan(0);
+  });
+});

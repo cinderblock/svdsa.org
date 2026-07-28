@@ -84,6 +84,17 @@ shared file.
 | `scripts/build-content.ts`    | `bun run build:content` | Network-free. Renders Markdown → HTML, expands recurring events, and assembles `content/generated/*.json` (full + slim splits) plus `sitemap.xml`/`robots.txt` (all git-ignored). Runs before dev/typecheck/build. |
 | `scripts/lint-content.ts`     | `bun run lint:content`  | Style checks from `content/config/style-rules.json` (San José accent, inclusive language, …). `--fix` applies suggestions. The in-browser editor runs the same rules on every save.                                |
 
+### Calendar views
+
+`/calendar` offers **List**, **Week** and **Month**. Week and Month are
+**continuously vertically scrolling** — periods stack in order and you scroll
+into the future, so there is no prev/next paging to hunt through (which also
+suits a phone). Month is a real `<table>` grid so screen readers get row/column
+semantics; for the current month it starts at the current week rather than the
+1st, since past weeks would otherwise open the view on empty rows. The active
+view lives in the URL (`?view=week`) so it can be shared, and the facet filters
+and search apply to every view. See `app/components/CalendarViews.tsx`.
+
 ### Calendar subscription feeds
 
 `build-content.ts` also prerenders static iCalendar feeds (`scripts/ics.ts`), so
