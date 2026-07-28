@@ -23,7 +23,7 @@ flowchart TD
     W4 --> W5[Publish → opens a PR]
 
     G1 --> G2["Edit content/*.md in your editor<br/>(bun run dev for live preview,<br/>bun run lint:content for style checks)"]
-    G2 --> G3[Push your branch<br/>every branch gets a preview at<br/><code>&lt;branch&gt;-svdsa.…workers.dev</code>]
+    G2 --> G3[Push your branch<br/>every branch gets a preview at<br/><code>&lt;branch&gt;-site.…workers.dev</code>]
     G3 --> G4[Open a PR to <code>red</code>]
 
     Code --> C1["app/ (React), styles, editor/<br/>theme experiments live on<br/><code>theme/*</code> branches"]
@@ -39,12 +39,12 @@ flowchart TD
 
 ## The rungs, in words
 
-| You are…                 | You use…                                                                                                                                                                     | Your safety net                                                                                                                         |
-| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| **WYSIWYG-only**         | [the editor](https://svdsa-edit.isozilla.workers.dev) in Rich text mode. No git, no Markdown, no accounts to create — sign in with whatever you have (Google, email OTP, …). | Nothing you do touches the live site. Saves go to your personal draft; Publish just _asks_ (opens a PR). Discard throws the draft away. |
-| **Markdown-comfortable** | the same editor, Markdown mode (the VS Code engine — find/replace, multi-cursor).                                                                                            | Same draft/PR flow. Modes toggle losslessly, use both.                                                                                  |
-| **Git-comfortable**      | a clone; edit `content/**/*.md` directly. One file per page/post/event; add a file to add content.                                                                           | Branch + PR. Every pushed branch gets its own full preview site.                                                                        |
-| **Developer**            | `app/` (React Router), `editor/`, `scripts/`. Theme experiments on `theme/*` branches.                                                                                       | Same PRs, plus typecheck/tests/lint in the repo.                                                                                        |
+| You are…                 | You use…                                                                                                                                                                         | Your safety net                                                                                                                         |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| **WYSIWYG-only**         | [the editor](https://edit.cameron-test-svdsa.workers.dev) in Rich text mode. No git, no Markdown, no accounts to create — sign in with whatever you have (Google, email OTP, …). | Nothing you do touches the live site. Saves go to your personal draft; Publish just _asks_ (opens a PR). Discard throws the draft away. |
+| **Markdown-comfortable** | the same editor, Markdown mode (the VS Code engine — find/replace, multi-cursor).                                                                                                | Same draft/PR flow. Modes toggle losslessly, use both.                                                                                  |
+| **Git-comfortable**      | a clone; edit `content/**/*.md` directly. One file per page/post/event; add a file to add content.                                                                               | Branch + PR. Every pushed branch gets its own full preview site.                                                                        |
+| **Developer**            | `app/` (React Router), `editor/`, `scripts/`. Theme experiments on `theme/*` branches.                                                                                           | Same PRs, plus typecheck/tests/lint in the repo.                                                                                        |
 
 Style rules (the San José é, inclusive language, …) live in
 `content/config/style-rules.json` and apply to **everyone the same way**: the

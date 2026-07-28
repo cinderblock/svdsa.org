@@ -29,6 +29,7 @@ export interface Env {
   GITLAB_TOKEN?: string; // secret
   GITLAB_PROJECT_ID?: string;
   CF_ACCESS_TEAM_DOMAIN?: string;
+  SITE_WORKER?: string;
   CF_ACCESS_AUD?: string;
 }
 
@@ -45,15 +46,30 @@ const json = (data: unknown, status = 200) =>
     headers: { "content-type": "application/json" },
   });
 
+/**
+ * Both the site and this editor are Workers on the same account, so their
+ * hostnames differ only in the first label: `<worker>.<subdomain>.workers.dev`.
+ * Swap in the site Worker's name to reach it — and prefix the branch alias for
+ * a Workers Builds preview. Keeps account/name moves to `SITE_WORKER`.
+ */
+function siteHostParts(request: Request, env: Env) {
+  const [, ...rest] = new URL(request.url).host.split(".");
+  return { worker: env.SITE_WORKER ?? "site", rest: rest.join(".") };
+}
+
+function siteOrigin(request: Request, env: Env): string {
+  const { worker, rest } = siteHostParts(request, env);
+  return `https://${worker}${rest ? `.${rest}` : ""}`;
+}
+
 /** Best-effort Workers Builds preview URL for a branch of the production Worker. */
-function previewUrl(request: Request, branch: string): string {
-  const host = new URL(request.url).host; // svdsa-edit.<sub>.workers.dev
-  const sub = host.split(".")[1] ?? "workers";
+function previewUrl(request: Request, env: Env, branch: string): string {
+  const { worker, rest } = siteHostParts(request, env);
   const alias = branch
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
-  return `https://${alias}-svdsa.${sub}.workers.dev/`;
+  return `https://${alias}-${worker}${rest ? `.${rest}` : ""}/`;
 }
 
 async function health(env: Env) {
@@ -85,7 +101,8 @@ async function handleApi(
   const url = new URL(request.url);
 
   // Identity comes straight from the Access-injected header — no git needed.
-  if (path === "/api/me") return json(editor(request));
+  if (path === "/api/me")
+    return json({ ...editor(request), siteOrigin: siteOrigin(request, env) });
 
   const gh = await createGitHub(env);
 
@@ -154,7 +171,7 @@ async function handleApi(
       exists: true,
       changed,
       pr,
-      previewUrl: previewUrl(request, draft),
+      previewUrl: previewUrl(request, env, draft),
     });
   }
 
@@ -204,7 +221,7 @@ async function handleApi(
     return json({
       branch,
       commitSha,
-      previewUrl: previewUrl(request, branch),
+      previewUrl: previewUrl(request, env, branch),
       lint,
       autofixed,
     });
@@ -252,7 +269,7 @@ async function handleApi(
       body:
         `Opened by **${who.email}** via the SVDSA editor.\n\n` +
         changed.map((f) => `- ${f.status}: \`${f.path}\``).join("\n") +
-        `\n\nPreview: ${previewUrl(request, draft)}`,
+        `\n\nPreview: ${previewUrl(request, env, draft)}`,
     });
     return json({ pr, alreadyOpen: false });
   }

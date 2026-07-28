@@ -30,15 +30,6 @@ const Raw = lazy(() =>
 
 type Mode = "wysiwyg" | "raw";
 
-/** The production site's origin, derived from this editor's host
- * (svdsa-edit.<sub>.workers.dev → svdsa.<sub>.workers.dev). */
-function liveOrigin(): string {
-  const host = window.location.host;
-  if (host.startsWith("svdsa-edit."))
-    return `https://${host.replace(/^svdsa-edit\./, "svdsa.")}`;
-  return "https://svdsa.isozilla.workers.dev"; // local dev fallback
-}
-
 /** Group branches by first path segment (theme/, draft/, …); rootless first. */
 function groupBranches(branches: string[]): {
   root: string[];
@@ -59,6 +50,7 @@ function groupBranches(branches: string[]): {
 
 export function App() {
   const [email, setEmail] = useState("");
+  const [siteOrigin, setSiteOrigin] = useState("");
   const [branches, setBranches] = useState<string[]>([]);
   const [base, setBase] = useState("");
   const [items, setItems] = useState<string[]>([]);
@@ -92,6 +84,7 @@ export function App() {
     (async () => {
       const [me, b] = await Promise.all([api.me(), api.branches()]);
       setEmail(me.email);
+      setSiteOrigin(me.siteOrigin ?? "");
       setBranches(b.branches.filter((x) => !x.startsWith("draft/")));
       setBase(
         (cur) =>
@@ -302,10 +295,10 @@ export function App() {
               <div className="path">
                 {item.path}
                 {item.fromDraft && <span className="chip">draft version</span>}
-                {typeof item.frontmatter.path === "string" && (
+                {siteOrigin && typeof item.frontmatter.path === "string" && (
                   <a
                     className="live"
-                    href={`${liveOrigin()}${item.frontmatter.path}`}
+                    href={`${siteOrigin}${item.frontmatter.path}`}
                     target="_blank"
                     rel="noreferrer"
                   >

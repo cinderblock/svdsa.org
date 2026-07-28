@@ -26,6 +26,10 @@
   "vars": {
     "GIT_HOST": "github",
     "EDITOR_DEFAULT_BASE": "red",
+    // The production site Worker's name on this account. Used to derive the
+    // live-site and per-branch preview URLs from this Worker's own hostname, so
+    // moving accounts is a config change rather than a code change.
+    "SITE_WORKER": "site",
     "GH_REPO": "cinderblock/svdsa.org",
     "GH_APP_ID": "4368113",
     "GH_INSTALLATION_ID": "148335084",

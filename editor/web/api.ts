@@ -2,6 +2,8 @@
 
 export interface Me {
   email: string;
+  /** Origin of the production site Worker, derived server-side. */
+  siteOrigin: string;
 }
 export interface ItemDetail {
   path: string;
