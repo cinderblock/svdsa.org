@@ -21,6 +21,21 @@ of truth. Full design: `plans/svdsa-wysiwyg-phase0.md` +
   branch. The App needs "Pull requests: Read & write" for publish.
 - **+ branch** creates real branches (e.g. `theme/…`) to edit against.
 
+## Rescheduling a repeating meeting
+
+Recurring events are stored as one file with an iCalendar rule, and the editor
+exposes that as a **recurrence widget** — a repeat switch, weekly/monthly with a
+weekday picker, an optional end date, and "skip a date" / "add an extra date"
+for cancellations and reschedules. It previews the next occurrences using the
+**same engine the site and the .ics feeds use** (`app/lib/recurrence.ts`), so
+what an editor sees is what members get. Nobody has to type an RRULE, and a
+one-off event can be turned into a series (or back) from the browser.
+
+Round-trip is verified: opening a series and saving it untouched must not
+rewrite its rule (`tests/recurrence-editor.spec.ts` checks every rule in the
+real corpus). `tests/editor-ui.spec.ts` drives the widget in a browser with the
+API stubbed and asserts the exact frontmatter a save would commit.
+
 ## UI
 
 Vite-built SPA (`web/`) served by the Worker's Static Assets binding (Worker

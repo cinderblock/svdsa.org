@@ -1,5 +1,8 @@
 import { defineConfig, devices } from "@playwright/test";
 
+/** The editor SPA's dev server (see editor/vite.config.ts). */
+export const EDITOR_URL = "http://localhost:9998";
+
 export default defineConfig({
   testDir: "./tests",
   fullyParallel: true,
@@ -25,12 +28,22 @@ export default defineConfig({
       use: { ...devices["Desktop Safari"] },
     },
   ],
-  webServer: {
-    command: "bun run dev",
-    url: "http://localhost:9999",
-    reuseExistingServer: !process.env.CI,
-    // `bun run dev` assembles content (build:content) before Vite boots, so
-    // allow generous startup time under load / on a large content tree.
-    timeout: 180_000,
-  },
+  webServer: [
+    {
+      command: "bun run dev",
+      url: "http://localhost:9999",
+      reuseExistingServer: !process.env.CI,
+      // `bun run dev` assembles content (build:content) before Vite boots, so
+      // allow generous startup time under load / on a large content tree.
+      timeout: 180_000,
+    },
+    {
+      // The editor SPA. Its /api/* calls are stubbed by the tests (the real
+      // Worker needs GitHub credentials), so no wrangler process is required.
+      command: "bun run editor:dev",
+      url: EDITOR_URL,
+      reuseExistingServer: !process.env.CI,
+      timeout: 120_000,
+    },
+  ],
 });

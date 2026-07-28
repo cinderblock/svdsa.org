@@ -258,3 +258,40 @@ site should derive occurrences the same way instead of baking them.
   has confirmed.** Worth asking those WGs.
 - Still open from earlier rounds: directive shortcodes, socials regression
   (3 of ~8 accounts), 857 unaccented "San Jose", scheduled rebuild.
+
+## 2026-07-27 round 6 — recurrence editor in the WYSIWYG (closes the round-5 gap)
+
+`recurrence` was showing as a read-only JSON blob, so a WYSIWYG-only member
+could not reschedule a meeting. Now a first-class widget
+(`editor/web/recurrence-field.tsx` + pure model in `recurrence-model.ts`):
+repeat switch, weekly/monthly, weekday chips, optional end date, and
+skip-a-date / add-a-date for cancellations and moves. Previews upcoming dates
+with the SAME engine as the site and feeds, so the editor can't disagree with
+what members see. A one-off can be promoted to a series and back.
+
+**Three real bugs found only by driving the UI in a browser** (worth remembering
+— none were visible to typecheck, build, or the site's own tests):
+
+1. `values[key] ?? initial` in the frontmatter form treated `null` as nullish,
+   so **"stop repeating" silently fell back to the stored rule** — the toggle
+   couldn't be turned off.
+2. `editor:dev` was broken from the day it was added: the Vite proxy key
+   `"/api"` matches by PREFIX, so it swallowed the SPA's own `api.ts` module and
+   the app never booted in dev. Fixed with the `^/api/` regex form. (It had
+   never been noticed because local testing always went through
+   `wrangler dev` against built assets.)
+3. Running the site's and the editor's Vite dev servers concurrently made them
+   **clobber each other's `node_modules/.vite` dep-optimization cache**, which
+   broke client JS on whichever lost the race — this failed 5 site tests that
+   depend on hydration. Fixed with a separate `cacheDir` for the editor.
+
+Also fixed while in there: file-list entries were `<a>` elements with no `href`
+(not focusable, not announced as links) — now buttons; and the recurrence
+enable row was a `<label>` wrapping a `<button>`, which leaked surrounding text
+into the control's accessible name.
+
+Test coverage added: `tests/recurrence-editor.spec.ts` (round-trip over every
+rule in the corpus) and `tests/editor-ui.spec.ts` (7 browser tests driving the
+widget with `/api/*` stubbed, asserting the exact frontmatter a save commits).
+The editor had **zero** browser coverage before this. playwright.config.ts now
+starts the editor SPA as a second webServer.

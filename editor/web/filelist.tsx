@@ -101,9 +101,13 @@ export function FileList({
     const title = titles[p];
     const date = dateOf(p);
     return (
-      <a
+      // A button, not an anchor: opening a file is an action, not navigation —
+      // and an <a> without href is neither focusable nor announced as a link.
+      <button
+        type="button"
         key={p}
-        className={`${selected === p ? "sel" : ""}${changedSet.has(p) ? " edited" : ""}`}
+        aria-current={selected === p}
+        className={`entry${selected === p ? " sel" : ""}${changedSet.has(p) ? " edited" : ""}`}
         onClick={() => onOpen(p)}
       >
         {changedSet.has(p) && (
@@ -117,7 +121,7 @@ export function FileList({
         ) : (
           stem(p)
         )}
-      </a>
+      </button>
     );
   };
 

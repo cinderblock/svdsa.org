@@ -19,6 +19,7 @@ import {
   classify,
   FrontmatterForm,
   type FieldSpec,
+  type FieldValue,
 } from "./frontmatter";
 import { Wysiwyg, type EditorHandle } from "./editors/wysiwyg";
 
@@ -65,9 +66,7 @@ export function App() {
 
   const [item, setItem] = useState<ItemDetail | null>(null);
   const [specs, setSpecs] = useState<FieldSpec[]>([]);
-  const [fmValues, setFmValues] = useState<Record<string, string | boolean>>(
-    {},
-  );
+  const [fmValues, setFmValues] = useState<Record<string, FieldValue>>({});
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [mode, setMode] = useState<Mode>("wysiwyg");
@@ -323,6 +322,7 @@ export function App() {
               <FrontmatterForm
                 specs={specs}
                 values={fmValues}
+                anchorStart={String(item.frontmatter.start ?? "")}
                 onChange={(k, v) => setFmValues((cur) => ({ ...cur, [k]: v }))}
               />
 
