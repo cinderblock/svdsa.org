@@ -36,10 +36,11 @@ export default function Home() {
         <div className="container hero__grid">
           <div>
             <p className="kicker">Silicon Valley · South Bay</p>
-            <h1>
-              Building working-class power,
-              <br />
-              for the many — not the few.
+            {/* Two deliberate lines. Spans (not <br/>) so each clause is its
+                own block and can balance its own wrap on narrow screens. */}
+            <h1 className="hero__title">
+              <span>Building working-class power,</span>
+              <span>for the many — not the few.</span>
             </h1>
             <p className="lead">
               We're not a political party — we're a community building
