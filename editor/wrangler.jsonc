@@ -3,7 +3,11 @@
   // pure static). Deployed to its own domain behind Cloudflare Access.
   // See plans/svdsa-wysiwyg-phase0.md.
   "$schema": "../node_modules/wrangler/config-schema.json",
-  "name": "svdsa-edit",
+  // Named `edit` rather than `svdsa-edit` — the account subdomain already says
+  // svdsa, so this reads edit.cameron-test-svdsa.workers.dev.
+  "name": "edit",
+  // Pinned so a deploy can't land in the wrong account. DSA test account.
+  "account_id": "4ce5029d216dd48d4516b29665d12e5a",
   "main": "src/index.ts",
   "compatibility_date": "2026-07-01",
   // gray-matter (frontmatter serialize) needs Node Buffer at runtime.
