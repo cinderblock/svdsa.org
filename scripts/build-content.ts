@@ -254,6 +254,12 @@ await write("site.json", {
   builtAt: buildDate.toISOString(),
   buildYear: buildDate.getFullYear(),
 });
+// The home page's copy is content too (content/pages/home.md) so chapter
+// editors can change it in the browser; emit it as its own slim file rather
+// than making the home route import the whole pages bundle.
+const homeDoc = pageDocs.find(({ data }) => data.path === "/");
+await write("home.json", homeDoc?.data ?? {});
+
 await write("pages.json", pages);
 await write("posts.json", posts);
 await write("posts-index.json", postsIndex);

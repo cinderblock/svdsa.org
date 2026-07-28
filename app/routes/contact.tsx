@@ -26,9 +26,12 @@ export default function Contact() {
       </div>
 
       <div className="container" style={{ paddingBottom: "3rem" }}>
-        <div className="socials" style={{ marginBottom: "1.5rem" }}>
+        <h2 style={{ fontSize: "1.25rem" }}>Follow us</h2>
+        {/* One list, matching the footer's (content/config/socials.json) —
+            the per-branch accounts aren't maintained separately here. */}
+        <div className="social-buttons">
           {SOCIALS.map((s) => (
-            <a key={s.label} className="btn btn-outline" href={s.href}>
+            <a key={s.label} className="btn btn-primary" href={s.href}>
               {s.label}
             </a>
           ))}

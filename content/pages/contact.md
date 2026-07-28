@@ -20,26 +20,4 @@ If you have ever felt uncomfortable because of something an SVDSA Member has sai
 
 For more details, check out our [Harassment Grievance Policy](https://docs.google.com/document/d/1aVKRB29mZs2B-aGfaVKIcurZ00PmurY9W-pyyXn54gY/edit?usp=sharing).
 
-## Follow us on social media
-
-### Silicon Valley DSA
-
-  [Twitter](https://twitter.com/SV_DSA)
-
-  [Facebook](https://www.facebook.com/svdsa/)
-
-  [Instagram](https://www.instagram.com/silicon_valley_dsa/)
-
-### SV DSA – San Jose Branch
-
-  [Twitter](https://twitter.com/SV_DSA_SJ)
-
-### SV DSA – Lower Peninsula Branch
-
-  [Twitter](https://twitter.com/SV_DSA_LP)
-
-### Democratic Socialists of America
-
-  [DSA National](http://www.dsausa.org)
-
 <div style="min-height: 15vh;"></div>

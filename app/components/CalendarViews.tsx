@@ -14,6 +14,7 @@
 
 import { Link } from "react-router";
 import type { EventSlim } from "~/lib/data";
+import { categoryStyle, PLACE_META, placeOf } from "~/lib/eventStyle";
 import { time } from "~/lib/format";
 
 const DAY_MS = 86_400_000;
@@ -39,14 +40,18 @@ function groupByDay(events: EventSlim[]): Map<string, EventSlim[]> {
 
 /** An event as it appears inside a day cell/row. */
 function EventChip({ e, compact }: { e: EventSlim; compact?: boolean }) {
-  const online = e.isVirtual || e.venue === "Zoom";
+  const place = placeOf(e);
   return (
-    <Link to={e.path} className="cal-chip">
+    <Link
+      to={e.path}
+      className="cal-chip"
+      style={categoryStyle(e.categories) as React.CSSProperties}
+    >
       {!e.allDay && <span className="cal-chip__time">{time(e.start)}</span>}
       <span className="cal-chip__title">{e.title}</span>
       {!compact && (
-        <span className="cal-chip__where">
-          {online ? "🖥" : e.venue ? "📍" : ""}
+        <span className="cal-chip__where" aria-label={PLACE_META[place].label}>
+          {PLACE_META[place].icon}
         </span>
       )}
     </Link>

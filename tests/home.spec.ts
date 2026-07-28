@@ -37,12 +37,12 @@ test.describe("Content routes", () => {
   test("calendar lists events and can filter", async ({ page }) => {
     await page.goto("/calendar");
     await expect(page.getByRole("button", { name: "All" })).toBeVisible();
-    await expect(page.locator(".event-row").first()).toBeVisible();
+    await expect(page.locator(".ecard").first()).toBeVisible();
   });
 
   test("calendar row links to an event detail page", async ({ page }) => {
     await page.goto("/calendar");
-    await page.locator("a.event-row").first().click();
+    await page.locator("a.ecard").first().click();
     await expect(page).toHaveURL(/\/event\//);
     await expect(page.getByRole("heading", { name: "When" })).toBeVisible();
     await expect(
@@ -62,7 +62,7 @@ test.describe("Content routes", () => {
     await page.goto("/calendar");
 
     await expect(page.getByText(/^0 upcoming events/)).toHaveCount(0);
-    const rows = page.locator("a.event-row");
+    const rows = page.locator("a.ecard");
     await expect(rows.first()).toBeVisible();
     expect(await rows.count()).toBeGreaterThan(10);
     // Dates shown must be in 2099, not the build's window.
@@ -222,7 +222,7 @@ test.describe("Calendar subscription feeds", () => {
     request,
   }) => {
     await page.goto("/calendar");
-    await page.locator("a.event-row").first().click();
+    await page.locator("a.ecard").first().click();
     const link = page.getByRole("link", { name: "Add to calendar" });
     const href = await link.getAttribute("href");
     expect(href).toMatch(/^\/calendar\/event\/.+\.ics$/);

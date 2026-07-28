@@ -2,9 +2,10 @@ import type { MetaFunction } from "react-router";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router";
 import { MonthView, WeekView } from "~/components/CalendarViews";
+import { EventCard } from "~/components/EventCard";
 import { expandEvents, upcomingEvents } from "~/lib/data";
 import { FACETS, matchesFacet, type FacetKey } from "~/lib/eventFacets";
-import { dateParts, isUpcoming, longDate, time } from "~/lib/format";
+import { dayNumber, isUpcoming, monthOf, weekdayOf } from "~/lib/format";
 import { useNow } from "~/lib/useNow";
 import { SITE } from "~/lib/site";
 
@@ -93,11 +94,20 @@ export default function Calendar() {
     ? feedHttps.replace(/^https?:/, "webcal:")
     : null;
 
+  // Group the agenda by DAY so the date appears once, however many events it
+  // holds — three events on Aug 1 read as one dated block, not three "Aug 1"s.
+  const byDay = useMemo(() => {
+    const map = new Map<string, typeof shown>();
+    for (const e of shown) {
+      const key = e.start.slice(0, 10);
+      (map.get(key) ?? map.set(key, []).get(key)!).push(e);
+    }
+    return [...map.entries()];
+  }, [shown]);
+
   const firstDay = now
     ? localDay(now)
     : (shown[0]?.start.slice(0, 10) ?? localDay(new Date()));
-
-  let lastMonth = "";
 
   return (
     <main id="main">
@@ -199,63 +209,26 @@ export default function Calendar() {
           <MonthView events={shown} from={firstDay} months={6} />
         )}
 
-        {view === "list" &&
-          shown.map((e) => {
-            const { month, day } = dateParts(e.start);
-            const monthLabel = longDate(e.start).replace(/^\w+, /, "");
-            const monthKey = monthLabel.replace(/\d+,?\s?/g, "").trim();
-            const showDivider = monthKey !== lastMonth;
-            lastMonth = monthKey;
-            const online = e.isVirtual || e.venue === "Zoom";
-            return (
-              <div key={e.id}>
-                {showDivider && (
-                  <h2
-                    style={{
-                      fontSize: "1.1rem",
-                      marginTop: "2rem",
-                      color: "var(--muted)",
-                    }}
-                  >
-                    {monthKey}
-                  </h2>
-                )}
-                <Link to={e.path} className="event-row">
-                  <div className="event-row__date">
-                    <div className="m">{month}</div>
-                    <div className="d">{day}</div>
-                    <div className="t">
-                      {e.allDay ? "all day" : time(e.start)}
-                    </div>
-                  </div>
-                  <div>
-                    <h3>{e.title}</h3>
-                    <p className="where">
-                      {online ? "🖥 Online" : "📍 "}
-                      {e.venue && e.venue !== "Zoom" ? e.venue : ""}
-                    </p>
-                    {e.excerpt && (
-                      <p
-                        className="muted"
-                        style={{ margin: "0.25rem 0 0.5rem" }}
-                      >
-                        {e.excerpt.slice(0, 160)}
-                        {e.excerpt.length > 160 ? "…" : ""}
-                      </p>
-                    )}
-                    {e.categories
-                      .filter((c) => c !== "SV DSA")
-                      .slice(0, 3)
-                      .map((c) => (
-                        <span className="tag" key={c}>
-                          {c}
-                        </span>
-                      ))}
-                  </div>
-                </Link>
-              </div>
-            );
-          })}
+        {view === "list" && (
+          <ol className="agenda">
+            {byDay.map(([day, list]) => (
+              <li key={day} className="agenda__day">
+                {/* One heading per DAY — the date isn't repeated for each of
+                    that day's events, and same-day events read as a set. */}
+                <h2 className="agenda__date">
+                  <span className="agenda__dow">{weekdayOf(day)}</span>
+                  <span className="agenda__num">{dayNumber(day)}</span>
+                  <span className="agenda__mon">{monthOf(day)}</span>
+                </h2>
+                <div className="agenda__events">
+                  {list.map((e) => (
+                    <EventCard key={e.id} e={e} />
+                  ))}
+                </div>
+              </li>
+            ))}
+          </ol>
+        )}
       </div>
     </main>
   );

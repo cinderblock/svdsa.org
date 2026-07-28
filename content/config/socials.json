@@ -1,5 +1,11 @@
 [
-  { "label": "Instagram", "href": "https://www.instagram.com/silicon_valley_dsa/" },
+  {
+    "label": "Instagram",
+    "href": "https://www.instagram.com/silicon_valley_dsa/"
+  },
   { "label": "Facebook", "href": "https://www.facebook.com/svdsa/" },
-  { "label": "Twitter / X", "href": "https://twitter.com/SV_DSA" }
+  { "label": "Bluesky", "href": "https://bsky.app/profile/siliconvalleydsa.bsky.social" },
+  { "label": "YouTube", "href": "https://www.youtube.com/@siliconvalleydsa" },
+  { "label": "Twitter / X", "href": "https://twitter.com/SV_DSA" },
+  { "label": "Linktree", "href": "https://linktr.ee/silicon_valley_dsa" }
 ]

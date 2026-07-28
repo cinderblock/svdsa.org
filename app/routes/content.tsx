@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router";
 import { getPage, getPost } from "~/lib/content";
 import { shortDate } from "~/lib/format";
 import { Prose } from "~/components/Prose";
-import { SITE } from "~/lib/site";
+import { PAGE_ICONS, SITE } from "~/lib/site";
 
 export const meta: MetaFunction = ({ location }) => {
   const post = getPost(location.pathname);
@@ -66,10 +66,19 @@ export default function Content() {
 
   const page = getPage(pathname);
   if (page) {
+    // Working-group / committee pages carry the group's emoji (navigation.json).
+    const icon = PAGE_ICONS[page.path];
     return (
       <main id="main">
         <div className="container page-head">
-          <h1>{page.title}</h1>
+          <h1>
+            {icon && (
+              <span className="page-icon" aria-hidden="true">
+                {icon}
+              </span>
+            )}
+            {page.title}
+          </h1>
         </div>
         <article className="container">
           <Prose html={page.html} />

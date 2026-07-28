@@ -1,25 +1,37 @@
 {
   "workingGroups": [
-    { "label": "Housing", "to": "/housing/" },
-    { "label": "Labor", "to": "/labor/" },
-    { "label": "Transit", "to": "/transit/" },
-    { "label": "Community Safety", "to": "/community-safety/" },
-    { "label": "Ecosocialist", "to": "/ecosocialist/" },
-    { "label": "Healthcare", "to": "/healthcare/" },
-    { "label": "International Solidarity", "to": "/international-solidarity/" },
-    { "label": "Liberation & Justice", "to": "/liberation-and-justice/" },
-    { "label": "Mutual Aid", "to": "/mutual-aid/" },
-    { "label": "Political Education", "to": "/political-education/" },
-    { "label": "Socialist Feminist", "to": "/socialist-feminist/" }
+    { "label": "Housing", "to": "/housing/", "icon": "🏘️" },
+    { "label": "Labor", "to": "/labor/", "icon": "🪧" },
+    { "label": "Transit", "to": "/transit/", "icon": "🚉" },
+    { "label": "Community Safety", "to": "/community-safety/", "icon": "🦺" },
+    { "label": "Ecosocialist", "to": "/ecosocialist/", "icon": "🌱" },
+    { "label": "Healthcare", "to": "/healthcare/", "icon": "🩺" },
+    {
+      "label": "International Solidarity",
+      "to": "/international-solidarity/",
+      "icon": "🌎"
+    },
+    {
+      "label": "Liberation & Justice",
+      "to": "/liberation-and-justice/",
+      "icon": "⚖️"
+    },
+    { "label": "Mutual Aid", "to": "/mutual-aid/", "icon": "⛑️" },
+    {
+      "label": "Political Education",
+      "to": "/political-education/",
+      "icon": "📚"
+    },
+    { "label": "Socialist Feminist", "to": "/socialist-feminist/", "icon": "✊" }
   ],
   "committees": [
-    { "label": "Steering", "to": "/steering/" },
-    { "label": "Communications", "to": "/communications/" },
-    { "label": "Finance", "to": "/finance/" },
-    { "label": "Membership", "to": "/membership/" },
-    { "label": "Electoral", "to": "/electoral/" },
-    { "label": "Tech & Data", "to": "/tech-and-data/" },
-    { "label": "Social", "to": "/social/" }
+    { "label": "Steering", "to": "/steering/", "icon": "🧭" },
+    { "label": "Communications", "to": "/communications/", "icon": "🔊" },
+    { "label": "Finance", "to": "/finance/", "icon": "🧮" },
+    { "label": "Membership", "to": "/membership/", "icon": "🌹" },
+    { "label": "Electoral", "to": "/electoral/", "icon": "☑️" },
+    { "label": "Tech & Data", "to": "/tech-and-data/", "icon": "💻" },
+    { "label": "Social", "to": "/social/", "icon": "🤝" }
   ],
   "resources": [
     { "label": "Voters' Guide", "to": "/voters-guide/" },

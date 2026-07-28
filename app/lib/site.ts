@@ -60,6 +60,8 @@ export const CHAPTER_PHOTOS = photosData as ChapterPhoto[];
 export interface NavLink {
   label: string;
   to: string;
+  /** Emoji marker for working groups / committees (content/config/navigation.json). */
+  icon?: string;
 }
 export interface NavGroup {
   label: string;
@@ -75,6 +77,16 @@ const nav = navData as {
 export const WORKING_GROUPS = nav.workingGroups;
 export const COMMITTEES = nav.committees;
 export const RESOURCES = nav.resources;
+
+/**
+ * Emoji by page path, for the working-group / committee pages. Chapter-owned
+ * data (navigation.json) so adding a group means editing content, not code.
+ */
+export const PAGE_ICONS: Record<string, string> = Object.fromEntries(
+  [...WORKING_GROUPS, ...COMMITTEES]
+    .filter((l) => l.icon)
+    .map((l) => [l.to, l.icon as string]),
+);
 
 /** Primary nav composition (structure in code; the lists above are content). */
 export const NAV: NavGroup[] = [

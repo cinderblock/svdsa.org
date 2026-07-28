@@ -1050,3 +1050,174 @@ a.event-row:hover {
     display: inline;
   }
 }
+
+/* Working-group / committee emoji (content/config/navigation.json). Decorative
+   only — the label always carries the meaning, so they're aria-hidden. */
+.nav__icon,
+.card__icon,
+.page-icon {
+  margin-right: 0.45rem;
+  font-style: normal;
+}
+.page-icon {
+  margin-right: 0.6rem;
+}
+
+/* Contact page: the social accounts as full-width red buttons (the footer keeps
+   its compact circles). Wraps into columns where there's room. */
+.social-buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 0.6rem;
+  margin: 0.5rem 0 2rem;
+}
+.social-buttons .btn {
+  justify-content: center;
+}
+
+/* ==========================================================================
+   Agenda (list view) — the date appears ONCE per day, however many events.
+   ========================================================================== */
+
+.agenda {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.agenda__day {
+  display: grid;
+  grid-template-columns: 4.5rem 1fr;
+  gap: 1rem;
+  padding: 1rem 0;
+  border-top: 1px solid var(--border);
+}
+.agenda__date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: start;
+  margin: 0;
+  position: sticky;
+  top: calc(var(--header-h) + 0.5rem);
+  align-self: start;
+  line-height: 1.05;
+}
+.agenda__dow {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  font-weight: 700;
+}
+.agenda__num {
+  font-size: 1.7rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.agenda__mon {
+  font-size: 0.78rem;
+  color: var(--muted);
+  font-weight: 700;
+}
+.agenda__events {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+/* ---- Event card (agenda + home) ---- */
+.ecard {
+  --cat-hue: 355;
+  display: grid;
+  grid-template-columns: 4.5rem 1fr;
+  gap: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  border-left: 4px solid hsl(var(--cat-hue) 65% 45%);
+  background: var(--surface);
+  color: var(--text);
+}
+.ecard:hover {
+  text-decoration: none;
+  background: color-mix(
+    in srgb,
+    hsl(var(--cat-hue) 65% 45%) 7%,
+    var(--surface)
+  );
+}
+.ecard__time {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--muted);
+  padding-top: 0.15rem;
+  white-space: nowrap;
+}
+.ecard__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+.ecard__title {
+  font-weight: 700;
+  line-height: 1.25;
+}
+.ecard__place {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.ecard__place--hybrid {
+  color: hsl(var(--cat-hue) 55% 38%);
+  font-weight: 600;
+}
+.ecard__excerpt {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.ecard__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.25rem;
+}
+
+/* Category-coloured tag. */
+.tag--cat {
+  --cat-hue: 355;
+  background: hsl(var(--cat-hue) 70% 94%);
+  color: hsl(var(--cat-hue) 60% 28%);
+  border: 1px solid hsl(var(--cat-hue) 60% 82%);
+}
+@media (prefers-color-scheme: dark) {
+  .tag--cat {
+    background: hsl(var(--cat-hue) 45% 18%);
+    color: hsl(var(--cat-hue) 70% 80%);
+    border-color: hsl(var(--cat-hue) 40% 32%);
+  }
+  .ecard {
+    border-left-color: hsl(var(--cat-hue) 60% 55%);
+  }
+  .ecard__place--hybrid {
+    color: hsl(var(--cat-hue) 70% 72%);
+  }
+}
+
+@media (max-width: 34rem) {
+  .agenda__day {
+    grid-template-columns: 3.2rem 1fr;
+    gap: 0.6rem;
+  }
+  .ecard {
+    grid-template-columns: 1fr;
+    gap: 0.15rem;
+  }
+}
+
+/* Colour the week/month chips by category too. */
+.cal-chip {
+  --cat-hue: 355;
+  border-left-color: hsl(var(--cat-hue) 65% 45%);
+}
