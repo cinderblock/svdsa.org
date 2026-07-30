@@ -101,6 +101,11 @@ semantics; for the current month it starts at the current week rather than the
 view lives in the URL (`?view=week`) so it can be shared, and the facet filters
 and search apply to every view. See `app/components/CalendarViews.tsx`.
 
+Both grids step by **calendar day** (`new Date(y, m, d + n)`), never by adding
+86,400,000 ms — on a daylight-saving boundary local midnight + 24 h is 23:00 on
+the _same_ date, which repeats a day and drops the next one. `tests/calendar-grid.spec.ts`
+pins the invariant in Pacific time.
+
 ### Calendar subscription feeds
 
 `build-content.ts` also prerenders static iCalendar feeds (`scripts/ics.ts`), so
