@@ -1,0 +1,12 @@
+# External services the chapter already uses.
+# NOTE: the Google Form below is the HARASSMENT GRIEVANCE form, not a contact
+# form — the chapter's contact method is the email address.
+
+joinNational: 'https://www.dsausa.org/join'
+duesWaiver: 'https://act.dsausa.org/survey/dueswaiver/'
+localDues: 'https://www.zeffy.com/embed/donation-form/sv-dsa-local-dues'
+donate: 'https://www.zeffy.com/embed/donation-form/sv-dsa-local-dues'
+newsletter: 'https://actionnetwork.org/forms/sv-dsa-newsletter'
+email: info@siliconvalleydsa.org
+grievanceForm: 'https://docs.google.com/forms/d/1YGZIftsaZGCvtPY2HN4sVb91CakMTiIfVtLKiZfiOo0/viewform'
+grievancePolicy: 'https://docs.google.com/document/d/1aVKRB29mZs2B-aGfaVKIcurZ00PmurY9W-pyyXn54gY/edit'

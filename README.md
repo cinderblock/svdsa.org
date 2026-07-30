@@ -35,11 +35,17 @@ content/
   events/<slug>.md                    # RECURRING series (recurrence: rule — see below)
   events/<year>/<slug>-<date>.md      # one-off / irregular instances, bucketed by year
   pages/<url-path>.md                 # mirrors the page URL path
-  config/*.json                       # site config + style-rules.json (content lint rules)
+  config/*.yaml                       # chapter config: menus, socials, style rules
 ```
 
 Bodies are **Markdown** (things Markdown can't express — embeds, forms — are
 raw HTML islands, rendered via rehype-raw).
+
+**Config is YAML, not JSON**, because people read and edit it: it takes comments
+and doesn't punish a trailing comma. `build-content.ts` parses it and emits
+`content/generated/config/*.json`, which is what the app imports — so YAML never
+reaches the browser bundle and the imports stay typed. JSON in this repo is
+always a generated artifact, never something you hand-edit.
 
 ### Recurring events
 
@@ -82,7 +88,7 @@ shared file.
 | ----------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `scripts/fetch-wp-content.ts` | `bun run migrate`       | One-time / on-demand migration. Pulls WordPress → the per-item Markdown tree above (clears + rewrites the three dirs). Re-run to re-sync until WP is retired.                                                      |
 | `scripts/build-content.ts`    | `bun run build:content` | Network-free. Renders Markdown → HTML, expands recurring events, and assembles `content/generated/*.json` (full + slim splits) plus `sitemap.xml`/`robots.txt` (all git-ignored). Runs before dev/typecheck/build. |
-| `scripts/lint-content.ts`     | `bun run lint:content`  | Style checks from `content/config/style-rules.json` (San José accent, inclusive language, …). `--fix` applies suggestions. The in-browser editor runs the same rules on every save.                                |
+| `scripts/lint-content.ts`     | `bun run lint:content`  | Style checks from `content/config/style-rules.yaml` (San José accent, inclusive language, …). `--fix` applies suggestions. The in-browser editor runs the same rules on every save.                                |
 
 ### Calendar views
 

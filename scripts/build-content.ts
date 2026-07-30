@@ -22,6 +22,7 @@
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import matter from "gray-matter";
+import yaml from "js-yaml";
 import { categorySlug, FACETS, matchesFacet } from "../app/lib/eventFacets";
 import { occurrences, type Recurrence } from "../app/lib/recurrence";
 import { icalendar, utcStamp, type IcsEvent } from "./ics";
@@ -67,6 +68,26 @@ async function readCollection(dir: string) {
     }),
   );
 }
+
+/**
+ * Chapter-editable configuration is YAML — humans read and edit it, so it gets
+ * comments and no punctuation ceremony. The app imports the JSON emitted here
+ * instead of the YAML, which keeps YAML parsing out of the browser bundle and
+ * keeps the imports typed.
+ */
+async function readConfig(name: string): Promise<unknown> {
+  const text = await readFile(join(CONTENT, "config", `${name}.yaml`), "utf8");
+  return yaml.load(text) ?? {};
+}
+
+const CONFIG_FILES = [
+  "site",
+  "external",
+  "socials",
+  "navigation",
+  "photos",
+  "style-rules",
+];
 
 // ---- Assemble collections ---------------------------------------------------
 
@@ -246,8 +267,15 @@ const eventSeries = eventDocs
   .sort((a, b) => a.slug.localeCompare(b.slug));
 
 await mkdir(GENERATED, { recursive: true });
+await mkdir(join(GENERATED, "config"), { recursive: true });
 const write = (name: string, value: unknown) =>
   writeFile(join(GENERATED, name), JSON.stringify(value, null, 2) + "\n");
+
+for (const name of CONFIG_FILES)
+  await writeFile(
+    join(GENERATED, "config", `${name}.json`),
+    JSON.stringify(await readConfig(name), null, 2) + "\n",
+  );
 
 const buildDate = new Date();
 await write("site.json", {

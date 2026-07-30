@@ -10,14 +10,15 @@
 
 import { readdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import yaml from "js-yaml";
 import { fixText, lintText, type StyleRule } from "../editor/src/content/lint";
 
 const CONTENT = join(import.meta.dirname, "..", "content");
 const FIX = process.argv.includes("--fix");
 
-const rules: StyleRule[] = JSON.parse(
-  await readFile(join(CONTENT, "config", "style-rules.json"), "utf8"),
-);
+const rules = yaml.load(
+  await readFile(join(CONTENT, "config", "style-rules.yaml"), "utf8"),
+) as StyleRule[];
 
 let errors = 0;
 let warns = 0;

@@ -1,14 +1,14 @@
 name: CI
 
-# Deploys + per-branch preview URLs are handled by Cloudflare Workers Builds
-# (connected in the Cloudflare dashboard), which runs `bun run build` and
-# `wrangler deploy` on push. This workflow only validates the code, so no
-# Cloudflare secrets are needed here.
+# The SITE deploys via Cloudflare Workers Builds (connected in the dashboard),
+# which builds and `wrangler deploy`s on push and gives every branch a preview
+# URL. The EDITOR Worker isn't part of that integration, so this workflow
+# deploys it: `red` goes live, any other branch is uploaded as a preview
+# version. Deploying locally with `bun run editor:deploy` keeps working — CI is
+# an addition, not a gate.
 
 on:
   push:
-    branches:
-      - red
   pull_request:
   workflow_dispatch:
 
@@ -45,3 +45,41 @@ jobs:
 
       - name: Build
         run: bun run build
+
+  # ---- Editor Worker ---------------------------------------------------------
+  # Needs CLOUDFLARE_API_TOKEN (Workers Scripts: Edit) in repo secrets. Skipped
+  # automatically on forks and when the token isn't configured.
+  deploy-editor:
+    needs: check
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install
+        run: bun install --frozen-lockfile
+
+      - name: Build editor SPA
+        run: bun run editor:build
+
+      - name: Deploy (production)
+        if: github.ref == 'refs/heads/red' && env.CLOUDFLARE_API_TOKEN != ''
+        working-directory: editor
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: bunx wrangler deploy
+
+      - name: Upload preview version (other branches)
+        if: github.ref != 'refs/heads/red' && env.CLOUDFLARE_API_TOKEN != ''
+        working-directory: editor
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          alias="$(echo "${GITHUB_REF_NAME}" | tr '[:upper:]/_' '[:lower:]--' | tr -cd 'a-z0-9-' | cut -c1-40)"
+          bunx wrangler versions upload --preview-alias "$alias"

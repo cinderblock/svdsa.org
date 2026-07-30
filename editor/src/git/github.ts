@@ -132,7 +132,9 @@ export interface RawItem {
   text: string; // raw .md (frontmatter + body)
 }
 
-const CONTENT_RE = /^content\/(pages|posts|events|config)\/.+\.md$/;
+/** Editable content: Markdown items, plus the chapter's YAML configuration. */
+const CONTENT_RE =
+  /^content\/(?:(?:pages|posts|events)\/.+\.md|config\/.+\.ya?ml)$/;
 
 /** A GitHub client bound to one installation token (mint once per request). */
 export async function createGitHub(env: GhEnv) {
@@ -295,7 +297,11 @@ export async function createGitHub(env: GhEnv) {
       );
       const out: Record<string, ItemMeta> = {};
       for (const e of data.repository.object?.entries ?? []) {
-        if (e.type !== "blob" || !e.name.endsWith(".md")) continue;
+        if (
+          e.type !== "blob" ||
+          !(e.name.endsWith(".md") || e.name.endsWith(".yaml"))
+        )
+          continue;
         const text = e.object?.text ?? "";
         const fmEnd = text.indexOf("\n---", 3);
         const fm = fmEnd === -1 ? text.slice(0, 4000) : text.slice(0, fmEnd);

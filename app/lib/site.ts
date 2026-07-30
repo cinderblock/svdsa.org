@@ -10,11 +10,11 @@
  * chapter already uses (Action Network, Zeffy, national DSA, Google Forms).
  */
 
-import siteData from "../../content/config/site.json";
-import externalData from "../../content/config/external.json";
-import socialsData from "../../content/config/socials.json";
-import navData from "../../content/config/navigation.json";
-import photosData from "../../content/config/photos.json";
+import siteData from "../../content/generated/config/site.json";
+import externalData from "../../content/generated/config/external.json";
+import socialsData from "../../content/generated/config/socials.json";
+import navData from "../../content/generated/config/navigation.json";
+import photosData from "../../content/generated/config/photos.json";
 
 export interface SiteInfo {
   name: string;

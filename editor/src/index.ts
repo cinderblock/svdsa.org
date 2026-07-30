@@ -18,6 +18,7 @@ import {
   validBranchName,
 } from "./content/serialize";
 import { fixText, lintText, type StyleRule } from "./content/lint";
+import yaml from "js-yaml";
 
 export interface Env {
   GIT_HOST?: "github" | "gitlab";
@@ -117,8 +118,8 @@ async function handleApi(
     // answer in both places. Navigation is content, so read it from this ref.
     let nav: unknown = null;
     try {
-      const raw = await gh.readItem("content/config/navigation.json", base);
-      nav = JSON.parse(raw.text);
+      const raw = await gh.readItem("content/config/navigation.yaml", base);
+      nav = yaml.load(raw.text);
     } catch {
       /* nav is optional — the browser falls back to plain sections */
     }
@@ -210,10 +211,10 @@ async function handleApi(
     let autofixed = 0;
     try {
       const rulesRaw = await gh.readItem(
-        "content/config/style-rules.json",
+        "content/config/style-rules.yaml",
         base,
       );
-      const rules = JSON.parse(rulesRaw.text) as StyleRule[];
+      const rules = yaml.load(rulesRaw.text) as StyleRule[];
       const before = lintText(text, rules).length;
       text = fixText(text, rules);
       lint = lintText(text, rules);
