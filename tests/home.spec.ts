@@ -129,6 +129,12 @@ test.describe("Recurring events", () => {
   }) => {
     // A Tuesday — the Free Store is a 3rd-Saturday series.
     await page.goto("/event/sjfreestore/2027-11-16/");
+    // This URL is past the prerender horizon, so there is no static page: the
+    // whole route resolves from the rule after hydration. Wait for the route
+    // to actually render before asserting — in dev the client bundle can take
+    // longer than the default 5 s timeout under parallel load, and asserting
+    // early just sees the app shell with no <h1> yet.
+    await expect(page.locator("#main")).toBeVisible({ timeout: 30_000 });
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(
       "This event isn't on the calendar",
     );

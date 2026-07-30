@@ -20,15 +20,24 @@ export interface Me {
   /** Origin of the production site Worker, derived server-side. */
   siteOrigin: string;
 }
-export interface ItemDetail {
+interface ItemCommon {
   path: string;
   ref: string;
   base: string;
   fromDraft: boolean;
-  frontmatter: Record<string, unknown>;
-  body: string;
   sha: string;
 }
+
+/**
+ * Two genuinely different kinds of file, kept apart by the type system so the
+ * UI can't accidentally put YAML in the rich-text editor (which would rewrite
+ * it as Markdown — see isConfigPath in the Worker).
+ */
+export type ItemDetail = ItemCommon &
+  (
+    | { kind: "markdown"; frontmatter: Record<string, unknown>; body: string }
+    | { kind: "yaml"; text: string }
+  );
 export interface LintFinding {
   ruleId: string;
   level: "error" | "warn";
@@ -94,12 +103,12 @@ export const api = {
     req<{ meta: Record<string, ItemMeta> }>(
       `/api/meta?dir=${encodeURIComponent(dir)}&base=${encodeURIComponent(base)}`,
     ),
-  save: (payload: {
-    base: string;
-    path: string;
-    frontmatter: Record<string, unknown>;
-    body: string;
-  }) => post<SaveResult>("/api/save", payload),
+  save: (
+    payload: { base: string; path: string } & (
+      | { frontmatter: Record<string, unknown>; body: string }
+      | { text: string }
+    ),
+  ) => post<SaveResult>("/api/save", payload),
   createBranch: (name: string, from: string) =>
     post<{ branch: string }>("/api/branch", { name, from }),
   publish: (base: string, title?: string) =>

@@ -150,12 +150,21 @@ export function App() {
     try {
       const d = await api.item(path, base);
       setItem(d);
-      setBody(d.body);
-      setMode("wysiwyg");
-      setTitle(String(d.frontmatter.title ?? ""));
-      setSpecs(classify(d.frontmatter));
-      setFmValues({});
       setLint([]);
+      if (d.kind === "yaml") {
+        // Config is data, not a document: no title, no frontmatter fields, and
+        // never the rich-text editor — it would rewrite the YAML as Markdown.
+        setBody(d.text);
+        setMode("raw");
+        setTitle("");
+        setSpecs([]);
+      } else {
+        setBody(d.body);
+        setMode("wysiwyg");
+        setTitle(String(d.frontmatter.title ?? ""));
+        setSpecs(classify(d.frontmatter));
+      }
+      setFmValues({});
     } catch (e) {
       setMsg({ ok: false, text: String(e) });
     }
@@ -172,15 +181,22 @@ export function App() {
     setBusy("save");
     setMsg(null);
     try {
-      const latestBody = edRef.current?.getValue() ?? body;
-      const fm = buildFrontmatter(item.frontmatter, specs, fmValues, true);
-      if (title !== String(item.frontmatter.title ?? "")) fm.title = title;
-      const r = await api.save({
-        base,
-        path: item.path,
-        frontmatter: fm,
-        body: latestBody,
-      });
+      const latest = edRef.current?.getValue() ?? body;
+      const r = await api.save(
+        item.kind === "yaml"
+          ? { base, path: item.path, text: latest }
+          : (() => {
+              const fm = buildFrontmatter(
+                item.frontmatter,
+                specs,
+                fmValues,
+                true,
+              );
+              if (title !== String(item.frontmatter.title ?? ""))
+                fm.title = title;
+              return { base, path: item.path, frontmatter: fm, body: latest };
+            })(),
+      );
       setMsg({
         ok: true,
         text:
@@ -335,44 +351,68 @@ export function App() {
               <div className="path">
                 {item.path}
                 {item.fromDraft && <span className="chip">draft version</span>}
-                {siteOrigin && typeof item.frontmatter.path === "string" && (
-                  <a
-                    className="live"
-                    href={`${siteOrigin}${item.frontmatter.path}`}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    view live ↗
-                  </a>
-                )}
+                {siteOrigin &&
+                  item.kind === "markdown" &&
+                  typeof item.frontmatter.path === "string" && (
+                    <a
+                      className="live"
+                      href={`${siteOrigin}${item.frontmatter.path}`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      view live ↗
+                    </a>
+                  )}
               </div>
-              <input
-                className="title"
-                placeholder="Title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-              />
-              <FrontmatterForm
-                specs={specs}
-                values={fmValues}
-                anchorStart={String(item.frontmatter.start ?? "")}
-                onChange={(k, v) => setFmValues((cur) => ({ ...cur, [k]: v }))}
-              />
+
+              {item.kind === "markdown" ? (
+                <>
+                  <input
+                    className="title"
+                    placeholder="Title"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                  />
+                  <FrontmatterForm
+                    specs={specs}
+                    values={fmValues}
+                    anchorStart={String(item.frontmatter.start ?? "")}
+                    onChange={(k, v) =>
+                      setFmValues((cur) => ({ ...cur, [k]: v }))
+                    }
+                  />
+                </>
+              ) : (
+                <p className="confignote">
+                  <b>Site settings.</b> This is a settings file, not a page, so
+                  it is edited as YAML — indentation matters. The comments at
+                  the top say what it controls. A file that doesn&rsquo;t parse
+                  is refused on save, so you can&rsquo;t break the site by typo.
+                </p>
+              )}
 
               <div className="modebar">
                 <div className="tabs">
-                  <button
-                    className={mode === "wysiwyg" ? "on" : ""}
-                    onClick={() => switchMode("wysiwyg")}
-                  >
-                    Rich text
-                  </button>
-                  <button
-                    className={mode === "raw" ? "on" : ""}
-                    onClick={() => switchMode("raw")}
-                  >
-                    Markdown
-                  </button>
+                  {item.kind === "markdown" ? (
+                    <>
+                      <button
+                        className={mode === "wysiwyg" ? "on" : ""}
+                        onClick={() => switchMode("wysiwyg")}
+                      >
+                        Rich text
+                      </button>
+                      <button
+                        className={mode === "raw" ? "on" : ""}
+                        onClick={() => switchMode("raw")}
+                      >
+                        Markdown
+                      </button>
+                    </>
+                  ) : (
+                    <button className="on" disabled>
+                      YAML
+                    </button>
+                  )}
                 </div>
                 <button
                   className="save"
@@ -384,7 +424,7 @@ export function App() {
               </div>
 
               <div className="pane">
-                {mode === "wysiwyg" ? (
+                {mode === "wysiwyg" && item.kind === "markdown" ? (
                   <Wysiwyg
                     key={`${item.path}:${item.sha}:wysiwyg`}
                     ref={edRef}
@@ -396,6 +436,7 @@ export function App() {
                       key={`${item.path}:${item.sha}:raw`}
                       ref={edRef}
                       initial={body}
+                      language={item.kind === "yaml" ? "yaml" : "markdown"}
                     />
                   </Suspense>
                 )}

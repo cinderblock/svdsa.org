@@ -13,6 +13,7 @@
 import { createGitHub, type Author } from "./git/github";
 import {
   branchName,
+  isConfigPath,
   parseMarkdown,
   serializeMarkdown,
   validBranchName,
@@ -39,6 +40,15 @@ function editor(request: Request): Author {
   const email =
     request.headers.get("Cf-Access-Authenticated-User-Email") ?? "editor@svdsa";
   return { name: email, email };
+}
+
+function parsesAsYaml(text: string): boolean {
+  try {
+    yaml.load(text);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 const json = (data: unknown, status = 200) =>
@@ -143,16 +153,13 @@ async function handleApi(
       }
     }
     const raw = await gh.readItem(p, ref);
+    const common = { path: p, ref, base, fromDraft, sha: raw.sha };
+    // Config is data: hand back the file verbatim. Splitting it into
+    // frontmatter+body would feed YAML to the Markdown editor (see isConfigPath).
+    if (isConfigPath(p))
+      return json({ ...common, kind: "yaml", text: raw.text });
     const { frontmatter, body } = parseMarkdown(raw.text);
-    return json({
-      path: p,
-      ref,
-      base,
-      fromDraft,
-      frontmatter,
-      body,
-      sha: raw.sha,
-    });
+    return json({ ...common, kind: "markdown", frontmatter, body });
   }
 
   // Frontmatter metadata for one directory (labels, URLs, dates, recurrence).
@@ -192,21 +199,41 @@ async function handleApi(
       path: p,
       frontmatter,
       body,
+      text: configText,
     } = (await request.json()) as {
       base: string;
       path: string;
-      frontmatter: Record<string, unknown>;
-      body: string;
+      frontmatter?: Record<string, unknown>;
+      body?: string;
+      text?: string;
     };
     if (!p || !base) return json({ error: "base and path required" }, 400);
+    const isConfig = isConfigPath(p);
+
+    // Config is committed verbatim — but a config file that doesn't parse
+    // breaks the whole site build, so refuse it here and hand the editor the
+    // parser's own message. Markdown is normalized through serializeMarkdown.
+    let text: string;
+    if (isConfig) {
+      if (typeof configText !== "string")
+        return json({ error: "text required for config files" }, 400);
+      try {
+        yaml.load(configText);
+      } catch (e) {
+        return json({ error: `YAML error — ${(e as Error).message}` }, 400);
+      }
+      text = configText;
+    } else {
+      text = serializeMarkdown(frontmatter ?? {}, body ?? "");
+    }
+
     const who = editor(request);
     const branch = branchName(who.email, base);
     await gh.ensureBranch(branch, base);
-    // Normalize (serializeMarkdown), then AUTO-FIX every style rule with a
-    // deterministic suggestion before committing; only unfixable findings are
-    // returned as warnings. Rules are chapter-owned content — if the rules
-    // file is missing or broken, saves still succeed, just unlinted.
-    let text = serializeMarkdown(frontmatter, body);
+    // AUTO-FIX every style rule with a deterministic suggestion before
+    // committing; only unfixable findings come back as warnings. Rules are
+    // chapter-owned content — if the rules file is missing or broken, saves
+    // still succeed, just unlinted.
     let lint: ReturnType<typeof lintText> = [];
     let autofixed = 0;
     try {
@@ -216,7 +243,11 @@ async function handleApi(
       );
       const rules = yaml.load(rulesRaw.text) as StyleRule[];
       const before = lintText(text, rules).length;
-      text = fixText(text, rules);
+      const fixed = fixText(text, rules);
+      // A style fix is a blind text replacement, so on YAML it could in
+      // principle land inside a key or break quoting. Keep it only if the file
+      // still parses; otherwise commit what the editor actually wrote.
+      if (!isConfig || parsesAsYaml(fixed)) text = fixed;
       lint = lintText(text, rules);
       autofixed = before - lint.length;
     } catch {

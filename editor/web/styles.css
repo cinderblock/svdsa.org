@@ -276,6 +276,15 @@ header .ghost {
 #ed .empty {
   color: var(--muted);
 }
+/* Shown instead of title+frontmatter when the open file is chapter config. */
+.confignote {
+  margin: 0.6rem 0;
+  padding: 0.6rem 0.75rem;
+  border-left: 3px solid var(--accent, #c00);
+  background: color-mix(in srgb, currentColor 6%, transparent);
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
 .path {
   color: var(--muted);
   font-size: 0.8rem;
