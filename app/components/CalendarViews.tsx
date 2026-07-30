@@ -20,6 +20,25 @@ import { time } from "~/lib/format";
 const DAY_MS = 86_400_000;
 const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
+/**
+ * Add whole CALENDAR days.
+ *
+ * Millisecond arithmetic (`t + n * DAY_MS`) is wrong across a daylight-saving
+ * boundary: on the US fall-back day, local midnight + 24 h is 23:00 on the
+ * SAME date. A grid built that way repeats a day and drops the next one —
+ * which is exactly what happened around 2026-11-01. Constructing a new local
+ * Date from (year, month, day + n) hands the arithmetic to the platform's
+ * calendar, which handles the 23- and 25-hour days.
+ */
+function addDays(d: Date, n: number): Date {
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
+}
+
+/** Whole days between two local midnights (rounded past DST's ±1 h). */
+function daysBetween(a: Date, b: Date): number {
+  return Math.round((b.getTime() - a.getTime()) / DAY_MS);
+}
+
 /** 'YYYY-MM-DD' of a Date, in local time (not UTC — avoids off-by-one). */
 function ymd(d: Date): string {
   const p = (n: number) => String(n).padStart(2, "0");
@@ -75,16 +94,13 @@ export function WeekView({
   const today = ymd(new Date());
   const start = atMidnight(from);
   // Back up to Sunday so each block is a real calendar week.
-  const firstSunday = new Date(start.getTime() - start.getDay() * DAY_MS);
+  const firstSunday = addDays(start, -start.getDay());
 
   return (
     <div className="cal-weeks">
       {Array.from({ length: weeks }, (_, w) => {
-        const weekStart = new Date(firstSunday.getTime() + w * 7 * DAY_MS);
-        const days = Array.from(
-          { length: 7 },
-          (_, i) => new Date(weekStart.getTime() + i * DAY_MS),
-        );
+        const weekStart = addDays(firstSunday, w * 7);
+        const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
         const weekEnd = days[6];
         const label = `${weekStart.toLocaleDateString("en-US", { month: "short", day: "numeric" })} – ${weekEnd.toLocaleDateString(
           "en-US",
@@ -172,19 +188,15 @@ export function MonthView({
           0,
         );
         // Pad to whole weeks (Sunday-start) so the grid is rectangular…
-        let gridStart = new Date(
-          monthStart.getTime() - monthStart.getDay() * DAY_MS,
-        );
+        let gridStart = addDays(monthStart, -monthStart.getDay());
         // …but for the CURRENT month, start at this week rather than the 1st:
         // this is an upcoming-events calendar, so weeks that are entirely in
         // the past would otherwise open the view on rows of empty cells.
         if (m === 0) {
-          const thisWeek = new Date(first.getTime() - first.getDay() * DAY_MS);
+          const thisWeek = addDays(first, -first.getDay());
           if (thisWeek > gridStart) gridStart = thisWeek;
         }
-        const cells = Math.ceil(
-          (monthEnd.getTime() - gridStart.getTime()) / DAY_MS + 1,
-        );
+        const cells = daysBetween(gridStart, monthEnd) + 1;
         const weekRows = Math.ceil(cells / 7);
 
         return (
@@ -214,9 +226,7 @@ export function MonthView({
               {Array.from({ length: weekRows }, (_, row) => (
                 <tr key={row}>
                   {Array.from({ length: 7 }, (_, col) => {
-                    const d = new Date(
-                      gridStart.getTime() + (row * 7 + col) * DAY_MS,
-                    );
+                    const d = addDays(gridStart, row * 7 + col);
                     const key = ymd(d);
                     const outside = d.getMonth() !== monthStart.getMonth();
                     const list = outside ? [] : (byDay.get(key) ?? []);
