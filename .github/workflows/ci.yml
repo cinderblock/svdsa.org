@@ -3,9 +3,15 @@ name: CI
 # The SITE deploys via Cloudflare Workers Builds (connected in the dashboard),
 # which builds and `wrangler deploy`s on push and gives every branch a preview
 # URL. The EDITOR Worker isn't part of that integration, so this workflow
-# deploys it: `red` goes live, any other branch is uploaded as a preview
-# version. Deploying locally with `bun run editor:deploy` keeps working — CI is
-# an addition, not a gate.
+# deploys it — from `red` only.
+#
+# There is deliberately ONE editor deployment. It is a tool, not a per-branch
+# artifact: a single instance already edits any base branch (`?base=`), and the
+# previews it links to are the SITE's branch previews. Per-branch copies of the
+# editor would only add versions to reason about.
+#
+# Deploying locally with `bun run editor:deploy` keeps working — CI is an
+# addition, not a gate.
 
 on:
   push:
@@ -48,11 +54,15 @@ jobs:
 
   # ---- Editor Worker ---------------------------------------------------------
   # Needs CLOUDFLARE_API_TOKEN (Workers Scripts: Edit) in repo secrets. Skipped
-  # automatically on forks and when the token isn't configured.
+  # automatically on forks and when the token isn't configured. The token lives
+  # at JOB level because the `env` context — unlike `secrets` — can be read from
+  # a step's `if:`, which is how the skip-when-unset check works.
   deploy-editor:
     needs: check
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/red'
     runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -68,18 +78,7 @@ jobs:
       - name: Build editor SPA
         run: bun run editor:build
 
-      - name: Deploy (production)
-        if: github.ref == 'refs/heads/red' && env.CLOUDFLARE_API_TOKEN != ''
+      - name: Deploy
+        if: env.CLOUDFLARE_API_TOKEN != ''
         working-directory: editor
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: bunx wrangler deploy
-
-      - name: Upload preview version (other branches)
-        if: github.ref != 'refs/heads/red' && env.CLOUDFLARE_API_TOKEN != ''
-        working-directory: editor
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        run: |
-          alias="$(echo "${GITHUB_REF_NAME}" | tr '[:upper:]/_' '[:lower:]--' | tr -cd 'a-z0-9-' | cut -c1-40)"
-          bunx wrangler versions upload --preview-alias "$alias"

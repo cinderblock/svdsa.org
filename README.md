@@ -201,6 +201,19 @@ Git integration for Workers):
 5. Push to `red` → production; open a PR / push a branch → a preview URL.
 
 `.github/workflows/ci.yml` runs format/typecheck/test/build on every push and
-PR (no Cloudflare secrets needed there — Workers Builds does the deploying).
+PR. Workers Builds does the site's deploying, so no Cloudflare secrets are
+needed for that.
+
+### The editor Worker
+
+The editor (`editor/wrangler.jsonc`, Worker `edit`) is a **separate** Worker and
+is **not** connected to Workers Builds, so `ci.yml` deploys it — from `red` only,
+using a `CLOUDFLARE_API_TOKEN` repo secret (Workers Scripts: Edit). Without the
+secret the step skips itself; `bun run editor:deploy` still works locally.
+
+**There is exactly one editor deployment, on purpose.** The editor is a tool,
+not a per-branch artifact: one instance edits any base branch (`?base=`), and
+the preview links it hands out point at the _site's_ per-branch previews. Adding
+per-branch editor copies would only create versions to reason about.
 
 > The default/production branch is **`red`** (chapter theming), not `main`/`master`.
