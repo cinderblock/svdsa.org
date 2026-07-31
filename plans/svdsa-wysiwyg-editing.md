@@ -153,6 +153,29 @@ accurate preview), and can be deployed/version-gated independently.
 - **Phase 6 — Hardening.** Roles/permissions, optional PR-review publish path,
   audit log surfacing, conflict UX, Playwright coverage for the editor.
 
+## Decided 2026-07-31 (editor roadmap)
+
+- **New content goes through a wizard**, not a blank form — it walks an editor
+  through the options that matter (and introduces ones they wouldn't know to
+  ask for). It owns path construction, so nobody hand-writes `path:`.
+- **Rename must leave an HTTP redirect.** URL preservation is a founding
+  premise of the rebuild; a rename without a redirect breaks it.
+- **Conflicts are same-branch only** — drafts are `draft/<who>/<base>`, so the
+  case is one person in two tabs or a stale tab, not two people. A moved _base_
+  is different staleness and needs "update draft from base", not a 409. A new
+  branch is the **escape hatch** for keeping both versions, not the default
+  resolution.
+- **Images live in the repo** (`content/media/<year>/`), resized/compressed
+  before upload. Versioned with the content, atomic in the PR, free on Workers
+  assets, correct in branch previews — and PR review becomes the **consent
+  checkpoint**, which the chapter needs given the member-photo concern below.
+  R2 was rejected: extra infra, another credential, and it breaks both
+  git-as-source-of-truth and preview fidelity.
+- **A live preview is worth building even though a WYSIWYG exists.** Milkdown
+  shows structure in Milkdown's theme — not the site's fonts, spacing or
+  components, and raw-HTML islands don't render as they do live. The preview
+  must run the site's own `cleanHtml`/`Prose`, and applies to both modes.
+
 ## Findings / gotchas
 
 - Content bodies are **WP HTML inside Markdown**, rendered by `cleanHtml` +
@@ -189,6 +212,18 @@ accurate preview), and can be deployed/version-gated independently.
   the grid repeated a day and dropped the next one, twice a year. React had
   been reporting it as a duplicate-key warning for `2026-11-01`; it was a real
   rendering bug, not log noise. Use `new Date(y, m, d + n)`.
+- **The editor was unprotected, and had been the whole time.** `Cf-Access-…-Email`
+  was read as a plain header with a `?? "editor@svdsa"` fallback, so a
+  never-created Access application was indistinguishable from a working one —
+  and `CF_ACCESS_TEAM_DOMAIN`/`CF_ACCESS_AUD` were in fact still empty. Fixed by
+  verifying the signed JWT and failing closed. **The lesson generalizes: an auth
+  check with a default identity is not an auth check.** `REQUIRE_ACCESS:"false"`
+  in `editor/wrangler.jsonc` is the visible record that this deployment is still
+  open; delete it once the Access app exists.
+- **A filter used for display is not an authorization boundary.** `CONTENT_RE`
+  gated the file listing only; `/api/save` would commit any path it was handed,
+  including `.github/workflows/`. One predicate (`isEditablePath`) now serves
+  both.
 - Playwright's 5 s default is not enough for lazily-loaded Monaco or for a
   route that resolves entirely after hydration, when the suite runs in
   parallel against the dev server. Wait for the editor/route to actually hold
