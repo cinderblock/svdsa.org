@@ -36,6 +36,14 @@ Related plan: `plans/svdsa-static-rebuild.md` (the base build this extends).
   without repo access (bot commits + editor identity in metadata/co-author).
 - **Production stays a pure static-assets Worker.** The editor is a _separate_
   Worker/project on its own domain; production `svdsa` Worker is untouched.
+- **The editor is a separate workspace package** (`@svdsa/editor`,
+  `editor/package.json`), not just a subdirectory. It owns Milkdown/Monaco so
+  the site's dependency graph never sees them, and — the deployment reason —
+  Workers Builds can then use `editor` as a plain **root directory** and run the
+  ordinary `bun install && bun run build`. No `--config` flag, no API token, no
+  GitHub Actions deploy step. Both Workers deploy via Workers Builds; `ci.yml`
+  is checks-only. Non-production branch builds are **off** for `edit`: one
+  editor deployment, deliberately.
 - **Build a purpose-built, small custom CMS Worker** (not TinaCMS/Decap/Sveltia).
   Full control of the D1 draft model + Cloudflare Access + GitHub App commit.
 - **Editor runs on a `*.workers.dev` domain for now** (e.g.
