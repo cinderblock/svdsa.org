@@ -82,6 +82,24 @@ export function isConfigPath(path: string): boolean {
   return /^content\/config\/[^/]+\.ya?ml$/.test(path);
 }
 
+/**
+ * Everything the editor may read OR write: chapter content and configuration.
+ *
+ * This is the Worker's write boundary, not a display filter. The editor commits
+ * as a trusted GitHub App, so an unconstrained `path` in a save request means
+ * any file in the repository — `.github/workflows/*` included. It only ever
+ * lands on a `draft/` branch and publishing goes through a PR, but that is one
+ * careless merge away from being someone else's problem.
+ *
+ * Deliberately excludes `..` and absolute paths by construction (the pattern is
+ * anchored and every segment is explicit).
+ */
+export function isEditablePath(path: string): boolean {
+  return /^content\/(?:(?:pages|posts|events)\/[^\s]+\.md|config\/[^/]+\.ya?ml)$/.test(
+    path,
+  ) && !path.includes("..");
+}
+
 /** URL/branch-safe slug. */
 export function slugify(input: string): string {
   return input

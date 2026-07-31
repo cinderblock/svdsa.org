@@ -13,6 +13,7 @@ import {
   type ItemDetail,
   type LintFinding,
   type SiteNav,
+  SaveConflict,
 } from "./api";
 import { FileList } from "./filelist";
 import {
@@ -52,6 +53,7 @@ function groupBranches(branches: string[]): {
 export function App() {
   const [email, setEmail] = useState("");
   const [siteOrigin, setSiteOrigin] = useState("");
+  const [unprotected, setUnprotected] = useState<string | null>(null);
   const [branches, setBranches] = useState<string[]>([]);
   const [base, setBase] = useState("");
   const [items, setItems] = useState<string[]>([]);
@@ -64,6 +66,9 @@ export function App() {
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [mode, setMode] = useState<Mode>("wysiwyg");
+  /** Blob sha the open file was loaded at — sent back to detect conflicts. */
+  const [sha, setSha] = useState<string | undefined>();
+  const [conflict, setConflict] = useState(false);
 
   const [busy, setBusy] = useState<string | null>(null);
   const [msg, setMsg] = useState<{
@@ -87,6 +92,7 @@ export function App() {
       const [me, b] = await Promise.all([api.me(), api.branches()]);
       setEmail(me.email);
       setSiteOrigin(me.siteOrigin ?? "");
+      setUnprotected(me.unprotected ?? null);
       setBranches(b.branches.filter((x) => !x.startsWith("draft/")));
       setBase(
         (cur) =>
@@ -150,6 +156,8 @@ export function App() {
     try {
       const d = await api.item(path, base);
       setItem(d);
+      setSha(d.sha);
+      setConflict(false);
       setLint([]);
       if (d.kind === "yaml") {
         // Config is data, not a document: no title, no frontmatter fields, and
@@ -184,7 +192,7 @@ export function App() {
       const latest = edRef.current?.getValue() ?? body;
       const r = await api.save(
         item.kind === "yaml"
-          ? { base, path: item.path, text: latest }
+          ? { base, path: item.path, sha, text: latest }
           : (() => {
               const fm = buildFrontmatter(
                 item.frontmatter,
@@ -194,7 +202,13 @@ export function App() {
               );
               if (title !== String(item.frontmatter.title ?? ""))
                 fm.title = title;
-              return { base, path: item.path, frontmatter: fm, body: latest };
+              return {
+                base,
+                path: item.path,
+                sha,
+                frontmatter: fm,
+                body: latest,
+              };
             })(),
       );
       setMsg({
@@ -207,10 +221,47 @@ export function App() {
           ` — preview builds in ~1–2 min`,
         href: r.previewUrl,
       });
+      setSha(r.sha);
+      setConflict(false);
       setLint(r.lint ?? []);
       refreshStatus(base);
     } catch (e) {
-      setMsg({ ok: false, text: String(e) });
+      if (e instanceof SaveConflict) setConflict(true);
+      setMsg({ ok: false, text: (e as Error).message });
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  /** Discard local edits and re-open the file at whatever is there now. */
+  async function reloadOpen() {
+    if (item) await open(item.path);
+  }
+
+  /**
+   * Conflict escape hatch: fork the base into a new branch and save there, so
+   * BOTH versions survive and the difference can be settled in a PR. Switching
+   * base re-points the draft workspace, so the retry lands on the new branch.
+   */
+  async function saveToNewBranch() {
+    const name = window.prompt(
+      "Name a branch to keep your version on (from '" + base + "'):",
+      `rework/${(item?.path.split("/").pop() ?? "edit").replace(/\.[^.]+$/, "")}`,
+    );
+    if (!name) return;
+    setBusy("branch");
+    try {
+      const r = await api.createBranch(name.trim(), base);
+      const b = await api.branches();
+      setBranches(b.branches.filter((x) => !x.startsWith("draft/")));
+      setBase(r.branch);
+      setConflict(false);
+      setMsg({
+        ok: true,
+        text: `created ${r.branch} — reopen the file here and save your version`,
+      });
+    } catch (e) {
+      setMsg({ ok: false, text: (e as Error).message });
     } finally {
       setBusy(null);
     }
@@ -307,6 +358,16 @@ export function App() {
         <span className="who">{email}</span>
       </header>
 
+      {unprotected && (
+        <div className="alarm" role="alert">
+          <b>⚠ This editor is not protected.</b> Anyone who knows the URL can
+          edit the site and commit as you — {unprotected}. Put a Cloudflare
+          Access application in front of it, set{" "}
+          <code>CF_ACCESS_TEAM_DOMAIN</code> and <code>CF_ACCESS_AUD</code>, and
+          remove <code>REQUIRE_ACCESS: "false"</code>.
+        </div>
+      )}
+
       {changed.length > 0 && (
         <div className="draftbar">
           <span>
@@ -389,6 +450,21 @@ export function App() {
                   the top say what it controls. A file that doesn&rsquo;t parse
                   is refused on save, so you can&rsquo;t break the site by typo.
                 </p>
+              )}
+
+              {conflict && (
+                <div className="conflict" role="alert">
+                  <span>
+                    <b>Someone else&rsquo;s version is newer.</b> Your changes
+                    are still here, unsaved.
+                  </span>
+                  <button onClick={reloadOpen} disabled={busy !== null}>
+                    Discard mine &amp; reload
+                  </button>
+                  <button onClick={saveToNewBranch} disabled={busy !== null}>
+                    Save mine to a new branch
+                  </button>
+                </div>
               )}
 
               <div className="modebar">

@@ -276,6 +276,37 @@ header .ghost {
 #ed .empty {
   color: var(--muted);
 }
+/* Editor is reachable without Cloudflare Access — deliberately loud. */
+.alarm {
+  padding: 0.7rem 1rem;
+  background: #7f1d1d;
+  color: #fff;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+.alarm code {
+  background: rgba(255, 255, 255, 0.18);
+  padding: 0 0.25em;
+  border-radius: 3px;
+}
+
+/* A save was refused because the file moved on since it was opened. */
+.conflict {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: center;
+  margin: 0.6rem 0;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #b45309;
+  border-left-width: 3px;
+  border-radius: 4px;
+  font-size: 0.87rem;
+}
+.conflict span {
+  flex: 1 1 16rem;
+}
+
 /* Shown instead of title+frontmatter when the open file is chapter config. */
 .confignote {
   margin: 0.6rem 0;

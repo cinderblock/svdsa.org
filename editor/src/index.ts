@@ -10,10 +10,17 @@
  * See plans/svdsa-wysiwyg-phase0.md and plans/svdsa-editor-rich-ui.md.
  */
 
-import { createGitHub, type Author } from "./git/github";
+import { ConflictError, createGitHub, type Author } from "./git/github";
+import {
+  AccessDenied,
+  authenticate,
+  unprotectedReason,
+  type AccessEnv,
+} from "./access";
 import {
   branchName,
   isConfigPath,
+  isEditablePath,
   parseMarkdown,
   serializeMarkdown,
   validBranchName,
@@ -21,7 +28,7 @@ import {
 import { fixText, lintText, type StyleRule } from "./content/lint";
 import yaml from "js-yaml";
 
-export interface Env {
+export interface Env extends AccessEnv {
   GIT_HOST?: "github" | "gitlab";
   EDITOR_DEFAULT_BASE?: string;
   GH_REPO?: string;
@@ -30,16 +37,7 @@ export interface Env {
   GH_PRIVATE_KEY?: string; // secret (PKCS#8)
   GITLAB_TOKEN?: string; // secret
   GITLAB_PROJECT_ID?: string;
-  CF_ACCESS_TEAM_DOMAIN?: string;
   SITE_WORKER?: string;
-  CF_ACCESS_AUD?: string;
-}
-
-/** Access injects the authenticated email; see plan for JWT-verification hardening. */
-function editor(request: Request): Author {
-  const email =
-    request.headers.get("Cf-Access-Authenticated-User-Email") ?? "editor@svdsa";
-  return { name: email, email };
 }
 
 function parsesAsYaml(text: string): boolean {
@@ -108,12 +106,17 @@ async function handleApi(
   request: Request,
   env: Env,
   path: string,
+  who: Author,
 ): Promise<Response> {
   const url = new URL(request.url);
 
-  // Identity comes straight from the Access-injected header — no git needed.
+  // Identity is already verified; `unprotected` drives the UI's warning banner.
   if (path === "/api/me")
-    return json({ ...editor(request), siteOrigin: siteOrigin(request, env) });
+    return json({
+      ...who,
+      siteOrigin: siteOrigin(request, env),
+      unprotected: unprotectedReason(env),
+    });
 
   const gh = await createGitHub(env);
 
@@ -141,8 +144,9 @@ async function handleApi(
     const base =
       url.searchParams.get("base") || env.EDITOR_DEFAULT_BASE || "red";
     if (!p) return json({ error: "path required" }, 400);
+    if (!isEditablePath(p)) return json({ error: "not an editable path" }, 400);
     // Serve the editor's drafted version when one exists, else the base copy.
-    const draft = branchName(editor(request).email, base);
+    const draft = branchName(who.email, base);
     let ref = base;
     let fromDraft = false;
     if (await gh.branchExists(draft)) {
@@ -176,7 +180,7 @@ async function handleApi(
   if (path === "/api/status") {
     const base =
       url.searchParams.get("base") || env.EDITOR_DEFAULT_BASE || "red";
-    const draft = branchName(editor(request).email, base);
+    const draft = branchName(who.email, base);
     if (!(await gh.branchExists(draft)))
       return json({ base, draft, exists: false, changed: [], pr: null });
     const [changed, pr] = await Promise.all([
@@ -200,14 +204,19 @@ async function handleApi(
       frontmatter,
       body,
       text: configText,
+      sha: expectedSha,
     } = (await request.json()) as {
       base: string;
       path: string;
       frontmatter?: Record<string, unknown>;
       body?: string;
       text?: string;
+      sha?: string;
     };
     if (!p || !base) return json({ error: "base and path required" }, 400);
+    // The write boundary. This Worker commits as a trusted GitHub App, so an
+    // unchecked path here would let a caller write anywhere in the repo.
+    if (!isEditablePath(p)) return json({ error: "not an editable path" }, 400);
     const isConfig = isConfigPath(p);
 
     // Config is committed verbatim — but a config file that doesn't parse
@@ -227,7 +236,6 @@ async function handleApi(
       text = serializeMarkdown(frontmatter ?? {}, body ?? "");
     }
 
-    const who = editor(request);
     const branch = branchName(who.email, base);
     await gh.ensureBranch(branch, base);
     // AUTO-FIX every style rule with a deterministic suggestion before
@@ -253,16 +261,41 @@ async function handleApi(
     } catch {
       /* no rules — no findings */
     }
-    const { commitSha } = await gh.commit({
-      branch,
-      path: p,
-      text,
-      message: `edit ${p} (via editor)`,
-      author: who,
-    });
+    // `sha` is the blob the editor loaded. When present this becomes an
+    // optimistic-concurrency write: a stale tab, or the same person editing in
+    // two windows, gets a 409 instead of silently discarding the newer copy.
+    // The draft branch belongs to ONE editor, so this is the only way a
+    // same-branch conflict arises — a moved base is reported separately.
+    let saved;
+    try {
+      saved = await gh.commit({
+        branch,
+        path: p,
+        text,
+        message: `edit ${p} (via editor)`,
+        author: who,
+        expectedSha: expectedSha,
+      });
+    } catch (e) {
+      if (e instanceof ConflictError)
+        return json(
+          {
+            error:
+              "This file changed since you opened it — probably another tab, " +
+              "or a publish that landed in between. Reload to get the current " +
+              "version, or save to a new branch to keep both.",
+            conflict: true,
+            currentSha: e.currentSha,
+          },
+          409,
+        );
+      throw e;
+    }
+    const { commitSha, sha } = saved;
     return json({
       branch,
       commitSha,
+      sha,
       previewUrl: previewUrl(request, env, branch),
       lint,
       autofixed,
@@ -290,7 +323,6 @@ async function handleApi(
       title?: string;
     };
     if (!base) return json({ error: "base required" }, 400);
-    const who = editor(request);
     const draft = branchName(who.email, base);
     if (!(await gh.branchExists(draft)))
       return json({ error: "no draft to publish" }, 400);
@@ -320,7 +352,7 @@ async function handleApi(
   if (path === "/api/discard" && request.method === "POST") {
     const { base } = (await request.json()) as { base: string };
     if (!base) return json({ error: "base required" }, 400);
-    const draft = branchName(editor(request).email, base);
+    const draft = branchName(who.email, base);
     if (await gh.branchExists(draft)) await gh.deleteBranch(draft);
     return json({ discarded: draft });
   }
@@ -332,11 +364,25 @@ export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
 
-    if (url.pathname === "/api/health") return json(await health(env));
+    // Health reports configuration and never touches content, so it stays
+    // reachable — it is how you diagnose a locked-out editor. It deliberately
+    // reports whether Access is enforced.
+    if (url.pathname === "/api/health")
+      return json({
+        ...(await health(env)),
+        unprotected: unprotectedReason(env),
+      });
+
     if (url.pathname.startsWith("/api/")) {
       try {
-        return await handleApi(request, env, url.pathname);
+        // Every other route requires a verified identity. Failing closed is the
+        // point: an unconfigured Access application must not look like a
+        // working one.
+        const who = await authenticate(request, env);
+        return await handleApi(request, env, url.pathname, who);
       } catch (e) {
+        if (e instanceof AccessDenied)
+          return json({ error: e.message }, e.status);
         return json({ error: (e as Error).message }, 500);
       }
     }

@@ -24,6 +24,18 @@
   // by `bun run setup:editor`. The ONLY secret is GH_PRIVATE_KEY (and, for the
   // GitLab host, GITLAB_TOKEN), set via `wrangler secret put` — never committed.
   "vars": {
+    // ⚠ THE EDITOR IS CURRENTLY OPEN TO ANYONE WHO KNOWS ITS URL.
+    //
+    // The Worker commits to the repo as a trusted GitHub App, so its identity
+    // check is the only access control there is. It fails CLOSED by default —
+    // omit this variable and unauthenticated requests are refused. This "false"
+    // exists only because the Cloudflare Access application has never been
+    // created (CF_ACCESS_TEAM_DOMAIN / CF_ACCESS_AUD below are still empty), and
+    // enforcing without it would lock everyone out including the chapter.
+    //
+    // TO FIX: create the Access application, fill in the two vars below, then
+    // DELETE this line. The editor shows a red banner until you do.
+    "REQUIRE_ACCESS": "false",
     "GIT_HOST": "github",
     "EDITOR_DEFAULT_BASE": "red",
     // The production site Worker's name on this account. Used to derive the

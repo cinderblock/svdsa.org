@@ -19,6 +19,8 @@ export interface Me {
   email: string;
   /** Origin of the production site Worker, derived server-side. */
   siteOrigin: string;
+  /** Why the editor is NOT behind Cloudflare Access, or null when it is. */
+  unprotected: string | null;
 }
 interface ItemCommon {
   path: string;
@@ -50,9 +52,21 @@ export interface LintFinding {
 export interface SaveResult {
   branch: string;
   commitSha: string;
+  /** Blob sha of what was just written — becomes the next save's `sha`. */
+  sha: string;
   previewUrl: string;
   lint: LintFinding[];
   autofixed: number;
+}
+
+/** A save refused because the file moved on since it was opened. */
+export class SaveConflict extends Error {
+  constructor(
+    message: string,
+    readonly currentSha?: string,
+  ) {
+    super(message);
+  }
 }
 export interface ChangedFile {
   path: string;
@@ -74,7 +88,13 @@ export interface DraftStatus {
 
 async function req<T>(url: string, init?: RequestInit): Promise<T> {
   const r = await fetch(url, init);
-  const d = (await r.json()) as T & { error?: string };
+  const d = (await r.json()) as T & {
+    error?: string;
+    conflict?: boolean;
+    currentSha?: string;
+  };
+  if (r.status === 409 && d.conflict)
+    throw new SaveConflict(d.error ?? "conflict", d.currentSha);
   if (!r.ok || d.error) throw new Error(d.error || `${r.status} ${url}`);
   return d;
 }
@@ -104,7 +124,7 @@ export const api = {
       `/api/meta?dir=${encodeURIComponent(dir)}&base=${encodeURIComponent(base)}`,
     ),
   save: (
-    payload: { base: string; path: string } & (
+    payload: { base: string; path: string; sha?: string } & (
       | { frontmatter: Record<string, unknown>; body: string }
       | { text: string }
     ),

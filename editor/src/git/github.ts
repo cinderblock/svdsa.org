@@ -7,6 +7,18 @@
  * key on the way into the secret.
  */
 
+import { isEditablePath } from "../content/serialize";
+
+/**
+ * The file changed under the editor between load and save. Carries the sha that
+ * is actually there now, so the UI can offer to show the difference.
+ */
+export class ConflictError extends Error {
+  constructor(readonly currentSha: string | undefined) {
+    super("file changed since it was opened");
+  }
+}
+
 interface GhEnv {
   GH_REPO?: string; // "owner/repo"
   GH_APP_ID?: string;
@@ -132,10 +144,6 @@ export interface RawItem {
   text: string; // raw .md (frontmatter + body)
 }
 
-/** Editable content: Markdown items, plus the chapter's YAML configuration. */
-const CONTENT_RE =
-  /^content\/(?:(?:pages|posts|events)\/.+\.md|config\/.+\.ya?ml)$/;
-
 /** A GitHub client bound to one installation token (mint once per request). */
 export async function createGitHub(env: GhEnv) {
   const [owner, repo] = (env.GH_REPO ?? "").split("/");
@@ -233,7 +241,7 @@ export async function createGitHub(env: GhEnv) {
         tree: { path: string; type: string }[];
       };
       return t.tree
-        .filter((n) => n.type === "blob" && CONTENT_RE.test(n.path))
+        .filter((n) => n.type === "blob" && isEditablePath(n.path))
         .map((n) => n.path)
         .sort();
     },
@@ -382,15 +390,31 @@ export async function createGitHub(env: GhEnv) {
         throw e;
       }
     },
-    /** Commit `text` to `path` on `branch`, authored by the editor. */
+    /** Blob sha of `path` at `ref`, or undefined if it isn't there. */
+    fileSha,
+    /**
+     * Commit `text` to `path` on `branch`, authored by the editor.
+     *
+     * `expectedSha` is the blob sha the editor loaded. Passing it makes this an
+     * optimistic-concurrency write: if the file has moved on since (the same
+     * person editing in two tabs, or a stale tab left open across a publish),
+     * the write is REFUSED rather than silently overwriting the newer copy.
+     * Pass `null` to assert the file does not exist yet (a create).
+     */
     async commit(args: {
       branch: string;
       path: string;
       text: string;
       message: string;
       author: Author;
-    }): Promise<{ commitSha: string }> {
+      expectedSha?: string | null;
+    }): Promise<{ commitSha: string; sha: string }> {
       const sha = await fileSha(args.path, args.branch);
+      if (
+        args.expectedSha !== undefined &&
+        sha !== (args.expectedSha ?? undefined)
+      )
+        throw new ConflictError(sha);
       const r = (await api(`${base}/contents/${encPath(args.path)}`, {
         method: "PUT",
         body: JSON.stringify({
@@ -400,8 +424,8 @@ export async function createGitHub(env: GhEnv) {
           sha,
           author: args.author,
         }),
-      })) as { commit: { sha: string } };
-      return { commitSha: r.commit.sha };
+      })) as { commit: { sha: string }; content: { sha: string } };
+      return { commitSha: r.commit.sha, sha: r.content.sha };
     },
   };
 }
