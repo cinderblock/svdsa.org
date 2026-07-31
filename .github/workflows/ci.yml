@@ -1,17 +1,16 @@
 name: CI
 
-# The SITE deploys via Cloudflare Workers Builds (connected in the dashboard),
-# which builds and `wrangler deploy`s on push and gives every branch a preview
-# URL. The EDITOR Worker isn't part of that integration, so this workflow
-# deploys it — from `red` only.
+# Checks only — no deploying, and no Cloudflare credentials.
 #
-# There is deliberately ONE editor deployment. It is a tool, not a per-branch
-# artifact: a single instance already edits any base branch (`?base=`), and the
-# previews it links to are the SITE's branch previews. Per-branch copies of the
-# editor would only add versions to reason about.
+# BOTH Workers deploy via Cloudflare Workers Builds, connected in the dashboard:
+#   svdsa  root directory `/`       production branch red
+#   edit   root directory `editor`  production branch red, other branches OFF
 #
-# Deploying locally with `bun run editor:deploy` keeps working — CI is an
-# addition, not a gate.
+# `edit` is its own workspace package (editor/package.json), so Workers Builds
+# runs the ordinary `bun install && bun run build` in that directory. There is
+# deliberately ONE editor deployment: it is a tool, not a per-branch artifact —
+# a single instance edits any base branch (`?base=`), and the previews it links
+# to are the SITE's branch previews.
 
 on:
   push:
@@ -51,34 +50,3 @@ jobs:
 
       - name: Build
         run: bun run build
-
-  # ---- Editor Worker ---------------------------------------------------------
-  # Needs CLOUDFLARE_API_TOKEN (Workers Scripts: Edit) in repo secrets. Skipped
-  # automatically on forks and when the token isn't configured. The token lives
-  # at JOB level because the `env` context — unlike `secrets` — can be read from
-  # a step's `if:`, which is how the skip-when-unset check works.
-  deploy-editor:
-    needs: check
-    if: github.event_name == 'push' && github.ref == 'refs/heads/red'
-    runs-on: ubuntu-latest
-    env:
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
-      - name: Install
-        run: bun install --frozen-lockfile
-
-      - name: Build editor SPA
-        run: bun run editor:build
-
-      - name: Deploy
-        if: env.CLOUDFLARE_API_TOKEN != ''
-        working-directory: editor
-        run: bunx wrangler deploy

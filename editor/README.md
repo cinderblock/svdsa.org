@@ -6,6 +6,29 @@ git account needed — edit content in the browser. Git stays the single source
 of truth. Full design: `plans/svdsa-wysiwyg-phase0.md` +
 `plans/svdsa-editor-rich-ui.md`.
 
+## This is its own package
+
+`@svdsa/editor` is a **workspace package** (`editor/package.json`) inside the
+site repo, not part of the site's build. That boundary is load-bearing: Milkdown
+and Monaco are ~4 MB of dependencies that belong to this Worker and must never
+enter the site's dependency graph.
+
+```sh
+bun install      # from anywhere in the repo — one lockfile, one install
+bun run dev      # SPA dev server on :9998 (or `bun run editor:dev` from the root)
+bun run build    # web/ -> dist/
+bun run deploy   # build, then wrangler deploy
+```
+
+Because it's a normal package, **Cloudflare Workers Builds points at `editor` as
+its root directory** and runs the ordinary `bun install && bun run build` —
+no `--config` flags and no API token. See the table in the root README.
+
+It does share one file with the site by relative import:
+`app/lib/recurrence.ts`, deliberately, so the recurrence widget previews dates
+with the exact engine the site and `.ics` feeds use. That file has no imports of
+its own, so nothing else crosses the boundary.
+
 ## How editing works
 
 - Content bodies are **real Markdown** (converted from the WP migration's HTML);

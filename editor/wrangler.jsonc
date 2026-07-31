@@ -2,7 +2,7 @@
   // The WYSIWYG editor — a SEPARATE Worker from production `svdsa` (which stays
   // pure static). Deployed to its own domain behind Cloudflare Access.
   // See plans/svdsa-wysiwyg-phase0.md.
-  "$schema": "../node_modules/wrangler/config-schema.json",
+  "$schema": "./node_modules/wrangler/config-schema.json",
   // Named `edit` rather than `svdsa-edit` — the account subdomain already says
   // svdsa, so this reads edit.cameron-test-svdsa.workers.dev.
   "name": "edit",

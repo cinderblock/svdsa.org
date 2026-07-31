@@ -154,11 +154,23 @@ HTML at build.
 
 ## Getting started
 
+This is a **Bun workspace with two packages**, one per deployed Worker:
+
+| Package         | Directory | Worker  | What it is                                |
+| --------------- | --------- | ------- | ----------------------------------------- |
+| `svdsa`         | `.`       | `svdsa` | The static site (this README)             |
+| `@svdsa/editor` | `editor/` | `edit`  | The in-browser editor for chapter editors |
+
+They are split so the site never carries the editor's dependencies — Milkdown
+and Monaco are ~4 MB that belong to the editor Worker alone. It also means each
+Worker's Workers Builds connection is a plain root-directory setting.
+
 ```sh
-bun install
+bun install          # one lockfile, installs both packages
 bun run dev          # dev server at http://localhost:9999
 bun run build        # assemble content + prerender all pages
 bun run preview      # preview the built static site
+bun run editor:dev   # the editor SPA at http://localhost:9998
 ```
 
 Other scripts: `bun run typecheck`, `bun run fmt`, `bun run test`.
@@ -211,14 +223,25 @@ needed for that.
 
 ### The editor Worker
 
-The editor (`editor/wrangler.jsonc`, Worker `edit`) is a **separate** Worker and
-is **not** connected to Workers Builds, so `ci.yml` deploys it — from `red` only,
-using a `CLOUDFLARE_API_TOKEN` repo secret (Workers Scripts: Edit). Without the
-secret the step skips itself; `bun run editor:deploy` still works locally.
+The editor is a **second Worker** (`edit`) built from a **separate workspace
+package**, `editor/` — see [editor/README.md](editor/README.md). It deploys via
+its own Workers Builds connection using the standard monorepo setup:
 
-**There is exactly one editor deployment, on purpose.** The editor is a tool,
-not a per-branch artifact: one instance edits any base branch (`?base=`), and
-the preview links it hands out point at the _site's_ per-branch previews. Adding
-per-branch editor copies would only create versions to reason about.
+| Setting                 | Value                          |
+| ----------------------- | ------------------------------ |
+| Root directory          | `editor`                       |
+| Build command           | `bun install && bun run build` |
+| Deploy command          | `bunx wrangler deploy`         |
+| Production branch       | `red`                          |
+| Non-production branches | **off**                        |
+
+No custom flags and no `CLOUDFLARE_API_TOKEN` anywhere — `ci.yml` runs checks
+only. `bun run editor:deploy` still works locally.
+
+**There is exactly one editor deployment, on purpose**, which is why
+non-production branch builds are off. The editor is a tool, not a per-branch
+artifact: one instance edits any base branch (`?base=`), and the preview links
+it hands out point at the _site's_ per-branch previews. Per-branch editor copies
+would only create versions to reason about.
 
 > The default/production branch is **`red`** (chapter theming), not `main`/`master`.
