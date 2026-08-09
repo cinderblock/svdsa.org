@@ -26,6 +26,11 @@ import {
   validBranchName,
 } from "./content/serialize";
 import { fixText, lintText, type StyleRule } from "./content/lint";
+import {
+  InvalidNewItem,
+  planNewItem,
+  type NewItemInput,
+} from "./content/newItem";
 import yaml from "js-yaml";
 
 export interface Env extends AccessEnv {
@@ -136,7 +141,26 @@ async function handleApi(
     } catch {
       /* nav is optional — the browser falls back to plain sections */
     }
-    return json({ base, items: await gh.listContent(base), nav });
+    // The category vocabulary travels with the list too, so the wizard offers a
+    // picker instead of a text box — a free-text category silently drops out of
+    // the calendar's filters and its own subscription feed.
+    let categories: unknown = null;
+    try {
+      const raw = await gh.readItem(
+        "content/config/event-categories.yaml",
+        base,
+      );
+      categories =
+        (yaml.load(raw.text) as { categories?: unknown })?.categories ?? null;
+    } catch {
+      /* optional — the editor falls back to free text */
+    }
+    return json({
+      base,
+      items: await gh.listContent(base),
+      nav,
+      categories,
+    });
   }
 
   if (path === "/api/item") {
@@ -299,6 +323,100 @@ async function handleApi(
       previewUrl: previewUrl(request, env, branch),
       lint,
       autofixed,
+    });
+  }
+
+  /**
+   * Create a new item. The wizard sends INTENT — kind, title, date — and never
+   * a path: `planNewItem` owns every naming convention, so no editor has to
+   * know that a post is `content/posts/<year>/<date>-<slug>.md` or that a
+   * recurring meeting lives at the top level.
+   */
+  if (path === "/api/create" && request.method === "POST") {
+    const { base, ...input } = (await request.json()) as {
+      base: string;
+    } & NewItemInput;
+    if (!base) return json({ error: "base required" }, 400);
+
+    /**
+     * Default to a withheld draft when working against the PRODUCTION branch,
+     * because there merging the publish PR is what makes content public. On any
+     * other branch the branch itself is the staging area, so a draft flag would
+     * only be something to remember to remove.
+     */
+    const production = env.EDITOR_DEFAULT_BASE ?? "red";
+    const draft = input.draft ?? base === production;
+
+    let planned;
+    try {
+      planned = planNewItem({ ...input, draft });
+    } catch (e) {
+      if (e instanceof InvalidNewItem) return json({ error: e.message }, 400);
+      throw e;
+    }
+
+    // Enforce the category vocabulary here rather than only in CI: the editor is
+    // where categories are chosen, and an invented one is invisible until
+    // someone notices an event missing from a filter.
+    const cats = (planned.frontmatter.categories as string[]) ?? [];
+    if (cats.length) {
+      try {
+        const raw = await gh.readItem(
+          "content/config/event-categories.yaml",
+          base,
+        );
+        const allowed = new Set(
+          (
+            (yaml.load(raw.text) as { categories: { label: string }[] })
+              .categories ?? []
+          ).map((c) => c.label.toLowerCase()),
+        );
+        const bad = cats.filter((c) => !allowed.has(c.toLowerCase()));
+        if (bad.length)
+          return json(
+            {
+              error: `not chapter categories: ${bad.join(", ")} — add them to content/config/event-categories.yaml first`,
+            },
+            400,
+          );
+      } catch {
+        /* no vocabulary file — nothing to enforce */
+      }
+    }
+
+    const branch = branchName(who.email, base);
+    await gh.ensureBranch(branch, base);
+
+    // Refuse to overwrite. Checking the BASE as well as the draft branch
+    // matters: a draft that doesn't have the file yet would otherwise let a
+    // create silently shadow something already published.
+    for (const ref of [base, branch]) {
+      if (await gh.fileSha(planned.path, ref))
+        return json(
+          {
+            error: `${planned.path} already exists on ${ref} — open it instead, or choose a different title`,
+          },
+          409,
+        );
+    }
+
+    const text = serializeMarkdown(planned.frontmatter, planned.body);
+    const { commitSha, sha } = await gh.commit({
+      branch,
+      path: planned.path,
+      text,
+      message: `create ${planned.path} (via editor)`,
+      author: who,
+      expectedSha: null, // assert it does not exist
+    });
+    return json({
+      path: planned.path,
+      url: planned.url,
+      draft,
+      branch,
+      commitSha,
+      sha,
+      previewUrl: previewUrl(request, env, branch),
     });
   }
 

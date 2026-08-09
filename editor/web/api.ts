@@ -15,6 +15,41 @@ export interface SiteNav {
   resources?: { label: string; to: string; icon?: string }[];
 }
 
+/** One entry in the chapter's event-category vocabulary. */
+export interface EventCategory {
+  label: string;
+  hue?: number;
+  note?: string;
+  retired?: boolean;
+}
+
+export type NewKind = "page" | "post" | "event" | "series";
+
+/** What the wizard sends. Note it never sends a path — the Worker builds it. */
+export interface NewItemInput {
+  kind: NewKind;
+  title: string;
+  date?: string;
+  startTime?: string;
+  endTime?: string;
+  parent?: string;
+  categories?: string[];
+  venue?: string;
+  isVirtual?: boolean;
+  draft?: boolean;
+  summary?: string;
+}
+
+export interface CreateResult {
+  path: string;
+  url: string;
+  draft: boolean;
+  branch: string;
+  commitSha: string;
+  sha: string;
+  previewUrl: string;
+}
+
 export interface Me {
   email: string;
   /** Origin of the production site Worker, derived server-side. */
@@ -110,9 +145,12 @@ export const api = {
   me: () => req<Me>("/api/me"),
   branches: () => req<{ branches: string[] }>("/api/branches"),
   list: (base: string) =>
-    req<{ base: string; items: string[]; nav: SiteNav | null }>(
-      `/api/list?base=${encodeURIComponent(base)}`,
-    ),
+    req<{
+      base: string;
+      items: string[];
+      nav: SiteNav | null;
+      categories: EventCategory[] | null;
+    }>(`/api/list?base=${encodeURIComponent(base)}`),
   item: (path: string, base: string) =>
     req<ItemDetail>(
       `/api/item?path=${encodeURIComponent(path)}&base=${encodeURIComponent(base)}`,
@@ -129,6 +167,8 @@ export const api = {
       | { text: string }
     ),
   ) => post<SaveResult>("/api/save", payload),
+  create: (payload: { base: string } & NewItemInput) =>
+    post<CreateResult>("/api/create", payload),
   createBranch: (name: string, from: string) =>
     post<{ branch: string }>("/api/branch", { name, from }),
   publish: (base: string, title?: string) =>

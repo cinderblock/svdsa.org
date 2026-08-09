@@ -14,7 +14,9 @@ import {
   type LintFinding,
   type SiteNav,
   SaveConflict,
+  type EventCategory,
 } from "./api";
+import { Wizard } from "./wizard";
 import { FileList } from "./filelist";
 import {
   buildFrontmatter,
@@ -58,6 +60,8 @@ export function App() {
   const [base, setBase] = useState("");
   const [items, setItems] = useState<string[]>([]);
   const [nav, setNav] = useState<SiteNav | null>(null);
+  const [categories, setCategories] = useState<EventCategory[]>([]);
+  const [wizard, setWizard] = useState(false);
   const [status, setStatus] = useState<DraftStatus | null>(null);
 
   const [item, setItem] = useState<ItemDetail | null>(null);
@@ -110,12 +114,23 @@ export function App() {
       .then((d) => {
         setItems(d.items);
         setNav(d.nav ?? null);
+        setCategories(d.categories ?? []);
       })
       .catch((e) => setMsg({ ok: false, text: String(e) }));
     refreshStatus(base);
   }, [base, refreshStatus]);
 
   const grouped = useMemo(() => groupBranches(branches), [branches]);
+
+  /** Existing page slugs (`about`, `political-education/bookclub`, …). */
+  const pageSlugs = useMemo(
+    () =>
+      items
+        .filter((p) => p.startsWith("content/pages/"))
+        .map((p) => p.slice("content/pages/".length).replace(/\.md$/, ""))
+        .sort(),
+    [items],
+  );
 
   /**
    * Deep links. A reader on the live site can append `?edit` to any page and
@@ -352,6 +367,13 @@ export function App() {
             ))}
           </select>
         </label>
+        <button
+          className="primary"
+          onClick={() => setWizard(true)}
+          disabled={busy !== null || !base}
+        >
+          + New
+        </button>
         <button className="ghost" onClick={newBranch} disabled={busy !== null}>
           + branch
         </button>
@@ -405,7 +427,23 @@ export function App() {
         />
 
         <main id="ed">
-          {!item ? (
+          {wizard ? (
+            <Wizard
+              base={base}
+              production="red"
+              categories={categories}
+              pages={pageSlugs}
+              onCancel={() => setWizard(false)}
+              onCreated={async (path) => {
+                setWizard(false);
+                // Refresh the list so the new file is there, then open it.
+                const d = await api.list(base);
+                setItems(d.items);
+                refreshStatus(base);
+                await open(path);
+              }}
+            />
+          ) : !item ? (
             <p className="empty">Select a file to edit.</p>
           ) : (
             <>

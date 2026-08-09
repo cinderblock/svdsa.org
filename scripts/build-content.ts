@@ -226,6 +226,44 @@ const events = eventDocs
   })
   .sort((a, b) => a.start.localeCompare(b.start));
 
+/**
+ * Ids must be unique: the app uses them for React keys and the `.ics` feeds use
+ * them for VEVENT UIDs, so a duplicate silently drops a row from a list or makes
+ * two events the same appointment in someone's calendar.
+ *
+ * Migrated items got their ids from WordPress. New ones are hashed from their
+ * path (see the editor's `idForPath`), which is reproducible but not collision-
+ * proof — so verify rather than assume, and fail loudly.
+ */
+function assertUniqueIds(
+  label: string,
+  items: { id: unknown; path: string }[],
+): void {
+  const seen = new Map<string, string>();
+  for (const it of items) {
+    const key = String(it.id);
+    const first = seen.get(key);
+    if (first !== undefined)
+      throw new Error(
+        `duplicate ${label} id ${key}: "${first}" and "${it.path}" — ` +
+          `change one item's slug so its id differs`,
+      );
+    seen.set(key, it.path);
+  }
+}
+
+assertUniqueIds("page", pages);
+assertUniqueIds("post", posts);
+// Occurrences of one series legitimately share a base id (they are suffixed
+// with the date), so check the source docs rather than the expansion.
+assertUniqueIds(
+  "event",
+  eventDocs.map(({ data }) => ({
+    id: data.id,
+    path: String(data.path ?? ""),
+  })),
+);
+
 const today = new Date().toISOString().slice(0, 10);
 const upcoming = events.filter((e) => e.start.slice(0, 10) >= today);
 
