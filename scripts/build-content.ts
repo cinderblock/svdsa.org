@@ -49,6 +49,9 @@ const excerptFrom = (html: string, len: number) => {
 
 /** Read + parse every .md under content/<dir>; bodies are Markdown, rendered
  * to HTML here so the app keeps consuming ready-to-inject HTML. */
+/** Per-collection count of `draft: true` items skipped, for the build log. */
+const draftCounts = new Map<string, number>();
+
 async function readCollection(dir: string) {
   const root = join(CONTENT, dir);
   let entries: string[] = [];
@@ -58,7 +61,7 @@ async function readCollection(dir: string) {
     return [];
   }
   const files = entries.filter((f) => f.endsWith(".md"));
-  return Promise.all(
+  const docs = await Promise.all(
     files.map(async (f) => {
       const parsed = matter(await readFile(join(root, f), "utf8"));
       return {
@@ -67,6 +70,22 @@ async function readCollection(dir: string) {
       };
     }),
   );
+
+  /**
+   * `draft: true` items are dropped HERE, at the single point every collection
+   * passes through, rather than filtered at each output. There are a dozen
+   * downstream consumers — indexes, the calendar, `.ics` feeds, the sitemap, the
+   * prerender list — and any one of them forgetting the check would publish the
+   * draft. Dropping it at the source means a draft cannot leak by omission.
+   *
+   * Drafts are not built at all, so an unpublished item has no public URL to
+   * find or share. Review happens on the editor's branch preview, where the work
+   * already lives before it is merged.
+   */
+  const live = docs.filter(({ data }) => data.draft !== true);
+  const dropped = docs.length - live.length;
+  if (dropped) draftCounts.set(dir, dropped);
+  return live;
 }
 
 /**
@@ -87,6 +106,7 @@ const CONFIG_FILES = [
   "navigation",
   "photos",
   "style-rules",
+  "event-categories",
 ];
 
 // ---- Assemble collections ---------------------------------------------------
@@ -531,7 +551,12 @@ await writeFile(
   `User-agent: *\nAllow: /\n\nSitemap: ${SITE_URL}/sitemap.xml\n`,
 );
 
+// Say what was left out. A build that silently drops content reads as "nothing
+// to publish" when the truth is "your post is still marked draft".
+const skipped = [...draftCounts].map(([dir, n]) => `${n} ${dir}`).join(", ");
+
 console.log(
   `build-content: ${pages.length} pages, ${posts.length} posts, ` +
-    `${events.length} events (${upcoming.length} upcoming), ${urls.length} sitemap URLs`,
+    `${events.length} events (${upcoming.length} upcoming), ${urls.length} sitemap URLs` +
+    (skipped ? `\n  skipped as draft: ${skipped}` : ""),
 );

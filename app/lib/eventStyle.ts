@@ -8,37 +8,24 @@
  * does Housing look like".
  */
 
-import { COMMITTEES, WORKING_GROUPS } from "./site";
+import { COMMITTEES, EVENT_CATEGORIES, WORKING_GROUPS } from "./site";
 
 /**
- * Hue per category. Deliberately a fixed table rather than a hash of the name:
- * categories are few and long-lived, and a hash would reshuffle every colour
- * whenever one is renamed.
+ * Hue per category, from the chapter's own vocabulary
+ * (`content/config/event-categories.yaml`).
+ *
+ * Deliberately a fixed table rather than a hash of the name: categories are few
+ * and long-lived, and a hash would reshuffle every colour whenever one is
+ * renamed. It lives in config rather than here because the same list is what
+ * the linter enforces and the editor offers as a picker — a colour table is a
+ * bad place to keep a vocabulary.
  */
-const CATEGORY_HUES: Record<string, number> = {
-  "wg - housing": 24,
-  "wg - labor": 45,
-  "wg - transit": 200,
-  "wg - community safety": 8,
-  "wg - ecosocialist": 140,
-  "wg - healthcare": 320,
-  "wg - international solidarity": 220,
-  "wg - liberation and justice": 265,
-  "wg - mutual aid": 170,
-  "wg - political education": 285,
-  "wg - socialist feminist": 340,
-  "wg - electoral": 95,
-  "committee - communications": 190,
-  "committee - tech and data": 210,
-  "committee - social": 300,
-  "committee - finance": 60,
-  "committee - membership": 350,
-  "steering committee": 355,
-  "general meeting": 355,
-  external: 30,
-  social: 300,
-  "newbie-friendly": 120,
-};
+const CATEGORY_HUES: Record<string, number> = Object.fromEntries(
+  EVENT_CATEGORIES.filter((c) => typeof c.hue === "number").map((c) => [
+    c.label.toLowerCase(),
+    c.hue!,
+  ]),
+);
 
 /** The category that should define an event's colour (most specific wins). */
 export function primaryCategory(categories: string[]): string | null {

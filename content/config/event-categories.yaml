@@ -1,0 +1,80 @@
+# The chapter's event category vocabulary — the ONLY categories an event may
+# carry. `bun run lint:content` fails on anything not listed here, and the
+# in-browser editor offers these as a picker rather than a text box.
+#
+# Why this file exists: the categories inherited from WordPress are consistent
+# (18 of them, all following "WG - X" / "Committee - X") only because WordPress
+# had a fixed list. Nothing in the code enforced it — the closest thing was a
+# colour table, which silently gave unknown categories a random hue. The first
+# editor to type "Housing WG" would have fragmented the calendar filters and the
+# per-category subscription feeds without any warning.
+#
+#   label  what appears on the site and is stored in frontmatter
+#   hue    0–360; fixed per category so a Housing meeting always looks the same.
+#          Omit and it falls back to a spread of the name.
+#   emoji  optional; working groups and committees inherit theirs from
+#          navigation.yaml, so don't duplicate it here.
+#   note   optional; shown to editors in the picker
+#   retired: true  still valid on old events, but not offered for new ones
+
+categories:
+  # --- Working groups -------------------------------------------------------
+  - label: WG - Housing
+    hue: 24
+  - label: WG - Labor
+    hue: 45
+  - label: WG - Transit
+    hue: 200
+  - label: WG - Community Safety
+    hue: 8
+  - label: WG - International Solidarity
+    hue: 220
+  - label: WG - Liberation and Justice
+    hue: 265
+  - label: WG - Mutual Aid
+    hue: 170
+  - label: WG - Political Education
+    hue: 285
+  - label: WG - Electoral
+    hue: 95
+  # Listed by the chapter but with no events in the corpus yet. Kept so the
+  # first one scheduled gets its intended colour instead of a hashed one.
+  - label: WG - Ecosocialist
+    hue: 140
+  - label: WG - Healthcare
+    hue: 320
+  - label: WG - Socialist Feminist
+    hue: 340
+
+  # --- Committees -----------------------------------------------------------
+  - label: Committee - Communications
+    hue: 190
+  - label: Committee - Tech and Data
+    hue: 210
+  - label: Committee - Social
+    hue: 300
+  - label: Committee - Finance
+    hue: 60
+  - label: Committee - Membership
+    hue: 350
+
+  # --- Chapter-wide ---------------------------------------------------------
+  - label: Steering Committee
+    hue: 355
+  - label: General Meeting
+    hue: 355
+    note: A meeting of the whole chapter.
+  - label: SV DSA
+    note: >-
+      Marks a chapter event rather than an outside one. On 463 of 558 events, so
+      it carries almost no information — prefer a specific category.
+  - label: External
+    hue: 30
+    note: Someone else's event that we're promoting.
+  - label: Social
+    hue: 300
+  - label: newbie-friendly
+    hue: 120
+    note: >-
+      Good for a first-timer. The only lowercase-hyphenated name, inherited from
+      WordPress; kept as-is because renaming it would change 223 events.

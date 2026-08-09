@@ -20,9 +20,46 @@ const rules = yaml.load(
   await readFile(join(CONTENT, "config", "style-rules.yaml"), "utf8"),
 ) as StyleRule[];
 
+/**
+ * The chapter's event-category vocabulary. Enforced here because nothing else
+ * did: `categories` is free text, and an unknown value used to sail through and
+ * merely get a hashed colour — while quietly dropping out of the calendar's
+ * facet filters and its own subscription feed. A typo was invisible.
+ */
+const allowedCategories = new Set(
+  (
+    yaml.load(
+      await readFile(join(CONTENT, "config", "event-categories.yaml"), "utf8"),
+    ) as { categories: { label: string }[] }
+  ).categories.map((c) => c.label.toLowerCase()),
+);
+
 let errors = 0;
 let warns = 0;
 let fixed = 0;
+let badCategories = 0;
+
+/** Frontmatter block of a content file, unparsed. */
+const frontmatterOf = (text: string) =>
+  text.match(/^---\r?\n([\s\S]*?)\r?\n---/)?.[1] ?? "";
+
+function checkCategories(rel: string, text: string): void {
+  const fm = yaml.load(frontmatterOf(text)) as
+    | { categories?: unknown }
+    | undefined;
+  const cats = fm?.categories;
+  if (!Array.isArray(cats)) return;
+  for (const c of cats) {
+    if (typeof c !== "string" || allowedCategories.has(c.toLowerCase()))
+      continue;
+    console.log(
+      `✗ ${rel} [event-category] "${c}" is not in the chapter's vocabulary ` +
+        `— add it to content/config/event-categories.yaml or use an existing one`,
+    );
+    badCategories++;
+    errors++;
+  }
+}
 
 for (const dir of ["pages", "posts", "events"]) {
   const root = join(CONTENT, dir);
@@ -38,6 +75,7 @@ for (const dir of ["pages", "posts", "events"]) {
         fixed++;
       }
     }
+    if (dir === "events") checkCategories(`${dir}/${rel}`, text);
     const findings = lintText(text, rules);
     for (const f of findings) {
       const tag = f.level === "error" ? "✗" : "⚠";
@@ -53,6 +91,7 @@ for (const dir of ["pages", "posts", "events"]) {
 
 console.log(
   `lint-content: ${errors} error(s), ${warns} warning(s)` +
+    (badCategories ? `, ${badCategories} unknown categor(y/ies)` : "") +
     (FIX ? `, ${fixed} file(s) auto-fixed` : ""),
 );
 if (errors) process.exit(1);
