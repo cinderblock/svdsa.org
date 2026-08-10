@@ -47,6 +47,27 @@ and doesn't punish a trailing comma. `build-content.ts` parses it and emits
 reaches the browser bundle and the imports stay typed. JSON in this repo is
 always a generated artifact, never something you hand-edit.
 
+### Redirects — old addresses keep working
+
+Preserving the old URLs is a founding premise here, so renaming is never just a
+move. `content/config/redirects.yaml` is the chapter's list of promises;
+`build-content.ts` renders it to `public/_redirects`, which Cloudflare's
+static-asset router serves as a **real 301 at the edge** — no JS, no
+meta-refresh, no 200-then-hop. Confirmed against `wrangler dev`:
+
+```
+$ curl -sI http://127.0.0.1:8799/old-housing-page/
+HTTP 301   Location: /housing/
+```
+
+`scripts/redirects.ts` **fails the build** rather than shipping a rule that
+can't work: a relative path (silently never matches), a self-redirect, a
+duplicated source, or a chain (`/a/`→`/b/`→`/c/`, which costs two hops and can
+loop). The editor appends to this file automatically on rename, so an address
+already out in the world can't be quietly broken — and it skips the entry when
+the old address was never published, rather than accruing promises about URLs
+nobody ever had.
+
 ### Recurring events
 
 A repeating meeting is **one file** carrying an iCalendar recurrence rule.

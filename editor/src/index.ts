@@ -29,6 +29,7 @@ import { fixText, lintText, type StyleRule } from "./content/lint";
 import {
   InvalidNewItem,
   planNewItem,
+  planRename,
   type NewItemInput,
 } from "./content/newItem";
 import yaml from "js-yaml";
@@ -416,6 +417,105 @@ async function handleApi(
       branch,
       commitSha,
       sha,
+      previewUrl: previewUrl(request, env, branch),
+    });
+  }
+
+  /**
+   * Change an item's address, leaving a redirect behind.
+   *
+   * The rebuild's founding promise is that old links keep working, so a rename
+   * is never just a move: the new file, the removal of the old one, and the
+   * redirect entry all land in ONE commit (see commitTree). Half a rename is
+   * worse than none.
+   */
+  if (path === "/api/rename" && request.method === "POST") {
+    const { base, from, slug, parent } = (await request.json()) as {
+      base: string;
+      from: string;
+      slug: string;
+      parent?: string;
+    };
+    if (!base || !from) return json({ error: "base and from required" }, 400);
+    if (!isEditablePath(from))
+      return json({ error: "not an editable path" }, 400);
+
+    let planned;
+    try {
+      planned = planRename(from, { slug, parent });
+    } catch (e) {
+      if (e instanceof InvalidNewItem) return json({ error: e.message }, 400);
+      throw e;
+    }
+
+    const branch = branchName(who.email, base);
+    await gh.ensureBranch(branch, base);
+
+    // Don't land on top of something that already exists at the new address.
+    for (const ref of [base, branch]) {
+      if (await gh.fileSha(planned.path, ref))
+        return json({ error: `${planned.path} already exists on ${ref}` }, 409);
+    }
+
+    const raw = await gh.readItem(from, branch);
+    const { frontmatter, body } = parseMarkdown(raw.text);
+    const oldUrl = String(frontmatter.path ?? "");
+    frontmatter.path = planned.url;
+    frontmatter.slug = planned.slug;
+
+    const changes: { path: string; text: string | null }[] = [
+      { path: planned.path, text: serializeMarkdown(frontmatter, body) },
+      { path: from, text: null },
+    ];
+
+    /**
+     * Record the redirect — but only for an address that was ever public. An
+     * item still unpublished on this draft branch has never been linked, so a
+     * redirect for it would be permanent clutter promising nothing.
+     */
+    let redirected = false;
+    if (oldUrl && oldUrl !== planned.url && (await gh.fileSha(from, base))) {
+      const file = "content/config/redirects.yaml";
+      let doc: { redirects?: unknown[] } = {};
+      let text = "";
+      try {
+        const cur = await gh.readItem(file, branch);
+        text = cur.text;
+        doc = (yaml.load(text) as { redirects?: unknown[] }) ?? {};
+      } catch {
+        /* first redirect — the file is created below with its header */
+      }
+      const list = Array.isArray(doc.redirects) ? doc.redirects : [];
+      list.push({
+        from: oldUrl,
+        to: planned.url,
+        why: `renamed by ${who.email}`,
+      });
+      // Re-emit the whole document so the comment header survives: keep
+      // everything above `redirects:` verbatim and rewrite only the list.
+      const header = text.split(/^redirects:/m)[0];
+      const dumped = yaml.dump(
+        { redirects: list },
+        { lineWidth: 100, quotingType: '"' },
+      );
+      changes.push({ path: file, text: `${header}${dumped}` });
+      redirected = true;
+    }
+
+    const { commitSha } = await gh.commitTree({
+      branch,
+      message: `rename ${from} → ${planned.path} (via editor)`,
+      author: who,
+      changes,
+    });
+    return json({
+      path: planned.path,
+      url: planned.url,
+      from,
+      fromUrl: oldUrl,
+      redirected,
+      branch,
+      commitSha,
       previewUrl: previewUrl(request, env, branch),
     });
   }

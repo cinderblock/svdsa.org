@@ -427,5 +427,52 @@ export async function createGitHub(env: GhEnv) {
       })) as { commit: { sha: string }; content: { sha: string } };
       return { commitSha: r.commit.sha, sha: r.content.sha };
     },
+    /**
+     * Commit several file changes as ONE commit (`text: null` deletes).
+     *
+     * Rename needs this. Writing the new file, deleting the old one, and
+     * recording the redirect are three edits that must land together — done as
+     * separate Contents-API calls, an interruption between them leaves the page
+     * at two addresses, or at none, or live with no redirect behind it.
+     */
+    async commitTree(args: {
+      branch: string;
+      message: string;
+      author: Author;
+      changes: { path: string; text: string | null }[];
+    }): Promise<{ commitSha: string }> {
+      const parent = await branchSha(args.branch);
+      const head = (await api(`${base}/git/commits/${parent}`)) as {
+        tree: { sha: string };
+      };
+      const tree = (await api(`${base}/git/trees`, {
+        method: "POST",
+        body: JSON.stringify({
+          base_tree: head.tree.sha,
+          tree: args.changes.map((c) => ({
+            path: c.path,
+            mode: "100644",
+            type: "blob",
+            // A null sha against an existing path is how the Git Data API
+            // expresses "remove this entry".
+            ...(c.text === null ? { sha: null } : { content: c.text }),
+          })),
+        }),
+      })) as { sha: string };
+      const created = (await api(`${base}/git/commits`, {
+        method: "POST",
+        body: JSON.stringify({
+          message: args.message,
+          tree: tree.sha,
+          parents: [parent],
+          author: args.author,
+        }),
+      })) as { sha: string };
+      await api(`${base}/git/refs/heads/${encPath(args.branch)}`, {
+        method: "PATCH",
+        body: JSON.stringify({ sha: created.sha }),
+      });
+      return { commitSha: created.sha };
+    },
   };
 }

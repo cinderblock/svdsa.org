@@ -27,6 +27,7 @@ import { categorySlug, FACETS, matchesFacet } from "../app/lib/eventFacets";
 import { occurrences, type Recurrence } from "../app/lib/recurrence";
 import { icalendar, utcStamp, type IcsEvent } from "./ics";
 import { renderMarkdown } from "./render-markdown";
+import { renderRedirects, type RedirectRule } from "./redirects";
 
 const CONTENT = join(import.meta.dirname, "..", "content");
 const GENERATED = join(CONTENT, "generated");
@@ -107,6 +108,7 @@ const CONFIG_FILES = [
   "photos",
   "style-rules",
   "event-categories",
+  "redirects",
 ];
 
 // ---- Assemble collections ---------------------------------------------------
@@ -588,6 +590,20 @@ await writeFile(
   join(PUBLIC, "robots.txt"),
   `User-agent: *\nAllow: /\n\nSitemap: ${SITE_URL}/sitemap.xml\n`,
 );
+
+let redirectCount = 0;
+
+// ---- _redirects -------------------------------------------------------------
+{
+  const cfg = (await readConfig("redirects")) as { redirects?: RedirectRule[] };
+  const rules = cfg.redirects ?? [];
+  try {
+    await writeFile(join(PUBLIC, "_redirects"), renderRedirects(rules));
+  } catch (e) {
+    throw new Error(`redirects.yaml: ${(e as Error).message}`);
+  }
+  redirectCount = rules.length;
+}
 
 // Say what was left out. A build that silently drops content reads as "nothing
 // to publish" when the truth is "your post is still marked draft".

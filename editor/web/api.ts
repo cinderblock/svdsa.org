@@ -50,6 +50,18 @@ export interface CreateResult {
   previewUrl: string;
 }
 
+export interface RenameResult {
+  path: string;
+  url: string;
+  from: string;
+  fromUrl: string;
+  /** False when the old address was never public, so no redirect was needed. */
+  redirected: boolean;
+  branch: string;
+  commitSha: string;
+  previewUrl: string;
+}
+
 export interface Me {
   email: string;
   /** Origin of the production site Worker, derived server-side. */
@@ -169,6 +181,12 @@ export const api = {
   ) => post<SaveResult>("/api/save", payload),
   create: (payload: { base: string } & NewItemInput) =>
     post<CreateResult>("/api/create", payload),
+  rename: (payload: {
+    base: string;
+    from: string;
+    slug: string;
+    parent?: string;
+  }) => post<RenameResult>("/api/rename", payload),
   createBranch: (name: string, from: string) =>
     post<{ branch: string }>("/api/branch", { name, from }),
   publish: (base: string, title?: string) =>

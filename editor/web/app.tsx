@@ -248,6 +248,45 @@ export function App() {
     }
   }
 
+  /**
+   * Change the open item's address. The Worker leaves a 301 behind, so this is
+   * safe on published content — but say so, since it's the one edit that
+   * changes something outside the site.
+   */
+  async function rename() {
+    if (!item || item.kind !== "markdown") return;
+    const currentUrl = String(item.frontmatter.path ?? "");
+    const currentSlug =
+      String(item.frontmatter.slug ?? "") ||
+      (item.path.split("/").pop() ?? "").replace(/\.md$/, "");
+    const next = window.prompt(
+      `New address for this ${currentUrl ? `page (now ${currentUrl})` : "item"}.
+
+` + `The old address keeps working — a permanent redirect is recorded.`,
+      currentSlug,
+    );
+    if (!next || next.trim() === currentSlug) return;
+    setBusy("rename");
+    setMsg(null);
+    try {
+      const r = await api.rename({ base, from: item.path, slug: next.trim() });
+      const d = await api.list(base);
+      setItems(d.items);
+      refreshStatus(base);
+      await open(r.path);
+      setMsg({
+        ok: true,
+        text: r.redirected
+          ? `moved to ${r.url} — ${r.fromUrl} now redirects there`
+          : `moved to ${r.url} (it was never published, so no redirect was needed)`,
+      });
+    } catch (e) {
+      setMsg({ ok: false, text: (e as Error).message });
+    } finally {
+      setBusy(null);
+    }
+  }
+
   /** Discard local edits and re-open the file at whatever is there now. */
   async function reloadOpen() {
     if (item) await open(item.path);
@@ -462,6 +501,15 @@ export function App() {
                       view live ↗
                     </a>
                   )}
+                {item.kind === "markdown" && (
+                  <button
+                    className="ghost tiny"
+                    onClick={rename}
+                    disabled={busy !== null}
+                  >
+                    {busy === "rename" ? "moving…" : "change address"}
+                  </button>
+                )}
               </div>
 
               {item.kind === "markdown" ? (

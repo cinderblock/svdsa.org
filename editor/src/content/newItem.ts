@@ -194,6 +194,75 @@ export function planNewItem(input: NewItemInput): PlannedItem {
   return planned;
 }
 
+/**
+ * Where an item moves to when its address changes.
+ *
+ * Derived from the OLD path so the structure that isn't being changed survives:
+ * a post keeps its year bucket and date prefix, a one-off event keeps its year
+ * directory, a series stays at the top level. Only the human-chosen part of the
+ * address moves.
+ */
+export function planRename(
+  oldPath: string,
+  next: { slug?: string; parent?: string },
+): { path: string; url: string; slug: string } {
+  const wanted = slugify(next.slug ?? "");
+  if (!wanted) throw new InvalidNewItem("a new address is required");
+
+  let planned: { path: string; url: string; slug: string };
+
+  const page = oldPath.match(/^content\/pages\/(.+)\.md$/);
+  const post = oldPath.match(/^content\/posts\/(\d{4})\/(\d{4}-\d{2}-\d{2})-.+\.md$/);
+  const dated = oldPath.match(/^content\/events\/(\d{4})\/.+\.md$/);
+  const series = oldPath.match(/^content\/events\/([^/]+)\.md$/);
+
+  if (page) {
+    // `parent` is optional: undefined keeps the page where it is, "" moves it
+    // to the top level. Those are different intentions, so don't conflate them.
+    const current = page[1].split("/").slice(0, -1).join("/");
+    const parent = (next.parent ?? current)
+      .replace(/^\/+|\/+$/g, "")
+      .split("/")
+      .filter(Boolean)
+      .map(slugify)
+      .join("/");
+    const rel = parent ? `${parent}/${wanted}` : wanted;
+    planned = {
+      path: `content/pages/${rel}.md`,
+      url: `/${rel}/`,
+      slug: wanted,
+    };
+  } else if (post) {
+    const [, year, date] = post;
+    const [y, m, d] = date.split("-");
+    planned = {
+      path: `content/posts/${year}/${date}-${wanted}.md`,
+      url: `/${y}/${m}/${d}/${wanted}/`,
+      slug: wanted,
+    };
+  } else if (dated) {
+    planned = {
+      path: `content/events/${dated[1]}/${wanted}.md`,
+      url: `/event/${wanted}/`,
+      slug: wanted,
+    };
+  } else if (series) {
+    planned = {
+      path: `content/events/${wanted}.md`,
+      url: `/event/${wanted}/`,
+      slug: wanted,
+    };
+  } else {
+    throw new InvalidNewItem(`don't know how to rename ${oldPath}`);
+  }
+
+  if (!isEditablePath(planned.path))
+    throw new InvalidNewItem(`refusing to move outside content: ${planned.path}`);
+  if (planned.path === oldPath)
+    throw new InvalidNewItem("that is already its address");
+  return planned;
+}
+
 /** iCalendar weekday code for a date, e.g. "SA". */
 function weekdayOf(date: string): string {
   const [y, m, d] = date.split("-").map(Number);
