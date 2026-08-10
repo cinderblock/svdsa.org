@@ -178,22 +178,29 @@ export function checkLinks(
     const { url, line, column } = link;
 
     /**
-     * A WordPress asset. These outlive the migration only as long as WordPress
-     * is still up — the whole point of the rebuild is retiring it, at which
-     * point every one of these 404s. Called out separately because the fix is
-     * different: the file has to be brought into the repo, not re-pointed.
+     * A WordPress upload — and these are broken RIGHT NOW, not eventually.
+     *
+     * `cleanHtml` rewrites siliconvalleydsa.org URLs to site-relative before
+     * render, so `https://siliconvalleydsa.org/wp-content/uploads/x.png`
+     * becomes `/wp-content/uploads/x.png` — an address this static site does
+     * not serve. Verified: 18 distinct images across 11 pages of the current
+     * build point at nothing.
+     *
+     * An error, not a warning: it's a visible defect in shipped output. The fix
+     * differs from a dead link — the file has to be brought into the repo, not
+     * re-pointed.
      */
     if (url.startsWith("/wp-content/")) {
       if (once(`wp:${url}`))
         findings.push({
           ruleId: "wordpress-asset",
-          level: "warn",
+          level: "error",
           line,
           column,
           match: url,
           message:
-            `Still hosted on WordPress — this breaks when WordPress is ` +
-            `retired. Bring the file into the repo instead.`,
+            `Broken image: nothing serves ${url}. It's still a WordPress ` +
+            `upload — the file has to be committed to the repo.`,
         });
       continue;
     }
@@ -217,23 +224,19 @@ export function checkLinks(
     }
 
     /**
-     * Resolves, but written as an absolute URL to our own domain. It works on
-     * production and nowhere else: on a branch preview it jumps to the live
-     * site, and even on production it forces a full page load instead of a
-     * client-side navigation.
+     * A resolving absolute self-link is deliberately NOT reported.
+     *
+     * An earlier version flagged all 86 of them, claiming they'd leave a branch
+     * preview for the live domain. That was wrong: `cleanHtml` (app/lib/html.ts)
+     * strips the siliconvalleydsa.org origin before render, and the built output
+     * contains zero of them — checked. So the renderer already handles it, and
+     * 86 warnings about a non-problem would only teach editors to ignore the
+     * panel.
+     *
+     * Unwrapping them in extractLinks still matters: it's the only way the dead
+     * ones get noticed, since the corpus writes almost every internal link this
+     * way.
      */
-    if (link.absolute && once(`abs:${url}`))
-      findings.push({
-        ruleId: "absolute-internal-link",
-        level: "warn",
-        line,
-        column,
-        match: url,
-        message:
-          `Written as a link to the live domain, so it leaves any preview ` +
-          `and reloads the whole page. Use the site-relative path.`,
-        suggest: url,
-      });
   }
   return findings;
 }

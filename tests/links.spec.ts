@@ -111,23 +111,35 @@ test.describe("checkLinks", () => {
     expect(f[0].match).toBe("/gone/");
   });
 
-  test("flags a WordPress asset separately — it dies with WordPress", () => {
+  test("flags a WordPress upload as broken NOW, not eventually", () => {
+    // cleanHtml strips the origin before render, so this resolves to
+    // /wp-content/... which the static site does not serve. Verified against
+    // the built output: 18 such images across 11 pages point at nothing.
     const f = checkLinks(
       '<img src="https://siliconvalleydsa.org/wp-content/uploads/2024/x.png">',
       PATHS,
     );
     expect(f).toHaveLength(1);
     expect(f[0].ruleId).toBe("wordpress-asset");
-    expect(f[0].message).toMatch(/retired/);
+    expect(f[0].level).toBe("error");
+    expect(f[0].message).toMatch(/Broken image/);
   });
 
-  test("flags a working absolute self-link, suggesting the relative path", () => {
-    // It resolves, so it isn't dead — but it leaves any preview deployment and
-    // forces a full page load.
-    const f = checkLinks("[a](https://siliconvalleydsa.org/about/)", PATHS);
+  test("does NOT flag a resolving absolute self-link", () => {
+    // cleanHtml rewrites these to site-relative and the built output contains
+    // none, so reporting all 86 would be noise that trains editors to ignore
+    // the panel. Unwrapping them still matters — see the dead-link case below.
+    expect(
+      checkLinks("[a](https://siliconvalleydsa.org/about/)", PATHS),
+    ).toEqual([]);
+  });
+
+  test("still finds a DEAD link written as an absolute self-link", () => {
+    // The whole reason absolutes are unwrapped: the corpus writes internal
+    // links this way, so /events/ (the old WP calendar) would be invisible.
+    const f = checkLinks("[a](https://siliconvalleydsa.org/events/)", PATHS);
     expect(f).toHaveLength(1);
-    expect(f[0].ruleId).toBe("absolute-internal-link");
-    expect(f[0].suggest).toBe("/about/");
+    expect(f[0].ruleId).toBe("dead-internal-link");
   });
 
   test("ignores query strings and fragments when resolving", () => {
@@ -143,12 +155,12 @@ test.describe("checkLinks", () => {
     ).toEqual([]);
   });
 
-  test("everything is a warning — a draft may link to a page it adds", () => {
-    // Blocking a save on this would teach editors to distrust the check.
-    const f = checkLinks("[a](/gone/) [b](/wp-content/x.png)", PATHS);
-    expect(f.map((x) => x.level)).toEqual(
-      ["wordpress-asset", "dead-internal-link"].map(() => "warn"),
-    );
+  test("a dead link is a warning — a draft may link to a page it adds", () => {
+    // Blocking a save on this would teach editors to distrust the check. The
+    // WordPress case is an error, because that one is broken in shipped output.
+    const f = checkLinks("[a](/gone/)", PATHS);
+    expect(f).toHaveLength(1);
+    expect(f[0].level).toBe("warn");
   });
 
   test("knows which hosts are us", () => {

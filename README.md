@@ -58,18 +58,28 @@ The corpus taught this check its most important lesson. It has only ~15
 genuinely relative internal links — the WordPress migration wrote the rest as
 **absolute URLs to the live domain**. A checker that dismissed those as
 "external" would have reported a clean bill of health. Treating same-host
-absolutes as internal turns up three distinct problems:
+absolutes as internal turns up two real problems:
 
-| Finding                  | Count | Why it matters                                                                                                            |
-| ------------------------ | ----- | ------------------------------------------------------------------------------------------------------------------------- |
-| `dead-internal-link`     | 91    | `/events/` (the old WP calendar), `/donations/` (we have `/donate/`), and pre-2025 events the migration didn't carry over |
-| `absolute-internal-link` | 86    | Resolves on production only — on a branch preview it jumps to the live site, and it forces a full page load               |
-| `wordpress-asset`        | 58    | `/wp-content/uploads/…` images that **404 the day WordPress is retired**                                                  |
+| Finding              | Level | Count | What it is                                                                                                                |
+| -------------------- | ----- | ----- | ------------------------------------------------------------------------------------------------------------------------- |
+| `wordpress-asset`    | error | 58    | `/wp-content/uploads/…` images that **are broken in the current build** — 18 distinct files across 11 pages serve nothing |
+| `dead-internal-link` | warn  | 91    | `/events/` (the old WP calendar), `/donations/` (the site has `/donate/`), and pre-2025 events the migration didn't carry |
 
-All are warnings, never errors: a draft may legitimately link to a page it adds
-in the same change, and blocking a save on that teaches editors to distrust the
-check. Asset references (`src=`) are checked for WordPress dependence but not for
+A dead link is a **warning**, because a draft may legitimately link to a page it
+adds in the same change and blocking a save on that teaches editors to distrust
+the check. A WordPress upload is an **error**: it's a visible defect in shipped
+output, not a future risk. `cleanHtml` strips the `siliconvalleydsa.org` origin
+before render, so those URLs resolve to `/wp-content/…` — an address this site
+does not serve. The file has to be committed to the repo.
+
+Asset references (`src=`) are checked for WordPress dependence but not for
 dead-ness, since files in `public/` are real addresses no content path predicts.
+
+**A resolving absolute self-link is deliberately not reported.** An earlier
+version flagged all 86, claiming they'd leave a branch preview for the live
+domain — wrong: `cleanHtml` rewrites them and the built output contains zero.
+Unwrapping them in the extractor still matters, since it's the only way the dead
+ones become visible.
 
 ### Redirects — old addresses keep working
 
