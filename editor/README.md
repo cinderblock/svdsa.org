@@ -104,16 +104,23 @@ with that page open. The site redirects to `edit.<subdomain>` with
 Vite-built SPA (`web/`) served by the Worker's Static Assets binding (Worker
 keeps `/api/*`): grouped file browser (sections + year buckets, draft-edit
 dots), prominent title + typed metadata widgets (toggles, date pickers, comma
-lists; WP legacy `id`/`slug`/`path` collapsed under _advanced_), two lossless
-body-editing modes (Milkdown WYSIWYG ↔ Monaco Markdown, lazy-loaded), and full
-system dark mode.
+lists; WP legacy `id`/`slug`/`path` collapsed under _advanced_), three views of
+the body (Milkdown WYSIWYG ↔ Monaco Markdown ↔ Preview, the last two
+lazy-loaded), and full system dark mode.
 
 ## API
 
-`/api/me` · `/api/health` · `/api/branches` · `/api/list?base=` ·
-`/api/item?path=&base=` (serves the drafted version when one exists) ·
-`/api/status?base=` (changed files + open PR) · `POST /api/save` ·
-`POST /api/publish` · `POST /api/discard` · `POST /api/branch`
+`/api/me` (identity + whether Access is enforced) · `/api/health` ·
+`/api/branches` · `/api/list?base=` (paths + site nav + category vocabulary) ·
+`/api/item?path=&base=` (serves the drafted version when one exists; returns a
+discriminated `kind: "markdown" | "yaml"`) · `/api/meta?dir=&base=` ·
+`/api/status?base=` (changed files + open PR) · `POST /api/save` (compare-and-swap
+on the loaded blob sha; 409 on conflict) · `POST /api/create` (intent, not a path)
+· `POST /api/rename` (atomic move + redirect) · `POST /api/publish` ·
+`POST /api/discard` · `POST /api/branch`
+
+Every route but `/api/health` requires a verified Cloudflare Access identity and
+fails closed. Writes are confined to `content/` by one shared predicate.
 
 ## Layout
 
@@ -124,22 +131,34 @@ editor/
   tsconfig.json         # SPA + Worker types
   src/index.ts          # Worker entry — owns /api/* (assets serve the SPA)
   src/git/github.ts     # GitHub App auth + REST/GraphQL (read/write/branch/commit/compare/PR/titles)
+  src/access.ts         # Cloudflare Access JWT verification (fails closed)
   src/content/
-    serialize.ts        # parse/serialize .md + slug/branch helpers (host-agnostic)
+    serialize.ts        # parse/serialize .md, path predicates, autolink cleanup
+    newItem.ts          # every naming convention: path <-> URL, create, rename
+    links.ts            # internal link checking (shared with lint-content.ts)
     lint.ts             # style-rule engine (shared with scripts/lint-content.ts)
   web/                  # the editor SPA (React)
     app.tsx             # shell: base picker, draft bar, publish/discard, save
     filelist.tsx        # grouped content browser
     frontmatter.tsx     # typed metadata form (touched-fields-only round-trip)
-    editors/            # wysiwyg.tsx (Milkdown), raw.tsx (Monaco), monaco-setup.ts
+    wizard.tsx          # "what are you adding?" — new content, no path typing
+    editors/            # wysiwyg.tsx (Milkdown), raw.tsx (Monaco),
+                        # preview.tsx (the site's own renderer), monaco-setup.ts
     api.ts, main.tsx, index.html, styles.css
   dist/                 # Vite build output (git-ignored)
 ```
 
 ## Next
 
-Full Access JWT verification, new-file creation, structured event fields,
-config (.json) editing, GitLab adapter for the gitlab.com move.
+Image upload (tracked separately — 18 WordPress uploads are broken in the
+current build and are the initial payload), spellcheck with a chapter
+dictionary, structured forms over the config YAML, a diff before publishing,
+delete, and a GitLab adapter for the gitlab.com move.
+
+**Open, and needs the chapter:** the Access application does not exist yet, so
+`REQUIRE_ACCESS: "false"` is set in `wrangler.jsonc` and the editor is reachable
+by anyone with the URL. Verification is built and enforces by default — creating
+the app and deleting that line is all that's left.
 
 ## Develop
 
