@@ -44,6 +44,34 @@ its own, so nothing else crosses the boundary.
   branch. The App needs "Pull requests: Read & write" for publish.
 - **+ branch** creates real branches (e.g. `theme/…`) to edit against.
 
+## Three views of the same document
+
+**Rich text** (Milkdown) · **Markdown** (Monaco) · **Preview**.
+
+The preview is not redundant with the WYSIWYG, which is the obvious objection.
+Milkdown shows document _structure_ in Milkdown's theme — not the site's fonts,
+spacing, colours or components — and the raw-HTML islands the migration
+preserved (embeds, forms, styled divs) **don't render there at all**. For ~20
+files that's most of the page.
+
+Fidelity comes from reusing the site's real pipeline by relative import, so it
+cannot drift:
+
+| Step            | Module                               | Why it matters                                                                           |
+| --------------- | ------------------------------------ | ---------------------------------------------------------------------------------------- |
+| Markdown → HTML | `scripts/render-markdown.ts`         | The exact processor `build-content.ts` runs — remark + GFM + `rehype-raw`                |
+| HTML cleanup    | `app/lib/html.ts` (`cleanHtml`)      | Rewrites absolute svdsa.org links, strips `title=`. A lookalike renderer would skip this |
+| Styling         | `app/styles/global.css` in an iframe | The site's own stylesheet, isolated from the editor's                                    |
+
+The iframe carries `<base href>` pointed at the live origin, so fonts, images and
+relative links resolve exactly as they do on the real page — including resolving
+to **nothing** where a page is genuinely broken. A WordPress upload shows as a
+broken image here, because that is what a reader gets today.
+
+It's `sandbox=""` — no `allow-same-origin`, no `allow-scripts` — so preview
+content can't reach back into the editor and `<script>` islands stay inert. And
+it's lazily loaded (72 kB gzip), so the pipeline only downloads if you open it.
+
 ## Rescheduling a repeating meeting
 
 Recurring events are stored as one file with an iCalendar rule, and the editor

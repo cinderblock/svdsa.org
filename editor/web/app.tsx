@@ -31,8 +31,12 @@ import { Wysiwyg, type EditorHandle } from "./editors/wysiwyg";
 const Raw = lazy(() =>
   import("./editors/raw").then((m) => ({ default: m.Raw })),
 );
+// Likewise the preview: it pulls in the site's whole remark/rehype pipeline.
+const Preview = lazy(() =>
+  import("./editors/preview").then((m) => ({ default: m.Preview })),
+);
 
-type Mode = "wysiwyg" | "raw";
+type Mode = "wysiwyg" | "raw" | "preview";
 
 /** Group branches by first path segment (theme/, draft/, …); rootless first. */
 function groupBranches(branches: string[]): {
@@ -195,6 +199,8 @@ export function App() {
 
   function switchMode(next: Mode) {
     if (next === mode) return;
+    // Pull the live text out of whichever editor owns it before swapping, so
+    // preview shows unsaved work and nothing is lost switching back.
     if (edRef.current) setBody(edRef.current.getValue());
     setMode(next);
   }
@@ -569,6 +575,12 @@ export function App() {
                       >
                         Markdown
                       </button>
+                      <button
+                        className={mode === "preview" ? "on" : ""}
+                        onClick={() => switchMode("preview")}
+                      >
+                        Preview
+                      </button>
                     </>
                   ) : (
                     <button className="on" disabled>
@@ -586,7 +598,17 @@ export function App() {
               </div>
 
               <div className="pane">
-                {mode === "wysiwyg" && item.kind === "markdown" ? (
+                {mode === "preview" && item.kind === "markdown" ? (
+                  <Suspense
+                    fallback={<p className="empty">rendering preview…</p>}
+                  >
+                    <Preview
+                      body={body}
+                      siteOrigin={siteOrigin}
+                      title={title}
+                    />
+                  </Suspense>
+                ) : mode === "wysiwyg" && item.kind === "markdown" ? (
                   <Wysiwyg
                     key={`${item.path}:${item.sha}:wysiwyg`}
                     ref={edRef}
