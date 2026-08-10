@@ -9,9 +9,10 @@
  */
 
 import { readdir, readFile, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { join, sep } from "node:path";
 import yaml from "js-yaml";
 import { fixText, lintText, type StyleRule } from "../editor/src/content/lint";
+import { checkLinks } from "../editor/src/content/links";
 
 const CONTENT = join(import.meta.dirname, "..", "content");
 const FIX = process.argv.includes("--fix");
@@ -61,6 +62,20 @@ function checkCategories(rel: string, text: string): void {
   }
 }
 
+/**
+ * Every content path, for link checking — the checker needs to know what exists
+ * before it can say what doesn't.
+ */
+const allPaths: string[] = [];
+for (const dir of ["pages", "posts", "events"]) {
+  const entries = (await readdir(join(CONTENT, dir), {
+    recursive: true,
+  })) as string[];
+  for (const rel of entries.filter((f) => f.endsWith(".md")))
+    // readdir yields OS separators on Windows; repo paths are always forward.
+    allPaths.push(`content/${dir}/${rel.split(sep).join("/")}`);
+}
+
 for (const dir of ["pages", "posts", "events"]) {
   const root = join(CONTENT, dir);
   const entries = (await readdir(root, { recursive: true })) as string[];
@@ -76,7 +91,7 @@ for (const dir of ["pages", "posts", "events"]) {
       }
     }
     if (dir === "events") checkCategories(`${dir}/${rel}`, text);
-    const findings = lintText(text, rules);
+    const findings = [...lintText(text, rules), ...checkLinks(text, allPaths)];
     for (const f of findings) {
       const tag = f.level === "error" ? "✗" : "⚠";
       console.log(

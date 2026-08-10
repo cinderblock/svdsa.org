@@ -26,6 +26,7 @@ import {
   validBranchName,
 } from "./content/serialize";
 import { fixText, lintText, type StyleRule } from "./content/lint";
+import { checkLinks } from "./content/links";
 import {
   InvalidNewItem,
   planNewItem,
@@ -285,6 +286,19 @@ async function handleApi(
       autofixed = before - lint.length;
     } catch {
       /* no rules — no findings */
+    }
+
+    // Dead internal links, checked against what actually exists on this branch.
+    // Only for Markdown: a link inside config YAML is a menu target, and the
+    // page it points at may legitimately be added in the same draft.
+    if (!isConfig) {
+      try {
+        lint = lint.concat(
+          await gh.listContent(base).then((paths) => checkLinks(text, paths)),
+        );
+      } catch {
+        /* can't list content — skip rather than block the save */
+      }
     }
     // `sha` is the blob the editor loaded. When present this becomes an
     // optimistic-concurrency write: a stale tab, or the same person editing in

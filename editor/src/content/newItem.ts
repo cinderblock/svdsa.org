@@ -195,6 +195,33 @@ export function planNewItem(input: NewItemInput): PlannedItem {
 }
 
 /**
+ * The URL a content file will have on the site — the inverse of the conventions
+ * above, derived from the filename alone.
+ *
+ * That it works from the filename with no frontmatter is what makes link
+ * checking cheap: the Worker already has the file list, so it can build the set
+ * of valid addresses without reading a thousand files.
+ *
+ * Returns null for anything without a public URL (config, drafts we can't see
+ * from the path).
+ */
+export function urlForContentPath(path: string): string | null {
+  const page = path.match(/^content\/pages\/(.+)\.md$/);
+  if (page) return `/${page[1]}/`;
+
+  const post = path.match(
+    /^content\/posts\/\d{4}\/(\d{4})-(\d{2})-(\d{2})-(.+)\.md$/,
+  );
+  if (post) return `/${post[1]}/${post[2]}/${post[3]}/${post[4]}/`;
+
+  // Both a top-level series and a year-bucketed one-off address as /event/<slug>/.
+  const event = path.match(/^content\/events\/(?:\d{4}\/)?([^/]+)\.md$/);
+  if (event) return `/event/${event[1]}/`;
+
+  return null;
+}
+
+/**
  * Where an item moves to when its address changes.
  *
  * Derived from the OLD path so the structure that isn't being changed survives:

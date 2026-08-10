@@ -47,6 +47,30 @@ and doesn't punish a trailing comma. `build-content.ts` parses it and emits
 reaches the browser bundle and the imports stay typed. JSON in this repo is
 always a generated artifact, never something you hand-edit.
 
+### Link checking
+
+`editor/src/content/links.ts` checks internal links against the content that
+actually exists — on every save and in `bun run lint:content`. Deliberately
+**no network**: external URLs go stale on someone else's schedule and would make
+saving slow and intermittently wrong, so they belong in a scheduled job.
+
+The corpus taught this check its most important lesson. It has only ~15
+genuinely relative internal links — the WordPress migration wrote the rest as
+**absolute URLs to the live domain**. A checker that dismissed those as
+"external" would have reported a clean bill of health. Treating same-host
+absolutes as internal turns up three distinct problems:
+
+| Finding                  | Count | Why it matters                                                                                                            |
+| ------------------------ | ----- | ------------------------------------------------------------------------------------------------------------------------- |
+| `dead-internal-link`     | 91    | `/events/` (the old WP calendar), `/donations/` (we have `/donate/`), and pre-2025 events the migration didn't carry over |
+| `absolute-internal-link` | 86    | Resolves on production only — on a branch preview it jumps to the live site, and it forces a full page load               |
+| `wordpress-asset`        | 58    | `/wp-content/uploads/…` images that **404 the day WordPress is retired**                                                  |
+
+All are warnings, never errors: a draft may legitimately link to a page it adds
+in the same change, and blocking a save on that teaches editors to distrust the
+check. Asset references (`src=`) are checked for WordPress dependence but not for
+dead-ness, since files in `public/` are real addresses no content path predicts.
+
 ### Redirects — old addresses keep working
 
 Preserving the old URLs is a founding premise here, so renaming is never just a
