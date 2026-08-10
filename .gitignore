@@ -55,3 +55,4 @@ content/generated/
 
 # Generated from content/config/redirects.yaml by build-content.ts
 public/_redirects
+media-originals/

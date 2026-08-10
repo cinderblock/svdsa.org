@@ -1,20 +1,15 @@
 ---
-id: 10001290
+id: 14349
 slug: international-solidarity-wg-meeting-2-2
-path: /event/international-solidarity-wg-meeting-2-2/2025-08-13/
+path: /event/international-solidarity-wg-meeting-2-2/2025-11-05/
 title: International Solidarity WG Meeting
 start: '2025-08-13 18:30:00'
 end: '2025-08-13 20:00:00'
-allDay: false
 timezone: America/Los_Angeles
-isVirtual: false
-categories:
-  - SV DSA
-  - WG - International Solidarity
 ---
 
 Join our International Solidarity Working Group as we organize for a free Palestine, protections for immigrants, an end to US imperialism, and a liberated international working class!
 
-Please register for the Zoom meeting here: [https://us06web.zoom.us/meeting/register/Pzfk-whGRre39zr8rv2Dew](https://us06web.zoom.us/meeting/register/Pzfk-whGRre39zr8rv2Dew)
+Please register for the Zoom meeting here: <a href="https://us06web.zoom.us/meeting/register/Pzfk-whGRre39zr8rv2Dew">https://us06web.zoom.us/meeting/register/Pzfk-whGRre39zr8rv2Dew</a>
 
-Read more about the International Solidarity Working Group at [https://siliconvalleydsa.org/international-solidarity/](https://siliconvalleydsa.org/international-solidarity/).
+Read more about the International Solidarity Working Group at <a href="https://siliconvalleydsa.org/international-solidarity/" target="_blank" rel="noopener">https://siliconvalleydsa.org/international-solidarity/</a>.

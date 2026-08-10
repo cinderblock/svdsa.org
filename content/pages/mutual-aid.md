@@ -3,7 +3,7 @@ id: 6226
 slug: mutual-aid
 path: /mutual-aid/
 title: Mutual Aid
-modified: '2026-05-21T22:14:56'
+modified: '2026-05-21 22:14:56'
 ---
 
 ## **What is Mutual Aid?**
@@ -12,7 +12,7 @@ modified: '2026-05-21T22:14:56'
 
 ### **Mutual Aid vs. Charity** ([source](https://lilipoh.com/articles/mutual-aid-solidarity-not-charity-and-cooperation-for-the-sake-of-the-common-good/))
 
-“I don’t believe in charity. I believe in solidarity. Charity is vertical. It goes from the top to the bottom. Solidarity is horizontal. It respects the other person. I have a lot to learn from other people” – Eduardo Galeano (Uruguayan journalist, writer and novelist)
+"I don't believe in charity. I believe in solidarity. Charity is vertical. It goes from the top to the bottom. Solidarity is horizontal. It respects the other person. I have a lot to learn from other people" - Eduardo Galeano (Uruguayan journalist, writer and novelist)
 
 *   An understanding that it is the system, not the people suffering under it, that creates poverty, crisis, and vulnerability
 *   Governance/control by people who are most affected (can mean having a membership base of those most affected, or being formed in ways that ensure those providing the aid are from the same group as those giving the aid, or models that allow allies to participate but focus on accountability to those being served)
@@ -25,9 +25,9 @@ modified: '2026-05-21T22:14:56'
 *   Commitment to dignity and self-determination of people in need or crisis
 *   Consensus-based decision making rather than majority rule
 
-### **How does it relate to SV DSA’s mission?**
+### **How does it relate to SV DSA's mission?**
 
-Capitalism has created conditions threatening many people’s safety, well-being, and access to basic resources. However, capitalism is *not* inevitable. In SVDSA, we are working towards a world where everyone’s basic shelter, food, and healthcare needs are met. Mutual Aid is one way we are working towards a world where workers have democratic control of their own workplaces, and where regular people can live in and democratically participate in society.
+Capitalism has created conditions threatening many people's safety, well-being, and access to basic resources. However, capitalism is *not* inevitable. In SVDSA, we are working towards a world where everyone's basic shelter, food, and healthcare needs are met. Mutual Aid is one way we are working towards a world where workers have democratic control of their own workplaces, and where regular people can live in and democratically participate in society.
 
 ## **Our Work**
 
@@ -42,7 +42,7 @@ South Bay Mutual Aid, our affiliated group: [https://southbaymutualaid.org/](htt
 
 We meet monthly Thursday at 6:30 PM, see our [calendar](https://siliconvalleydsa.org/events/) to join a meeting!
 
-Sign up to volunteer with SBMA: [https://southbaymutualaid.org/volunteermulti?lang=en](https://southbaymutualaid.org/volunteermulti?lang=en) (ddistribution event volunteer, flyering/outreach, and other roles). Formulario de voluntariado español: [Deseo ser Voluntario](https://southbaymutualaid.org/volunteermulti?lang=en)
+Sign up to volunteer with SBMA: [https://southbaymutualaid.org/volunteermulti?lang=en](https://southbaymutualaid.org/volunteermulti?lang=en) (ddistribution event volunteer, flyering/outreach, and other roles). Formulario de voluntariado español: [Deseo ser Voluntario](https://southbaymutualaid.org/volunteermulti?lang=en)
 
 Donate Here: [https://siliconvalleydsa.org/donate/](https://siliconvalleydsa.org/donate/) (select mutual aid fund)
 
@@ -77,7 +77,7 @@ Donate Here: [https://siliconvalleydsa.org/donate/](https://siliconvalleydsa.org
 
 ## Projects
 
-*   Running a monthly Really, Really Free Store on the third Saturday of each month at the San José Peace and Justice Center, where folks can take whatever they need for free, including cleaning supplies, clothes, fresh produce, menstrual products, zines, and more. This is run in collaboration with South Bay Mutual Aid, San Jose Food Not Bombs, San Jose Clothing Swap, and Art Pocket SJ. [Check out our calendar](https://siliconvalleydsa.org/events/) for the next Free Store!
+*   Running a monthly Really, Really Free Store on the third Saturday of each month at the San José Peace and Justice Center, where folks can take whatever they need for free, including cleaning supplies, clothes, fresh produce, menstrual products, zines, and more. This is run in collaboration with South Bay Mutual Aid, San Jose Food Not Bombs, San Jose Clothing Swap, and Art Pocket SJ. [Check out our calendar](https://siliconvalleydsa.org/events/) for the next Free Store!
 *   Maintaining a community garden at the San José Peace and Justice Center to provide fresh produce to the community, as well as providing other community resources there.
 *   Organizing in partnership with our International Solidarity, Community Safety, and Housing groups to protect immigrants and the unhoused community from ICE and the police.
 

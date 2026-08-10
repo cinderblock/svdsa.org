@@ -1,0 +1,26 @@
+---
+id: 16339
+slug: 2026-07-23-calstrs-divest-from-genocide
+path: /event/2026-07-23-calstrs-divest-from-genocide/
+title: CalSTRS Divest from Genocide
+start: '2026-07-23 08:30:00'
+end: '2026-07-23 13:30:00'
+timezone: America/Los_Angeles
+venue:
+  name: Westin San Francisco Airport
+  address: 1 Old Bayshore Highway
+  city: Millbrae
+  state: CA
+organizer: CalSTRS Divest 4 Palestine
+---
+
+On Thu July 23rd, 2026, Rally @ 8:30 AM, public comment @ 9:00 AM. Westin San Francisco Airport, 1 Old Bayshore Highway
+Millbrae, CA.
+
+Answer the call from teachers against the genocide against Palestinians from across California- from Los Angeles to San Diego to Sacramento to Eureka to the Bay Area! Join them in s show of political will and the power of the people at the  CalSTRS' summer board meeting.
+
+Parking is limited so take BART to the Millbrae station or carpool with your friends.
+
+Look for the flags at the park across the street!
+
+Bring kuffieyhs, signs and flags. Tell CalSTRS to retire genocide now! Our educators don't want their retirement to be tied to occupation!
