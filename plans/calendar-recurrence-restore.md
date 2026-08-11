@@ -254,6 +254,70 @@ content dirs at line 291 _and_ re-introduces the `wptexturize`d typography
 
 Both are follow-up work, not part of this restore.
 
+### The importer needs a recurrence feature — investigated 2026-08-11
+
+The restore puts the data back but leaves the import **not idempotent**, which is
+the property that actually matters: re-importing should be a no-op. Findings
+from reading WebPress's `scripts/wxr.ts` and `scripts/import-wxr.ts`:
+
+- **The recurrence data is already parsed.** `wxr.ts:112-116` copies every
+  `wp:postmeta` key into `item.meta` with no allowlist, so TEC's
+  `_EventRecurrence` is present on every run today. It is dropped at
+  _conversion_ time — `wxr.ts:501-524` consumes about eleven `_Event*` keys and
+  simply never reads that one. This is an emit gap, not a data gap.
+- **`import-wxr.ts` never deletes anything.** It only `writeFile`s the paths it
+  generates (`import-wxr.ts:97-101`). The `rm -rf` of `content/{pages,posts,events}`
+  lives in the _old REST_ importer at `fetch-wp-content.ts:424-427` — i.e. behind
+  `bun run migrate`. So the 21 files died from how the output was landed, not
+  from the WXR importer itself. Correct the "Why it happened" section's emphasis
+  accordingly.
+- **Non-destructive alone would NOT give a no-op — it would give duplicates.**
+  Series files live at flat `content/events/<slug>.md`; the importer writes
+  `content/events/<year>/<slug>-<date>.md`. Different paths, so it would never
+  overwrite a series file — it would add ~278 instance files _beside_ the 21
+  series and every recurring meeting would appear twice. `deduplicate()`
+  (`wxr.ts:393-408`) makes this worse by renaming collisions to `-2`, `-3`
+  instead of merging. Recurrence support is genuinely required, not optional.
+- One piece of recurrence semantics is already handled by accident: the
+  `tribe-ignored` status is excluded (`wxr.ts:149-155`), and that is TEC's marker
+  for deleted occurrences of a series.
+
+So the feature is three parts: **collapse** instances into one series (TEC gives
+recurring instances provisional ids ≥ 10,000,000 — `sjfreestore` is `10000996`),
+**translate** `_EventRecurrence` (serialized PHP) into a rule, and **re-route**
+the output to the flat series path so a re-import lands on the existing file.
+
+Two things to settle before writing it:
+
+1. **Schema.** svdsa uses `recurrence: { rrule: "FREQ=MONTHLY;BYDAY=3SA" }`
+   (`app/lib/recurrence.ts:30-31`) and its parser implements only
+   `FREQ=WEEKLY|MONTHLY`, _requiring_ an nth on monthly `BYDAY`
+   (`recurrence.ts:107`). WebPress uses a different shape,
+   `repeats: { freq, interval, byday, until }`
+   (`plugins/events/expand-recurring.ts:17-23`). These have diverged and need
+   reconciling, or the importer must emit whichever the site declares.
+2. **Unrepresentable rules must fail loudly.** TEC's model does not map 1:1 onto
+   RRULE (custom rules, per-instance exclusions, end-after-N-occurrences,
+   same-date-monthly vs nth-weekday). Anything svdsa's parser can't express
+   should error, not silently drop — silent dropping is how this whole incident
+   started.
+
+**Only 21 of the restored 24 files can ever come from the import.** The two
+canaries carry synthetic ids (`90000001`) and `content/pages/home.md` has no WP
+`id` at all — it is bespoke frontmatter (`kicker`, `headline`, `lead`, CTAs).
+Those are genuinely site-owned and no importer feature will reproduce them, so
+the merge/preserve backstop is still needed _in addition to_ recurrence support.
+The two fixes solve different halves, and the i18n files land in the same
+site-owned bucket.
+
+**Acceptance test, and the reason to have restored first:** the 21 committed
+files are now a golden oracle. Implement the feature, re-import with
+`--out <tmp>`, and diff against them. An empty diff _is_ the no-op property.
+
+**Blocker:** no WXR export is committed and none was found on disk; `wxr.test.ts`
+uses an inline fixture with a single non-recurring event and no `_EventRecurrence`
+anywhere. Building this needs the real export (or a fresh one).
+
 ## Alternative considered
 
 Reverting `b34baca` outright and re-landing it later through WebPress with a
