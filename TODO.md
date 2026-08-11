@@ -19,13 +19,28 @@ produced each one is given; re-run it rather than trusting the figure.
 
 Nothing here can be finished by a code change alone.
 
-- [ ] **The editor is publicly writable.** `REQUIRE_ACCESS: "false"` in
-      `editor/wrangler.jsonc:38` — anyone with the URL can edit the site and
-      commit as you. Verification is built and fails closed by default; the
-      Cloudflare Access application just doesn't exist yet. Creating it, setting
-      `CF_ACCESS_TEAM_DOMAIN` / `CF_ACCESS_AUD`, and deleting that line is all
-      that is left. The editor shows a red banner about this to whoever opens it.
-      → `editor/README.md` § "Open, and needs the chapter"
+> All Cloudflare infrastructure is currently on the SVDSA **test** account
+> (`4ce5029d216dd48d4516b29665d12e5a`), moving to the chapter's real account
+> once they approve. Account ID, hostnames, Access team domain, AUD and policy
+> ID are all account-scoped and will change with it — so keep them in
+> `editor/wrangler.jsonc` vars and `bun run setup:editor`, not in source.
+
+- [ ] **The editor does not verify who it is talking to.**
+      `REQUIRE_ACCESS: "false"` in `editor/wrangler.jsonc:38` makes the Worker
+      trust the `Cf-Access-Authenticated-User-Email` header, which is a plain
+      forgeable header, and fall back to a default identity when it is absent.
+      As of 2026-08-11 a Cloudflare Access application **is** live in front of
+      `edit.cameron-test-svdsa.workers.dev`, so the ordinary URL is gated at the
+      edge — but an Access application is scoped to exact hostnames, and a
+      Worker is reachable on more than one. A version-preview hostname
+      (`<version>-edit.<subdomain>.workers.dev`) does not match that
+      destination, reaches the Worker directly, and is then trusted. Edge
+      gating and Worker verification are not substitutes for each other.
+      **To close:** set `CF_ACCESS_TEAM_DOMAIN` + `CF_ACCESS_AUD` and delete
+      the `REQUIRE_ACCESS` line — `bun run setup:editor` does all three. The
+      editor shows a red banner until then.
+      → `editor/src/access.ts` header comment; `editor/README.md` § "Open, and
+      needs the chapter"
 - [ ] **Working-group emoji were guessed.** Ecosocialist, Healthcare and
       Socialist Feminist weren't in the chapter's list, so placeholders shipped.
       Electoral is described by the chapter as a working group but sits under
