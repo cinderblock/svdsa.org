@@ -13,6 +13,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { api, type ChangedFile, type ItemMeta, type SiteNav } from "./api";
+import { Picker } from "./picker";
 
 export type SortKey = "site" | "title" | "date" | "recent";
 
@@ -225,20 +226,23 @@ export function FileList({
         onChange={(e) => setFilter(e.target.value)}
         aria-label="Search content"
       />
-      <label className="sortbar">
-        <span>Sort</span>
-        <select
+      {/*
+        A div, not a label: a <label> wrapping the Picker's <button> would fold
+        the word "Sort" into the control's accessible name instead of labelling
+        it, so the name lives on the trigger itself.
+      */}
+      <div className="sortbar">
+        <span aria-hidden="true">Sort</span>
+        <Picker
+          className="pick--block"
+          label="Sort content"
+          showLabel={false}
+          filterable={false}
           value={sort}
-          onChange={(e) => setSort(e.target.value as SortKey)}
-          aria-label="Sort content"
-        >
-          {SORTS.map((s) => (
-            <option key={s.key} value={s.key}>
-              {s.label}
-            </option>
-          ))}
-        </select>
-      </label>
+          options={SORTS.map((s) => ({ value: s.key, label: s.label }))}
+          onChange={(v) => setSort(v as SortKey)}
+        />
+      </div>
 
       {groups.map((g) => {
         const shown = sortItems(g.items.filter(matches));

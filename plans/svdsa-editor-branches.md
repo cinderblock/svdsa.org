@@ -27,9 +27,9 @@ a **custom branch switcher** in a redesigned top bar.
   with `useState`), and the branch list is a thing you consult _while_ editing —
   a modal keeps the editing state mounted underneath. Deep-linkable via
   `?branches` so a link can open it.
-- **The switcher is a reusable component, but only the top bar adopts it now.**
-  The other five `<select>`s (file-list sort, wizard parent, three recurrence
-  dropdowns) keep working as they are; they can migrate later.
+- **The switcher is a reusable component.** Round 1 wired only the top bar;
+  round 2 (below) adopted it for the file-list sort and wizard parent. The
+  three recurrence dropdowns stay native on purpose — see round 2.
 - **Branch rows show everything:** preview link, last commit (subject, author,
   relative time), ahead/behind vs production, open PR, and `draft/*` branches
   labelled with whose draft they are and what they branched from.
@@ -65,6 +65,36 @@ a **custom branch switcher** in a redesigned top bar.
 7. [x] `styles.css`: header, picker and modal sections.
 8. [x] `tests/branches.spec.ts`; update `wizard.spec.ts`'s `header select`.
 9. [x] README + `docs/editing.md`.
+
+## Round 2 — the rest of the dropdowns (SHIPPED)
+
+`Picker` grew a `filterable` prop and with it a second ARIA shape — **combobox**
+when there's a filter box, plain focusable **listbox** when there isn't.
+Enter/Escape now hand focus back to the trigger. It defaults to `true` and the
+one genuinely short list (four sort orders) opts out; an earlier
+`options.length > 8` default was dropped as a magic number that made the call
+site's behaviour depend on how much content happened to exist.
+
+Styling moved off "header only" to modifier classes — `pick--bar` for top-bar
+chrome, `pick--block` to fill a form or sidebar slot — with the bare
+`.pick__trigger` now a neutral in-app control. **A peer thread is making this
+CSS more modular and is building on `pick--bar`; keep the modifier class and
+don't re-scope it positionally (e.g. `#root > header`).**
+
+Adopted at two more call sites: the sidebar's **sort** control
+(`filelist.tsx`) and the wizard's **parent page** field (`wizard.tsx`).
+
+**The three recurrence dropdowns stay native, deliberately.** Two-to-six short
+options inside a dense form is where the platform control is genuinely better —
+compact, already correct for keyboard and screen readers, and on iOS it gets a
+wheel picker. The complaint that started this work was an OS widget on a red
+bar; that doesn't apply inside a white form.
+
+Both migrated call sites were `<label>`-wrapped selects and became `div` +
+`aria-label`, because a `<label>` around the trigger `<button>` folds the
+visible caption into the accessible name instead of labelling it — the exact
+bug round 6 of `svdsa-editor-rich-ui.md` hit with the recurrence toggle.
+`tests/picker.spec.ts` asserts the name is exactly `Sort content`.
 
 ## Findings / gotchas
 

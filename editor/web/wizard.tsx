@@ -18,6 +18,7 @@
  */
 
 import { useMemo, useState } from "react";
+import { Picker } from "./picker";
 import { api, type EventCategory, type NewKind } from "./api";
 
 const KINDS: {
@@ -258,17 +259,21 @@ export function Wizard({
       )}
 
       {kind === "page" && (
-        <label className="wiz__field">
-          <span>Inside another page (optional)</span>
-          <select value={parent} onChange={(e) => setParent(e.target.value)}>
-            <option value="">Top level</option>
-            {pages.map((p) => (
-              <option key={p} value={p}>
-                /{p}/
-              </option>
-            ))}
-          </select>
-        </label>
+        <div className="wiz__field">
+          <span aria-hidden="true">Inside another page (optional)</span>
+          <Picker
+            className="pick--block"
+            label="Inside another page"
+            showLabel={false}
+            placeholder="Filter pages…"
+            value={parent}
+            options={[
+              { value: "", label: "Top level" },
+              ...pages.map((p) => ({ value: p, label: `/${p}/` })),
+            ]}
+            onChange={setParent}
+          />
+        </div>
       )}
 
       {kind === "post" && (

@@ -3,14 +3,17 @@
  *
  * A native select can't be styled to match the app, can't show a second line
  * per option, and can't carry actions in its footer; on the editor's red header
- * it renders as an unrelated OS widget. This is the ARIA **combobox** pattern
- * rather than a listbox: the filter input keeps DOM focus and points at the
- * highlighted option through `aria-activedescendant`, so options are never
- * focused directly.
+ * it renders as an unrelated OS widget.
  *
- * Written generically (options + groups + hints + a footer slot) so the other
- * `<select>`s in the editor — file-list sort, wizard parent, the recurrence
- * dropdowns — can adopt it without a rewrite. Only the header uses it so far.
+ * Two ARIA shapes, picked by whether there's a filter box (see `filterable`):
+ * with one it's a **combobox** — the input keeps DOM focus and points at the
+ * highlighted option through `aria-activedescendant`; without one it's a plain
+ * **listbox** that takes focus itself. Either way options are never focused
+ * directly, and the keyboard handling is shared.
+ *
+ * The recurrence dropdowns are deliberately still native. They're two-to-six
+ * short options inside a dense form, where the platform control is genuinely
+ * better — especially on touch, where iOS gives them a wheel picker.
  */
 
 import {
@@ -39,6 +42,8 @@ export function Picker({
   placeholder = "Filter…",
   footer,
   className = "",
+  filterable = true,
+  showLabel = true,
 }: {
   value: string;
   options: PickerOption[];
@@ -49,12 +54,22 @@ export function Picker({
   /** Actions rendered under the list, e.g. "Browse all branches…". */
   footer?: (close: () => void) => ReactNode;
   className?: string;
+  /**
+   * Show the filter box. On by default — a list worth a custom control is
+   * usually worth searching. Pass `false` for a genuinely short, fixed set
+   * (four sort orders), where a search field is just noise.
+   */
+  filterable?: boolean;
+  /** Render `label` inside the trigger. Off when something else already says it. */
+  showLabel?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [active, setActive] = useState(0);
   const wrapRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const id = useId();
   const listId = `${id}-list`;
   const optionId = (i: number) => `${id}-opt-${i}`;
@@ -84,9 +99,15 @@ export function Picker({
     return out;
   }, [shown]);
 
-  function close() {
+  /**
+   * `refocus` returns focus to the trigger. Right for a keyboard dismissal or
+   * a choice; wrong for a click elsewhere, which would yank focus back from
+   * wherever the user just clicked.
+   */
+  function close(refocus = false) {
     setOpen(false);
     setQuery("");
+    if (refocus) triggerRef.current?.focus();
   }
 
   // Opening starts from a clean filter, with the current value highlighted.
@@ -99,7 +120,8 @@ export function Picker({
         options.findIndex((o) => o.value === value),
       ),
     );
-    inputRef.current?.focus();
+    // Whichever element carries the keyboard interaction takes focus.
+    (inputRef.current ?? listRef.current)?.focus();
   }, [open, options, value]);
 
   // A filter that scrolls the highlight off-screen is worse than none.
@@ -121,21 +143,21 @@ export function Picker({
     return () => document.removeEventListener("pointerdown", onDown);
   }, [open]);
 
-  function choose(v: string) {
+  function choose(v: string, refocus = false) {
     onChange(v);
-    close();
+    close(refocus);
   }
 
   function onKeyDown(e: React.KeyboardEvent) {
     if (e.key === "Escape") {
       e.stopPropagation();
-      close();
+      close(true);
       return;
     }
     if (e.key === "Enter") {
       e.preventDefault();
       const opt = shown[active];
-      if (opt) choose(opt.value);
+      if (opt) choose(opt.value, true);
       return;
     }
     const move =
@@ -165,12 +187,14 @@ export function Picker({
     <div className={`pick ${className}`} ref={wrapRef}>
       <button
         type="button"
+        ref={triggerRef}
         className="pick__trigger"
-        aria-haspopup="dialog"
+        aria-haspopup={filterable ? "dialog" : "listbox"}
         aria-expanded={open}
+        aria-label={showLabel ? undefined : label}
         onClick={() => (open ? close() : setOpen(true))}
       >
-        <span className="pick__label">{label}</span>
+        {showLabel && <span className="pick__label">{label}</span>}
         <span className="pick__value">{current?.label ?? value}</span>
         <span className="pick__caret" aria-hidden="true">
           ▾
@@ -178,30 +202,46 @@ export function Picker({
       </button>
 
       {open && (
-        <div className="pick__pop" role="dialog" aria-label={label}>
-          <input
-            ref={inputRef}
-            className="pick__filter"
-            role="combobox"
-            aria-expanded="true"
-            aria-controls={listId}
-            aria-autocomplete="list"
-            aria-label={`Filter ${label.toLowerCase()}`}
-            aria-activedescendant={shown.length ? optionId(active) : undefined}
-            placeholder={placeholder}
-            value={query}
-            onChange={(e) => {
-              setQuery(e.target.value);
-              setActive(0);
-            }}
-            onKeyDown={onKeyDown}
-          />
+        <div
+          className="pick__pop"
+          role={filterable ? "dialog" : undefined}
+          aria-label={filterable ? label : undefined}
+        >
+          {filterable && (
+            <input
+              ref={inputRef}
+              className="pick__filter"
+              role="combobox"
+              aria-expanded="true"
+              aria-controls={listId}
+              aria-autocomplete="list"
+              aria-label={`Filter ${label.toLowerCase()}`}
+              aria-activedescendant={
+                shown.length ? optionId(active) : undefined
+              }
+              placeholder={placeholder}
+              value={query}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setActive(0);
+              }}
+              onKeyDown={onKeyDown}
+            />
+          )}
 
           <div
             className="pick__list"
             role="listbox"
             id={listId}
             aria-label={label}
+            // Without a filter box there's nothing else to hold focus, so the
+            // list itself becomes the keyboard target.
+            ref={listRef}
+            tabIndex={filterable ? undefined : -1}
+            onKeyDown={filterable ? undefined : onKeyDown}
+            aria-activedescendant={
+              !filterable && shown.length ? optionId(active) : undefined
+            }
           >
             {!shown.length && <p className="pick__none">No match.</p>}
             {sections.map((s) => (
