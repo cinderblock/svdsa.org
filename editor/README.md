@@ -169,10 +169,12 @@ editor/
 
 ## Next
 
-Image upload (tracked separately — 18 WordPress uploads are broken in the
-current build and are the initial payload), spellcheck with a chapter
-dictionary, structured forms over the config YAML, a diff before publishing,
-delete, and a GitLab adapter for the gitlab.com move.
+Indexed with everything else in [`../TODO.md`](../TODO.md).
+
+Image upload (tracked separately — the WordPress uploads that didn't survive
+the migration are the initial payload), spellcheck with a chapter dictionary,
+structured forms over the config YAML, a diff before publishing, delete, and a
+GitLab adapter for the gitlab.com move.
 
 **Open, and needs the chapter:** the Access application does not exist yet, so
 `REQUIRE_ACCESS: "false"` is set in `wrangler.jsonc` and the editor is reachable

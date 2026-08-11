@@ -10,6 +10,9 @@ Vite + Bun, prerendered).
 **Want to change something on the site?** See **[docs/editing.md](docs/editing.md)**
 — one flowchart from "I only want a WYSIWYG" to full git workflows.
 
+**Looking for what's outstanding?** **[TODO.md](TODO.md)** — every open item in
+one list, each pointing at the plan doc that holds the detail.
+
 ## Why
 
 The current site is WordPress + The Events Calendar. Almost none of it needs a
