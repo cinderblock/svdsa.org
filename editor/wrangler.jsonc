@@ -24,18 +24,11 @@
   // by `bun run setup:editor`. The ONLY secret is GH_PRIVATE_KEY (and, for the
   // GitLab host, GITLAB_TOKEN), set via `wrangler secret put` — never committed.
   "vars": {
-    // ⚠ THE EDITOR IS CURRENTLY OPEN TO ANYONE WHO KNOWS ITS URL.
-    //
-    // The Worker commits to the repo as a trusted GitHub App, so its identity
-    // check is the only access control there is. It fails CLOSED by default —
-    // omit this variable and unauthenticated requests are refused. This "false"
-    // exists only because the Cloudflare Access application has never been
-    // created (CF_ACCESS_TEAM_DOMAIN / CF_ACCESS_AUD below are still empty), and
-    // enforcing without it would lock everyone out including the chapter.
-    //
-    // TO FIX: create the Access application, fill in the two vars below, then
-    // DELETE this line. The editor shows a red banner until you do.
-    "REQUIRE_ACCESS": "false",
+    // REQUIRE_ACCESS is deliberately absent: an unset variable means ENFORCE,
+    // so the insecure state is the one that has to be written down. Do not add
+    // it back to "silence" a lockout — a lockout means the two CF_ACCESS_*
+    // values below are wrong, and disabling the check hands write access to
+    // the repo to anyone who can reach the Worker.
     "GIT_HOST": "github",
     "EDITOR_DEFAULT_BASE": "red",
     // The production site Worker's name on this account. Used to derive the
@@ -46,7 +39,12 @@
     "GH_APP_ID": "4368113",
     "GH_INSTALLATION_ID": "148335084",
     "GITLAB_PROJECT_ID": "",
-    "CF_ACCESS_TEAM_DOMAIN": "",
-    "CF_ACCESS_AUD": "",
+    // Cloudflare Access, on the SVDSA *test* account. Both change when the
+    // chapter approves the move to their own account — re-run setup:editor
+    // there rather than hand-editing. Team domain fetches the JWT signing
+    // keys; AUD is this application's audience tag, and is what stops a token
+    // minted for a DIFFERENT app on the same team from opening the editor.
+    "CF_ACCESS_TEAM_DOMAIN": "calm-glade-6362.cloudflareaccess.com",
+    "CF_ACCESS_AUD": "0a33d922ce6cbb3f5edc50609af349f97838e7309c3595e4209c52315a949c42",
   },
 }

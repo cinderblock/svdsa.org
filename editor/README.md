@@ -24,10 +24,21 @@ Because it's a normal package, **Cloudflare Workers Builds points at `editor` as
 its root directory** and runs the ordinary `bun install && bun run build` —
 no `--config` flags and no API token. See the table in the root README.
 
-It does share one file with the site by relative import:
-`app/lib/recurrence.ts`, deliberately, so the recurrence widget previews dates
-with the exact engine the site and `.ics` feeds use. That file has no imports of
-its own, so nothing else crosses the boundary.
+The boundary is one-way, though: the editor imports site files by relative path,
+deliberately, wherever showing an editor what they're making means running the
+site's own code. One implementation, so it cannot drift.
+
+| From the site                | Used for                                         |
+| ---------------------------- | ------------------------------------------------ |
+| `app/lib/recurrence.ts`      | The recurrence widget's date preview             |
+| `scripts/render-markdown.ts` | Preview — the exact processor the build runs     |
+| `app/lib/html.ts`            | Preview — the cleanup step the site applies      |
+| `app/styles/global.css`      | Preview and Page, as text, injected into a frame |
+| `app/routes/home.tsx`        | The **Page** view below — it IS the home page    |
+
+The site imports nothing from `editor/`. Milkdown and Monaco stay on this side.
+`vite.config.ts` carries the `~/` alias and a `react-router` stand-in that make
+the last row possible.
 
 ## How editing works
 
@@ -82,6 +93,36 @@ islands. Closing both is planned in
 `plans/svdsa-editor-wysiwyg-fidelity.md` — including why the obvious fix
 (point Milkdown at the site's stylesheet) doesn't work as stated.
 
+## The home page, which is none of those things
+
+The front page has no body. It's a fixed layout with fourteen word-shaped holes
+in it, filled from `content/pages/home.md`'s frontmatter — so all three views
+above show an empty document, and the words end up as unlabelled text boxes in
+the metadata form.
+
+It gets one view instead, **Page**, which renders the site's own
+`app/routes/home.tsx` and makes each of those fourteen words editable where it
+sits. You change the headline by clicking the headline. Everything else on the
+page — the events, the working-group cards, the dispatches — is really there,
+pulled from the same content the site builds from, because it is the same
+component.
+
+A few consequences worth knowing:
+
+- **Blank means the shipped default**, not a blank heading (`app/lib/home.ts`).
+  Clear a slot and the default reappears when you click away — that's what the
+  page will render, so that's what you're shown.
+- **Enter does nothing.** Each slot is a single YAML string, including the
+  paragraphs.
+- **Structure isn't editable**, only words. Sections, order and layout stay in
+  the route.
+- This frame is same-origin and runs scripts, unlike the Markdown preview above.
+  It renders our own components against plain strings — there's no raw HTML on
+  the home page — so there is nothing here to sandbox away. The Markdown preview
+  keeps its `sandbox=""`; two panes, two threat models.
+
+→ `plans/svdsa-home-inplace-editing.md`
+
 ## Rescheduling a repeating meeting
 
 Recurring events are stored as one file with an iCalendar rule, and the editor
@@ -107,7 +148,10 @@ the event's date), and are sortable by site order / A–Z / date / newest.
 
 **Jump from the live site:** append `?edit` to any page URL and you land here
 with that page open. The site redirects to `edit.<subdomain>` with
-`?url=<path>`; `?path=<repo path>` also works.
+`?url=<path>`; `?path=<repo path>` also works. Both the file browser and this
+resolver get a page's address from `src/content/urls.ts`, which is also what the
+link checker uses — one definition, so `/` reaches the home page rather than the
+`/home/` its filename would suggest.
 
 ## UI
 
@@ -116,7 +160,8 @@ keeps `/api/*`): grouped file browser (sections + year buckets, draft-edit
 dots), prominent title + typed metadata widgets (toggles, date pickers, comma
 lists; WP legacy `id`/`slug`/`path` collapsed under _advanced_), three views of
 the body (Milkdown WYSIWYG ↔ Monaco Source ↔ Preview, the last two
-lazy-loaded), and full system dark mode.
+lazy-loaded) — or the in-place **Page** view for the home page — and full system
+dark mode.
 
 ## API
 
@@ -176,10 +221,28 @@ the migration are the initial payload), spellcheck with a chapter dictionary,
 structured forms over the config YAML, a diff before publishing, delete, and a
 GitLab adapter for the gitlab.com move.
 
-**Open, and needs the chapter:** the Access application does not exist yet, so
-`REQUIRE_ACCESS: "false"` is set in `wrangler.jsonc` and the editor is reachable
-by anyone with the URL. Verification is built and enforces by default — creating
-the app and deleting that line is all that's left.
+## Who can edit
+
+Access is enforced: the Worker verifies the **signed** Cloudflare Access JWT on
+every `/api/*` call, checking the signature against the team's keys and the
+`aud` claim against this application's audience tag. It fails closed — no valid
+token, no editor — and refuses to serve at all if it is misconfigured, rather
+than falling back to trusting a header. See `src/access.ts`.
+
+**Adding or removing an editor** is a one-field change: add their email to the
+**"Web Editors"** Access policy. No git account, no invitation, nothing in this
+repo.
+
+<https://dash.cloudflare.com/4ce5029d216dd48d4516b29665d12e5a/one/access-controls/policies/f987e6fd-ba12-49a4-b593-666ef9dc2625/edit>
+
+They sign in with whatever identity provider is enabled on the application
+(Google, GitHub, email one-time-code, …) and their commits are authored under
+that email.
+
+> ⚠ That link, the account ID and the `CF_ACCESS_*` vars in `wrangler.jsonc`
+> are all on the SVDSA **test** account. When the chapter approves the move to
+> their own account, every one of them changes — re-run `bun run setup:editor`
+> against the new account rather than editing by hand.
 
 ## Develop
 
