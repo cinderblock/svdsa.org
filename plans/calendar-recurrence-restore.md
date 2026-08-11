@@ -39,6 +39,67 @@ the home page silently falls back to the shipped `DEFAULTS` in
 **Not yet deployed.** `origin/red` is still at `3184766`, which predates the
 damage. The problem lands the moment someone pushes `red`.
 
+## LIVE BUG: three series publish dates WordPress does not agree with
+
+Found 2026-08-11 while decoding the export. This is **not** caused by the
+restore — the same rules were on the site before the WXR import — but the
+restore makes it live again, so it ships the moment `red` is pushed.
+
+TEC expresses "2nd and 4th Wednesday" as **weekly, minus the 1st/3rd/5th
+Wednesday** — a base rule plus structural exclusions. Whoever hand-wrote the
+series files read four of those and collapsed three of them to
+`INTERVAL=2` ("every other week"). **Those are not the same thing.** Biweekly
+counts forwards from a start date and drifts; nth-of-month re-anchors every
+month. They agree until a month contains five of that weekday, then separate
+permanently.
+
+| series                                                | ours                              | WordPress means     | verdict     |
+| ----------------------------------------------------- | --------------------------------- | ------------------- | ----------- |
+| `labor-working-group-meeting-recurring-2`             | `FREQ=MONTHLY;BYDAY=1TH`          | 1st Thursday        | **correct** |
+| `international-solidarity-wg-meeting-recurring-2-2-2` | `FREQ=WEEKLY;INTERVAL=2;BYDAY=TU` | 1st & 3rd Tuesday   | **wrong**   |
+| `liberation-and-justice-working-group-meeting-2-2`    | `FREQ=WEEKLY;INTERVAL=2;BYDAY=WE` | 2nd & 4th Wednesday | **wrong**   |
+| `electoral-wg-meeting-recurring-2`                    | `FREQ=WEEKLY;INTERVAL=2;BYDAY=TH` | 2nd & 4th Thursday  | **wrong**   |
+
+The `labor` row is the important one: an independent human collapsed _that_
+exclusion set correctly, which confirms the reading of TEC's semantics is right
+and the other three are genuinely mistakes rather than a misinterpretation here.
+
+Dates our files invent that WordPress does not have — these are published to the
+calendar **and to `.ics` subscribers**, so members would arrive on the wrong day:
+
+```
+international-solidarity  first wrong: 2026-09-29, then 10-13, 10-27, 11-10, 11-24, 12-08
+liberation-and-justice    first wrong: 2026-10-07, then 10-21, 11-04, 11-18, 12-02, 12-16
+electoral                 first wrong: 2026-11-05, then 11-19, 12-03, 12-17
+```
+
+**The correct rules need no schema change.** `app/lib/recurrence.ts` already
+supports multiple nth entries, and its output matches WordPress exactly:
+
+```
+FREQ=MONTHLY;BYDAY=2WE,4WE
+  → 2026-08-12 08-26 09-09 09-23 10-14 10-28 11-11 11-25 12-09 12-23
+```
+
+Two caveats before changing anything:
+
+1. **Do not assume WordPress is right.** Its rules carry `EventStartDate`s from
+   2025 and `until 2027-05-01`, while our files carry 2026 start dates — the two
+   have been maintained separately, so a working group may genuinely have moved
+   to biweekly and WordPress is the stale one. This needs a human who knows when
+   these groups actually meet. It is a question for the chapter, not a silent fix.
+2. `describeRecurrence()` renders a multi-nth rule as
+   "2nd & 4th Wednesday **& Wednesday** monthly" — a display bug that would show
+   on the series page the moment these rules are corrected. Fix it in the same
+   pass.
+
+This also reframes the import question: a faithful importer would not merely be
+idempotent, it would **correct** three wrong rules. And the exclusions are much
+less of an obstacle than first thought — the structural ones collapse into
+`BYDAY=nDD,mDD` which is already supported. Only genuine single-date exclusions
+need new schema, and across our 21 series there are exactly two, both on
+`electoral`, both in 2025 and therefore already past.
+
 ## Why it happened
 
 Commit `b34baca` ("content: re-import from the WordPress WXR export") is an
