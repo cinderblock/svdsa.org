@@ -16,7 +16,7 @@ flowchart TD
     HowEdit -->|"I know Markdown"| W1
     HowEdit -->|"I live in git"| G1[Clone the repo<br/>branch off <code>red</code>]
 
-    W1 --> W2["Pick a file → edit in<br/><b>Rich text</b> (WYSIWYG) or<br/><b>Markdown</b> (VS Code engine)"]
+    W1 --> W2["Pick a file → edit in<br/><b>Rich text</b> (WYSIWYG) or<br/><b>Source</b> (VS Code engine)"]
     W2 --> W3[Save draft<br/>auto-fixes style rules<br/>commits to <code>draft/you/red</code>]
     W3 --> W4[Preview link<br/>your own live copy of the site<br/>rebuilds ~1–2 min per save]
     W4 -->|more edits,<br/>any number of files| W2
@@ -42,7 +42,7 @@ flowchart TD
 | You are…                 | You use…                                                                                                                                                                         | Your safety net                                                                                                                         |
 | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
 | **WYSIWYG-only**         | [the editor](https://edit.cameron-test-svdsa.workers.dev) in Rich text mode. No git, no Markdown, no accounts to create — sign in with whatever you have (Google, email OTP, …). | Nothing you do touches the live site. Saves go to your personal draft; Publish just _asks_ (opens a PR). Discard throws the draft away. |
-| **Markdown-comfortable** | the same editor, Markdown mode (the VS Code engine — find/replace, multi-cursor).                                                                                                | Same draft/PR flow. Modes toggle losslessly, use both.                                                                                  |
+| **Markdown-comfortable** | the same editor, Source mode (the VS Code engine — find/replace, multi-cursor).                                                                                                  | Same draft/PR flow. Modes toggle losslessly, use both.                                                                                  |
 | **Git-comfortable**      | a clone; edit `content/**/*.md` directly. One file per page/post/event; add a file to add content.                                                                               | Branch + PR. Every pushed branch gets its own full preview site.                                                                        |
 | **Developer**            | `app/` (React Router), `editor/`, `scripts/`. Theme experiments on `theme/*` branches.                                                                                           | Same PRs, plus typecheck/tests/lint in the repo.                                                                                        |
 

@@ -155,7 +155,7 @@ test.describe("live preview", () => {
     page,
   }) => {
     const frame = await openPreview(page);
-    await page.getByRole("button", { name: "Markdown", exact: true }).click();
+    await page.getByRole("button", { name: "Source", exact: true }).click();
     await expect(page.locator(".raw")).toBeVisible({ timeout: 30_000 });
     await expect(page.locator(".raw .view-lines")).toContainText("Who we are");
 
@@ -171,7 +171,7 @@ test.describe("live preview", () => {
     });
 
     // And going back retains it rather than reverting to the loaded copy.
-    await page.getByRole("button", { name: "Markdown", exact: true }).click();
+    await page.getByRole("button", { name: "Source", exact: true }).click();
     await expect(page.locator(".raw .view-lines")).toContainText(
       "Brand New Heading",
     );

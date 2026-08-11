@@ -410,6 +410,7 @@ export function App() {
       <header>
         <b className="brand">🌹 SVDSA Editor</b>
         <Picker
+          className="pick--bar"
           label="Branch"
           value={base}
           options={branchOptions}
@@ -594,7 +595,7 @@ export function App() {
                         className={mode === "raw" ? "on" : ""}
                         onClick={() => switchMode("raw")}
                       >
-                        Markdown
+                        Source
                       </button>
                       <button
                         className={mode === "preview" ? "on" : ""}
