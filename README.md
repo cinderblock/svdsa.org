@@ -246,6 +246,15 @@ bun run editor:dev   # the editor SPA at http://localhost:9998
 
 Other scripts: `bun run typecheck`, `bun run fmt`, `bun run test`.
 
+`bun run test` drives real browsers, so it waits for its share of the machine
+before starting — 3 workers by default (`PW_WORKERS` to override), claimed from
+a machine-wide budget shared with every other project. This is not politeness:
+under load an ordinary wait becomes a timeout, and a timeout reads exactly like
+a regression. Measured 2026-08-11 — 14 specs failed with two concurrent runs and
+every one passed when run alone. See `tests/compute-budget.ts`; it degrades to
+running unthrottled if the broker isn't installed, so CI and fresh clones are
+unaffected.
+
 Append `?light` to any URL in dev to force light mode.
 
 ## Forms & external services

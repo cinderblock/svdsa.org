@@ -8,7 +8,23 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  /**
+   * Playwright's local default is half the LOGICAL cores — 6 on this machine,
+   * each driving a real browser (several OS processes) on 6 PHYSICAL cores.
+   * That saturates a computer someone is trying to use, and worse, it makes the
+   * results wrong: under load an ordinary wait becomes a timeout, and a timeout
+   * reads exactly like a regression. Measured 2026-08-11 — 14 specs failed
+   * under contention and every one passed when run alone.
+   *
+   * Three leaves the machine usable. Raise it deliberately with PW_WORKERS.
+   */
+  workers: process.env.CI ? 1 : Number(process.env.PW_WORKERS ?? 3),
+  /**
+   * Waits for this run's share of the machine before any browser starts, so two
+   * suites (or a suite and another project's build) can't saturate it. Returns
+   * its own teardown. See that file.
+   */
+  globalSetup: "./tests/compute-budget.ts",
   reporter: "html",
   use: {
     baseURL: "http://localhost:9999",
