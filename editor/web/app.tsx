@@ -18,6 +18,8 @@ import {
 } from "./api";
 import { Wizard } from "./wizard";
 import { FileList } from "./filelist";
+import { Picker, type PickerOption } from "./picker";
+import { BranchBrowser } from "./branches";
 import {
   buildFrontmatter,
   classify,
@@ -66,6 +68,7 @@ export function App() {
   const [nav, setNav] = useState<SiteNav | null>(null);
   const [categories, setCategories] = useState<EventCategory[]>([]);
   const [wizard, setWizard] = useState(false);
+  const [browsing, setBrowsing] = useState(false);
   const [status, setStatus] = useState<DraftStatus | null>(null);
 
   const [item, setItem] = useState<ItemDetail | null>(null);
@@ -124,7 +127,20 @@ export function App() {
     refreshStatus(base);
   }, [base, refreshStatus]);
 
-  const grouped = useMemo(() => groupBranches(branches), [branches]);
+  /** Branch picker options: rootless branches first, then one group per folder. */
+  const branchOptions = useMemo<PickerOption[]>(() => {
+    const g = groupBranches(branches);
+    return [
+      ...g.root.map((b) => ({ value: b, label: b })),
+      ...g.folders.flatMap(([folder, list]) =>
+        list.map((b) => ({
+          value: b,
+          label: b.slice(folder.length + 1),
+          group: folder,
+        })),
+      ),
+    ];
+  }, [branches]);
 
   /** Existing page slugs (`about`, `political-education/bookclub`, …). */
   const pageSlugs = useMemo(
@@ -142,6 +158,13 @@ export function App() {
    * the file list (the pages tree mirrors the site's URLs), and `?path=` opens
    * a repo path directly.
    */
+  // `?branches` opens the branch browser straight away, so a link can point
+  // someone at the list of previews rather than at a file.
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).has("branches"))
+      setBrowsing(true);
+  }, []);
+
   const jumped = useRef(false);
   useEffect(() => {
     if (jumped.current || !items.length) return;
@@ -368,23 +391,16 @@ export function App() {
     }
   }
 
-  async function newBranch() {
-    const name = window.prompt(
-      `New branch name (created from '${base}') — e.g. theme/my-experiment:`,
+  /**
+   * Switch the branch being edited. Called by the picker and by the browser;
+   * a branch the browser just created won't be in `branches` yet, so add it
+   * rather than waiting for a refetch.
+   */
+  function pickBranch(name: string) {
+    setBranches((bs) =>
+      bs.includes(name) || name.startsWith("draft/") ? bs : [...bs, name],
     );
-    if (!name) return;
-    setBusy("branch");
-    try {
-      const r = await api.createBranch(name.trim(), base);
-      const b = await api.branches();
-      setBranches(b.branches.filter((x) => !x.startsWith("draft/")));
-      setBase(r.branch);
-      setMsg({ ok: true, text: `created branch ${r.branch}` });
-    } catch (e) {
-      setMsg({ ok: false, text: String(e) });
-    } finally {
-      setBusy(null);
-    }
+    setBase(name);
   }
 
   const changed = status?.exists ? status.changed : [];
@@ -392,26 +408,26 @@ export function App() {
   return (
     <>
       <header>
-        <b>🌹 SVDSA Editor</b>
-        <label>
-          base{" "}
-          <select value={base} onChange={(e) => setBase(e.target.value)}>
-            {grouped.root.map((b) => (
-              <option key={b} value={b}>
-                {b}
-              </option>
-            ))}
-            {grouped.folders.map(([folder, list]) => (
-              <optgroup key={folder} label={`${folder}/`}>
-                {list.map((b) => (
-                  <option key={b} value={b}>
-                    {b.slice(folder.length + 1)}
-                  </option>
-                ))}
-              </optgroup>
-            ))}
-          </select>
-        </label>
+        <b className="brand">🌹 SVDSA Editor</b>
+        <Picker
+          label="Branch"
+          value={base}
+          options={branchOptions}
+          onChange={pickBranch}
+          placeholder="Filter branches…"
+          footer={(close) => (
+            <button
+              type="button"
+              className="pick__action"
+              onClick={() => {
+                close();
+                setBrowsing(true);
+              }}
+            >
+              Browse all branches &amp; previews…
+            </button>
+          )}
+        />
         <button
           className="primary"
           onClick={() => setWizard(true)}
@@ -419,11 +435,16 @@ export function App() {
         >
           + New
         </button>
-        <button className="ghost" onClick={newBranch} disabled={busy !== null}>
-          + branch
-        </button>
         <span className="who">{email}</span>
       </header>
+
+      {browsing && (
+        <BranchBrowser
+          base={base}
+          onPick={pickBranch}
+          onClose={() => setBrowsing(false)}
+        />
+      )}
 
       {unprotected && (
         <div className="alarm" role="alert">

@@ -42,7 +42,11 @@ its own, so nothing else crosses the boundary.
 - **Publish opens a PR** from the draft into its base; review + merge happen on
   GitHub, so nothing lands on `red` unreviewed. **Discard** deletes the draft
   branch. The App needs "Pull requests: Read & write" for publish.
-- **+ branch** creates real branches (e.g. `theme/…`) to edit against.
+- **Every branch is a whole site.** The header's branch picker switches which
+  one you're editing; **Browse all branches** opens the branch browser — every
+  branch with its preview URL, last commit, drift from `red`, and any open PR.
+  Real branches (e.g. `theme/…`) are created there too, off whichever branch
+  you're on. Deep link: `/?branches`.
 
 ## Three views of the same document
 
@@ -111,7 +115,9 @@ lazy-loaded), and full system dark mode.
 ## API
 
 `/api/me` (identity + whether Access is enforced) · `/api/health` ·
-`/api/branches` · `/api/list?base=` (paths + site nav + category vocabulary) ·
+`/api/branches` (names, for the picker) · `/api/branch-info` (the branch
+browser's richer view — preview URL, last commit, ahead/behind, PR — in one
+GraphQL round-trip) · `/api/list?base=` (paths + site nav + category vocabulary) ·
 `/api/item?path=&base=` (serves the drafted version when one exists; returns a
 discriminated `kind: "markdown" | "yaml"`) · `/api/meta?dir=&base=` ·
 `/api/status?base=` (changed files + open PR) · `POST /api/save` (compare-and-swap
@@ -138,7 +144,9 @@ editor/
     links.ts            # internal link checking (shared with lint-content.ts)
     lint.ts             # style-rule engine (shared with scripts/lint-content.ts)
   web/                  # the editor SPA (React)
-    app.tsx             # shell: base picker, draft bar, publish/discard, save
+    app.tsx             # shell: branch picker, draft bar, publish/discard, save
+    picker.tsx          # filterable popover picker — our <select> replacement
+    branches.tsx        # branch browser: every branch and its preview link
     filelist.tsx        # grouped content browser
     frontmatter.tsx     # typed metadata form (touched-fields-only round-trip)
     wizard.tsx          # "what are you adding?" — new content, no path typing

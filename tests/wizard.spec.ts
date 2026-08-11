@@ -195,7 +195,8 @@ test.describe("new-content wizard", () => {
     const created = await mockEditor(page, "theme/faithful");
     await page.goto(EDITOR_URL);
     // Switch base away from production before opening the wizard.
-    await page.locator("header select").selectOption("theme/faithful");
+    await page.getByRole("button", { name: /^Branch/ }).click();
+    await page.getByRole("option", { name: "faithful" }).click();
     await page.getByRole("button", { name: "+ New" }).click();
     await page.getByRole("button", { name: /Blog post/ }).click();
     await page.getByLabel("Title").fill("Branch Work");

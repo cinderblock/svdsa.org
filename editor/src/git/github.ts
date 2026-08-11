@@ -31,6 +31,32 @@ export interface Author {
   email: string;
 }
 
+/** A pull request as the branch browser shows it. */
+export interface BranchPull {
+  number: number;
+  url: string;
+  title: string;
+  state: string;
+  isDraft: boolean;
+  baseRefName: string;
+}
+
+/** Everything the branch browser needs to describe one branch. */
+export interface BranchDetail {
+  name: string;
+  /** Null only for the exotic case of a branch pointing at a non-commit. */
+  commit: {
+    oid: string;
+    subject: string;
+    committedDate: string;
+    author: string;
+  } | null;
+  /** Commits this branch has that the comparison branch doesn't, and vice versa. */
+  ahead: number;
+  behind: number;
+  pull: BranchPull | null;
+}
+
 const API = "https://api.github.com";
 const UA = "svdsa-edit";
 
@@ -233,6 +259,120 @@ export async function createGitHub(env: GhEnv) {
         name: string;
       }[];
       return branches.map((b) => b.name);
+    },
+    /**
+     * Every branch with the facts a human needs to choose between them — last
+     * commit, divergence from `compareTo`, open PR — in ONE GraphQL round-trip.
+     * (The REST equivalent is a compare and a PR search per branch.)
+     *
+     * The divergence numbers arrive INVERTED. `Ref.compare` treats the ref it
+     * hangs off as the *base*, so asking each branch to compare against
+     * production yields `aheadBy` = how far production has moved past this
+     * branch, i.e. this branch's "behind". Comparing the other way round would
+     * mean knowing the branch names before building the query — a second
+     * round-trip — so we accept the twist and swap it here.
+     */
+    async branchDetails(compareTo: string): Promise<BranchDetail[]> {
+      interface GqlCommit {
+        oid: string;
+        messageHeadline: string;
+        committedDate: string;
+        author?: { name?: string; user?: { login?: string } | null } | null;
+        associatedPullRequests?: {
+          nodes: (BranchPull & { headRefName: string })[];
+        };
+      }
+      const data = await graphql<{
+        repository: {
+          refs: {
+            nodes: {
+              name: string;
+              target: GqlCommit | null;
+              compare: { aheadBy: number; behindBy: number } | null;
+            }[];
+          };
+        };
+      }>(
+        `
+          query ($owner: String!, $repo: String!, $head: String!) {
+            repository(owner: $owner, name: $repo) {
+              refs(
+                refPrefix: "refs/heads/"
+                first: 100
+                orderBy: { field: TAG_COMMIT_DATE, direction: DESC }
+              ) {
+                nodes {
+                  name
+                  target {
+                    ... on Commit {
+                      oid
+                      messageHeadline
+                      committedDate
+                      author {
+                        name
+                        user {
+                          login
+                        }
+                      }
+                      associatedPullRequests(
+                        first: 5
+                        orderBy: { field: UPDATED_AT, direction: DESC }
+                      ) {
+                        nodes {
+                          number
+                          url
+                          title
+                          state
+                          isDraft
+                          baseRefName
+                          headRefName
+                        }
+                      }
+                    }
+                  }
+                  compare(headRef: $head) {
+                    aheadBy
+                    behindBy
+                  }
+                }
+              }
+            }
+          }
+        `,
+        { owner, repo, head: compareTo },
+      );
+
+      return data.repository.refs.nodes.map((ref) => {
+        const c = ref.target;
+        const pulls = c?.associatedPullRequests?.nodes ?? [];
+        // A commit can carry several PRs (it may have been merged onward).
+        // Prefer one still open FROM this branch; otherwise the most recent.
+        const pull =
+          pulls.find((p) => p.state === "OPEN" && p.headRefName === ref.name) ??
+          pulls.find((p) => p.headRefName === ref.name) ??
+          null;
+        return {
+          name: ref.name,
+          commit: c
+            ? {
+                oid: c.oid,
+                subject: c.messageHeadline,
+                committedDate: c.committedDate,
+                author: c.author?.user?.login || c.author?.name || "",
+              }
+            : null,
+          ahead: ref.compare?.behindBy ?? 0,
+          behind: ref.compare?.aheadBy ?? 0,
+          pull: pull && {
+            number: pull.number,
+            url: pull.url,
+            title: pull.title,
+            state: pull.state,
+            isDraft: pull.isDraft,
+            baseRefName: pull.baseRefName,
+          },
+        };
+      });
     },
     /** Editable content files (content/{pages,posts,events,config}/*.md) at ref. */
     async listContent(ref: string): Promise<string[]> {

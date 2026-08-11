@@ -124,6 +124,33 @@ export interface Pr {
   url: string;
   title?: string;
 }
+/** One row in the branch browser. */
+export interface BranchInfo {
+  name: string;
+  commit: {
+    oid: string;
+    subject: string;
+    committedDate: string;
+    author: string;
+  } | null;
+  /** Commits this branch has that production doesn't, and vice versa. */
+  ahead: number;
+  behind: number;
+  pull: {
+    number: number;
+    url: string;
+    title: string;
+    state: string;
+    isDraft: boolean;
+    baseRefName: string;
+  } | null;
+  /** Where this branch's own copy of the site is served. */
+  previewUrl: string;
+  isProduction: boolean;
+  /** Set for `draft/<who>/<base>` workspace branches only. */
+  draft: { who: string; base: string; mine: boolean } | null;
+}
+
 export interface DraftStatus {
   base: string;
   draft: string;
@@ -156,6 +183,8 @@ const post = <T>(url: string, payload: unknown) =>
 export const api = {
   me: () => req<Me>("/api/me"),
   branches: () => req<{ branches: string[] }>("/api/branches"),
+  branchInfo: () =>
+    req<{ production: string; branches: BranchInfo[] }>("/api/branch-info"),
   list: (base: string) =>
     req<{
       base: string;

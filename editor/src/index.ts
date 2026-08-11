@@ -88,6 +88,17 @@ function previewUrl(request: Request, env: Env, branch: string): string {
   return `https://${alias}-${worker}${rest ? `.${rest}` : ""}/`;
 }
 
+/**
+ * Split a `draft/<who>/<base>` workspace branch back into its parts, so the
+ * branch browser can say "Jane's draft off red" instead of showing the raw
+ * name. Returns null for ordinary branches. A base may itself contain a slash
+ * (`draft/jane/theme/faithful`), hence the greedy tail.
+ */
+function parseDraftBranch(name: string): { who: string; base: string } | null {
+  const m = /^draft\/([^/]+)\/(.+)$/.exec(name);
+  return m ? { who: m[1], base: m[2] } : null;
+}
+
 async function health(env: Env) {
   if ((env.GIT_HOST ?? "github") !== "github")
     return { ok: false, error: `GIT_HOST=${env.GIT_HOST} not implemented yet` };
@@ -129,6 +140,34 @@ async function handleApi(
 
   if (path === "/api/branches")
     return json({ branches: await gh.listBranches() });
+
+  /**
+   * The branch browser's data. Deliberately NOT folded into /api/branches:
+   * that one runs on every page load to fill the branch picker, and this is a
+   * much heavier query. Fetched when the browser is opened.
+   */
+  if (path === "/api/branch-info") {
+    const production = env.EDITOR_DEFAULT_BASE ?? "red";
+    const details = await gh.branchDetails(production);
+    return json({
+      production,
+      branches: details.map((b) => {
+        const draft = parseDraftBranch(b.name);
+        return {
+          ...b,
+          previewUrl: previewUrl(request, env, b.name),
+          isProduction: b.name === production,
+          // `mine` drives "your draft" in the UI. Recomputing the name from the
+          // signed-in identity is exact — no guessing from the `who` segment,
+          // which is a slug and can collide.
+          draft: draft && {
+            ...draft,
+            mine: b.name === branchName(who.email, draft.base),
+          },
+        };
+      }),
+    });
+  }
 
   if (path === "/api/list") {
     const base =

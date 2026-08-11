@@ -46,6 +46,13 @@ flowchart TD
 | **Git-comfortable**      | a clone; edit `content/**/*.md` directly. One file per page/post/event; add a file to add content.                                                                               | Branch + PR. Every pushed branch gets its own full preview site.                                                                        |
 | **Developer**            | `app/` (React Router), `editor/`, `scripts/`. Theme experiments on `theme/*` branches.                                                                                           | Same PRs, plus typecheck/tests/lint in the repo.                                                                                        |
 
+**Every branch is published as its own complete copy of the site**, at
+`<branch>-site.…workers.dev`. You don't have to work out that URL: the editor's
+**Branches** view (branch picker → _Browse all branches_, or `/?branches`)
+lists every branch with its preview link, what changed there last, how far it
+has drifted from `red`, and whether a PR is already open. That's how you show
+someone a design experiment or a draft without merging anything.
+
 Style rules (the San José é, inclusive language, …) live in
 `content/config/style-rules.json` and apply to **everyone the same way**: the
 editor auto-fixes what it can on every save and warns about the rest;
