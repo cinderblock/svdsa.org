@@ -94,11 +94,13 @@ Two caveats before changing anything:
    pass.
 
 This also reframes the import question: a faithful importer would not merely be
-idempotent, it would **correct** three wrong rules. And the exclusions are much
-less of an obstacle than first thought — the structural ones collapse into
-`BYDAY=nDD,mDD` which is already supported. Only genuine single-date exclusions
-need new schema, and across our 21 series there are exactly two, both on
-`electoral`, both in 2025 and therefore already past.
+idempotent, it would **correct** three wrong rules.
+
+And exclusions are **not** an obstacle at all — the structural ones collapse into
+`BYDAY=nDD,mDD`, and genuine single-date ones go in `exdate`, which the schema
+has always had. Across our 21 series there are exactly two single-date
+exclusions, both on `electoral`, both in 2025 and therefore already past. **No
+schema change is needed for any of this.**
 
 ## Why it happened
 
@@ -402,10 +404,30 @@ rules:      type=Custom custom{interval:2, week.day:[1], type:Weekly}
 exclusions: date 2025-09-22, date 2025-11-17
 ```
 
-svdsa's `Recurrence` is `{ rrule: string }` (`app/lib/recurrence.ts:30-31`) with
-**no exclusion support at all**. Eight series cannot be imported faithfully until
-the schema gains `EXDATE`/an `exclude:` list. This must not be papered over —
-silently dropping exclusions would publish meetings that were cancelled.
+**Correction — an earlier version of this section was wrong.** It claimed
+svdsa's `Recurrence` was `{ rrule: string }` with "no exclusion support at all",
+and called exclusions the blocker. That came from grepping for `rrule` and
+reading only the line it matched. The actual interface
+(`app/lib/recurrence.ts:30-34`) is:
+
+```ts
+export interface Recurrence {
+  rrule: string;
+  exdate?: string[]; // occurrences that DON'T happen
+  rdate?: string[]; // extra one-off occurrences (moved to)
+}
+```
+
+`EXDATE` and `RDATE` have been supported all along — the README documents them
+and says several working groups genuinely need them — and `parseRRule` also
+handles `UNTIL` and `COUNT`. **Exclusions were never a blocker.** Everything TEC
+expresses that matters here is already representable today: weekly/monthly with
+nth `BYDAY`, `INTERVAL`, `UNTIL`, and single-date exclusions via `exdate`.
+
+The lesson worth keeping is the method one: a grep that matches a single line is
+not a reading of a type. The claim was stated confidently, written into this
+plan, and repeated in a commit message before anything checked it — and what
+finally caught it was the README, not the code.
 
 ### The importer's filename is separately wrong
 
