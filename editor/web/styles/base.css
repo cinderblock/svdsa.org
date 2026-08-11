@@ -1,0 +1,28 @@
+/*
+ * Element-level resets and the page skeleton (`html`/`body`/`#root`).
+ *
+ * `#root` is the flex column every other layer sits in: fixed-height bars at
+ * the top, then `.wrap` taking the rest. See `shell.css`.
+ */
+
+* {
+  box-sizing: border-box;
+}
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+body {
+  font-family: system-ui, sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+}
+#root {
+  display: flex;
+  flex-direction: column;
+}
+a {
+  color: var(--red);
+}

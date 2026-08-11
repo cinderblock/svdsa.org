@@ -50,7 +50,7 @@ its own, so nothing else crosses the boundary.
 
 ## Three views of the same document
 
-**Rich text** (Milkdown) · **Markdown** (Monaco) · **Preview**.
+**Rich text** (Milkdown) · **Source** (Monaco, the Markdown itself) · **Preview**.
 
 The preview is not redundant with the WYSIWYG, which is the obvious objection.
 Milkdown shows document _structure_ in Milkdown's theme — not the site's fonts,
@@ -109,7 +109,7 @@ Vite-built SPA (`web/`) served by the Worker's Static Assets binding (Worker
 keeps `/api/*`): grouped file browser (sections + year buckets, draft-edit
 dots), prominent title + typed metadata widgets (toggles, date pickers, comma
 lists; WP legacy `id`/`slug`/`path` collapsed under _advanced_), three views of
-the body (Milkdown WYSIWYG ↔ Monaco Markdown ↔ Preview, the last two
+the body (Milkdown WYSIWYG ↔ Monaco Source ↔ Preview, the last two
 lazy-loaded), and full system dark mode.
 
 ## API
@@ -152,7 +152,12 @@ editor/
     wizard.tsx          # "what are you adding?" — new content, no path typing
     editors/            # wysiwyg.tsx (Milkdown), raw.tsx (Monaco),
                         # preview.tsx (the site's own renderer), monaco-setup.ts
-    api.ts, main.tsx, index.html, styles.css
+    styles.css          # a MANIFEST — @imports styles/, in cascade order
+    styles/             # one file per nameable thing, mostly per component:
+                        # tokens, base, shell, topbar, draftbar, picker,
+                        # branches, filelist, document, frontmatter,
+                        # recurrence, wizard, notices, preview
+    api.ts, main.tsx, index.html
   dist/                 # Vite build output (git-ignored)
 ```
 

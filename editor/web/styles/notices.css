@@ -1,0 +1,72 @@
+/*
+ * Everything the app says back to the editor: the unprotected-deployment
+ * alarm, save conflicts, the config-file explainer, save results and lint
+ * findings. Grouped by role rather than by which component renders them, so
+ * their severity styling stays consistent.
+ */
+
+/* Editor is reachable without Cloudflare Access — deliberately loud. */
+.alarm {
+  padding: 0.7rem 1rem;
+  background: #7f1d1d;
+  color: #fff;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+.alarm code {
+  background: rgba(255, 255, 255, 0.18);
+  padding: 0 0.25em;
+  border-radius: 3px;
+}
+
+/* A save was refused because the file moved on since it was opened. */
+.conflict {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: center;
+  margin: 0.6rem 0;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #b45309;
+  border-left-width: 3px;
+  border-radius: 4px;
+  font-size: 0.87rem;
+}
+.conflict span {
+  flex: 1 1 16rem;
+}
+
+/* Shown instead of title+frontmatter when the open file is chapter config. */
+.confignote {
+  margin: 0.6rem 0;
+  padding: 0.6rem 0.75rem;
+  border-left: 3px solid var(--accent, #c00);
+  background: color-mix(in srgb, currentColor 6%, transparent);
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.msg {
+  font-size: 0.9rem;
+  flex: 0 0 auto;
+  margin: 0;
+}
+.msg.err {
+  color: var(--red);
+}
+
+.lint {
+  margin: 0;
+  padding: 0.4rem 0 0 1.2rem;
+  font-size: 0.85rem;
+  flex: 0 0 auto;
+}
+.lint li.error {
+  color: var(--red);
+}
+.lint li.warn {
+  color: var(--muted);
+}
+.lint s {
+  opacity: 0.7;
+}

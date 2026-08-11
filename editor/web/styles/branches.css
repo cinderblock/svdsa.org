@@ -1,0 +1,175 @@
+/*
+ * `BranchBrowser` (`web/branches.tsx`) — the branches-and-previews dialog.
+ */
+
+/* ---- branch browser ---- */
+
+.br {
+  width: min(46rem, 92vw);
+  max-height: 86vh;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--bg);
+  color: var(--ink);
+  display: flex;
+  flex-direction: column;
+}
+.br::backdrop {
+  background: rgb(0 0 0 / 0.45);
+}
+.br__head {
+  position: relative;
+  padding: 1rem 3rem 0.75rem 1rem;
+  border-bottom: 1px solid var(--line);
+}
+.br__head h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+.br__blurb {
+  margin: 0.3rem 0 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+.br__x {
+  position: absolute;
+  top: 0.7rem;
+  right: 0.7rem;
+  font: inherit;
+  background: transparent;
+  border: 0;
+  color: var(--muted);
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+}
+.br__filter {
+  font: inherit;
+  font-size: 0.9rem;
+  margin: 0.7rem 1rem;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg-raised);
+  color: inherit;
+}
+.br__error {
+  margin: 0 1rem 0.6rem;
+  color: var(--red);
+  font-size: 0.9rem;
+}
+.br__list {
+  flex: 1 1 auto;
+  /* Without this a flex child refuses to shrink below its content, so the
+     list ran under the footer instead of scrolling. */
+  min-height: 0;
+  overflow: auto;
+  padding: 0 1rem 0.6rem;
+}
+.br__none {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.br__row {
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--line);
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem;
+  margin-bottom: 0.55rem;
+  background: var(--bg-raised);
+}
+.br__row.is-current {
+  border-left-color: var(--red);
+}
+.br__title {
+  display: flex;
+  gap: 0.45rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.br__name {
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+.br__tag {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.05rem 0.45rem;
+  color: var(--muted);
+}
+.br__tag--live {
+  background: var(--red);
+  border-color: var(--red);
+  color: #fff;
+}
+.br__commit {
+  margin: 0.35rem 0 0;
+  font-size: 0.9rem;
+}
+.br__meta {
+  margin: 0.15rem 0 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+.br__actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+.br__link {
+  font-size: 0.85rem;
+}
+.br__use {
+  font: inherit;
+  font-size: 0.85rem;
+  margin-left: auto;
+  border: 1px solid var(--red);
+  background: var(--red);
+  color: #fff;
+  border-radius: 6px;
+  padding: 0.2rem 0.65rem;
+  cursor: pointer;
+}
+.br__use:disabled {
+  background: transparent;
+  color: var(--muted);
+  border-color: var(--line);
+  cursor: default;
+}
+.br__new {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--line);
+  padding: 0.7rem 1rem;
+  font-size: 0.85rem;
+}
+.br__new input {
+  font: inherit;
+  flex: 1 1 12rem;
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--bg);
+  color: inherit;
+}
+.br__new button {
+  font: inherit;
+  border: 1px solid var(--red);
+  background: transparent;
+  color: var(--red);
+  border-radius: 6px;
+  padding: 0.3rem 0.8rem;
+  cursor: pointer;
+}
+.br__new button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
