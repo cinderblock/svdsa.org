@@ -9,7 +9,6 @@
     "dev": "bun run build:content && react-router dev",
     "build:content": "bun run scripts/build-content.ts",
     "build": "bun run build:content && react-router build",
-    "migrate": "bun run scripts/fetch-wp-content.ts",
     "setup:editor": "bun run scripts/setup-editor.ts",
     "editor:dev": "cd editor && bun run dev",
     "editor:build": "cd editor && bun run build",

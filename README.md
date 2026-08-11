@@ -142,11 +142,24 @@ a **generated, git-ignored build artifact** (`content/generated/`) — never
 hand-edited, never committed, so two people adding content never conflict on a
 shared file.
 
-| Script                        | Command                 | What it does                                                                                                                                                                                                       |
-| ----------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `scripts/fetch-wp-content.ts` | `bun run migrate`       | One-time / on-demand migration. Pulls WordPress → the per-item Markdown tree above (clears + rewrites the three dirs). Re-run to re-sync until WP is retired.                                                      |
-| `scripts/build-content.ts`    | `bun run build:content` | Network-free. Renders Markdown → HTML, expands recurring events, and assembles `content/generated/*.json` (full + slim splits) plus `sitemap.xml`/`robots.txt` (all git-ignored). Runs before dev/typecheck/build. |
-| `scripts/lint-content.ts`     | `bun run lint:content`  | Style checks from `content/config/style-rules.yaml` (San José accent, inclusive language, …). `--fix` applies suggestions. The in-browser editor runs the same rules on every save.                                |
+| Script                     | Command                 | What it does                                                                                                                                                                                                       |
+| -------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `scripts/build-content.ts` | `bun run build:content` | Network-free. Renders Markdown → HTML, expands recurring events, and assembles `content/generated/*.json` (full + slim splits) plus `sitemap.xml`/`robots.txt` (all git-ignored). Runs before dev/typecheck/build. |
+| `scripts/lint-content.ts`  | `bun run lint:content`  | Style checks from `content/config/style-rules.yaml` (San José accent, inclusive language, …). `--fix` applies suggestions. The in-browser editor runs the same rules on every save.                                |
+
+#### Importing from WordPress
+
+There is deliberately **no importer in this repo**. Importing is done from
+WebPress (`scripts/import-wxr.ts`) against a WXR export file, and its output is
+merged in — never landed by replacing `content/`.
+
+The old REST importer (`scripts/fetch-wp-content.ts`, `bun run migrate`) was
+removed: it began by `rm -rf`-ing `content/{pages,posts,events}`, which destroys
+everything WordPress does not know about — the hand-authored `recurrence:` rules,
+the draft canaries, `pages/home.md`, and any future translation files. It also
+re-introduced the `wptexturize`d typography the WXR import exists to remove. It
+is in git history if it is ever wanted back; do not resurrect it without
+replacing the wholesale delete with a merge.
 
 ### Calendar views
 
