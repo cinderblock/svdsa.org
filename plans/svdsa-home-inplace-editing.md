@@ -268,15 +268,48 @@ the control, not decoration.
 - **Don't make slots controlled React inputs.** Re-rendering a `contenteditable`
   from state while it has focus destroys the caret position.
 
+## What this leaves for the translation layer
+
+Both remaining questions were answered on 2026-08-11, and one of them hands work
+to `plans/i18n.md` rather than closing.
+
+**The home page's file-list position is settled**: one of the first rows inside
+"Main pages", not a pinned row above the search box. Shipped in `4a828f0`; no
+further change wanted.
+
+**The eight strings still hard-coded in `app/routes/home.tsx` are deliberately
+NOT being promoted to slots here.** They get handled in the translation work
+instead, because i18n has to make every user-visible string addressable anyway —
+doing it twice, with two mechanisms, is how the two drift apart.
+
+Measured 2026-08-11:
+
+| Line   | String                                                      |
+| ------ | ----------------------------------------------------------- |
+| `:73`  | `alt="Illustration of a crowd raising fists in solidarity"` |
+| `:108` | `Full calendar →`                                           |
+| `:125` | `About the chapter →`                                       |
+| `:149` | `Learn more →` (per working-group card)                     |
+| `:163` | `All posts →`                                               |
+| `:176` | `Read →` (per post card)                                    |
+| `:197` | `Join DSA`                                                  |
+| `:200` | `Newsletter signup`                                         |
+
+The useful thing for whoever picks up i18n: **the seam already exists.**
+`<Slot k="…">` (`app/components/HomeSlot.tsx`) is a string read the surrounding
+system can intercept, and `HOME_SLOTS` (`app/lib/home.ts`) is a per-string
+registry carrying a human label and the section it belongs to. That is the same
+shape a translation layer needs — an addressable key per string, with enough
+context for a translator to know what they're translating.
+
+Note `plans/i18n.md:269` lists `app/lib/home.ts:32-48 — 14 DEFAULTS fields`
+among the strings needing translation. Those fourteen are now reachable through
+`HOME_SLOTS` rather than only as a `DEFAULTS` object literal, so they no longer
+need special handling — and the eight above could join them by becoming slots
+whose values happen to have no frontmatter override. Worth deciding once, for
+both sets, in that plan rather than this one.
+
 ## Open questions for the user
 
-1. Should the home page be the first row _inside_ "Main pages", or its own pinned
-   row above the search box? Recommendation: first row inside Main pages, with
-   that group ordered by site order rather than alphabetically — it reads as part
-   of the site rather than as editor furniture.
-2. The three hard-coded strings that are _not_ editable — "Join DSA" and
-   "Newsletter signup" (`home.tsx:177,180`), and the section links "Full calendar
-   →", "About the chapter →", "All posts →". Leave them in code, or promote them
-   to slots while we are here? Recommendation: leave them; they are navigation
-   labels, not copy, and the closing section already has editable heading and
-   intro.
+None. Both were answered on 2026-08-11 and are recorded above — the file-list
+position is settled, and the hard-coded strings move to `plans/i18n.md`.
