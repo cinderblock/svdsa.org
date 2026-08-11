@@ -18,6 +18,29 @@ export default defineConfig({
   // client JS on whichever server lost the race.
   cacheDir: fileURLToPath(new URL("node_modules/.vite", import.meta.url)),
   plugins: [react()],
+  // The home-page editor renders the SITE's own `app/routes/home.tsx`, so the
+  // thing you type on is the thing that ships. Two aliases make that possible:
+  //
+  //   ~/      the site's own import alias, which its modules use internally
+  //   react-router
+  //           a two-line stand-in (web/shims/) — the editor has no Router, and
+  //           a link inside a preview must not navigate. See that file.
+  //
+  // Nothing else in the editor imports either, so neither can leak sideways.
+  resolve: {
+    alias: [
+      {
+        find: /^~\//,
+        replacement: fileURLToPath(new URL("../app/", import.meta.url)),
+      },
+      {
+        find: /^react-router$/,
+        replacement: fileURLToPath(
+          new URL("web/shims/react-router.tsx", import.meta.url),
+        ),
+      },
+    ],
+  },
   build: {
     outDir: fileURLToPath(new URL("dist", import.meta.url)),
     emptyOutDir: true,

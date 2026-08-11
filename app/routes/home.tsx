@@ -4,7 +4,9 @@ import { expandEvents, postsIndex, upcomingEvents } from "~/lib/data";
 import { isUpcoming, shortDate } from "~/lib/format";
 import { useNow } from "~/lib/useNow";
 import { EventCard } from "~/components/EventCard";
-import { HOME } from "~/lib/home";
+// Every word on this page is a <Slot>, so the browser editor can render this
+// very component with live values and make each one editable in place.
+import { Slot } from "~/components/HomeSlot";
 import { CHAPTER_PHOTOS, EXTERNAL, SITE, WORKING_GROUPS } from "~/lib/site";
 
 export const meta: MetaFunction = () => {
@@ -37,23 +39,31 @@ export default function Home() {
       <section className="hero">
         <div className="container hero__grid">
           <div>
-            <p className="kicker">{HOME.kicker}</p>
+            <p className="kicker">
+              <Slot k="kicker" />
+            </p>
             {/* Two deliberate lines. Spans (not <br/>) so each clause is its
                 own block and can balance its own wrap on narrow screens. */}
             <h1 className="hero__title">
-              <span>{HOME.headline}</span>
-              <span>{HOME.headlineTwo}</span>
+              <span>
+                <Slot k="headline" />
+              </span>
+              <span>
+                <Slot k="headlineTwo" />
+              </span>
             </h1>
-            <p className="lead">{HOME.lead}</p>
+            <p className="lead">
+              <Slot k="lead" />
+            </p>
             <div className="hero__actions">
               <Link className="btn btn-primary" to="/join/">
-                {HOME.ctaPrimary}
+                <Slot k="ctaPrimary" />
               </Link>
               <Link className="btn btn-outline" to="/calendar">
-                {HOME.ctaEvents}
+                <Slot k="ctaEvents" />
               </Link>
               <a className="btn btn-outline" href={EXTERNAL.donate}>
-                {HOME.ctaDonate}
+                <Slot k="ctaDonate" />
               </a>
             </div>
           </div>
@@ -72,7 +82,9 @@ export default function Home() {
         <section className="section">
           <div className="container">
             <div className="section__head">
-              <h2>{HOME.photosHeading}</h2>
+              <h2>
+                <Slot k="photosHeading" />
+              </h2>
             </div>
             <div className="photo-strip">
               {CHAPTER_PHOTOS.map((p) => (
@@ -90,7 +102,9 @@ export default function Home() {
       <section className="section">
         <div className="container">
           <div className="section__head">
-            <h2>{HOME.eventsHeading}</h2>
+            <h2>
+              <Slot k="eventsHeading" />
+            </h2>
             <Link to="/calendar">Full calendar →</Link>
           </div>
           <div className="stack">
@@ -105,14 +119,16 @@ export default function Home() {
       <section className="section section--alt">
         <div className="container">
           <div className="section__head">
-            <h2>{HOME.groupsHeading}</h2>
+            <h2>
+              <Slot k="groupsHeading" />
+            </h2>
             <Link to="/about/">About the chapter →</Link>
           </div>
           <p
             className="muted"
             style={{ maxWidth: "44rem", marginTop: "-0.75rem" }}
           >
-            {HOME.groupsIntro}
+            <Slot k="groupsIntro" />
           </p>
           <div className="grid grid--cards" style={{ marginTop: "1.5rem" }}>
             {WORKING_GROUPS.map((w) => (
@@ -141,7 +157,9 @@ export default function Home() {
       <section className="section">
         <div className="container">
           <div className="section__head">
-            <h2>{HOME.dispatchesHeading}</h2>
+            <h2>
+              <Slot k="dispatchesHeading" />
+            </h2>
             <Link to="/blog">All posts →</Link>
           </div>
           <div className="grid grid--cards">
@@ -165,12 +183,14 @@ export default function Home() {
       {/* Join CTA */}
       <section className="section section--alt">
         <div className="container text-center">
-          <h2>{HOME.closingHeading}</h2>
+          <h2>
+            <Slot k="closingHeading" />
+          </h2>
           <p
             className="muted"
             style={{ maxWidth: "38rem", margin: "0 auto 1.5rem" }}
           >
-            {HOME.closingIntro}
+            <Slot k="closingIntro" />
           </p>
           <div className="hero__actions" style={{ justifyContent: "center" }}>
             <Link className="btn btn-primary" to="/join/">

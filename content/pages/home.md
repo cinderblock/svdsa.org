@@ -24,6 +24,3 @@ closingIntro: >-
   Come to an event, sign up for the newsletter, or become a member today.
   Solidarity Forever!
 ---
-
-<!-- The home page's copy lives in the frontmatter above so chapter editors can
-change it in the browser. The body is not shown on the home page. -->

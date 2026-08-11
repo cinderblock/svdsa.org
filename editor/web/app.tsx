@@ -28,6 +28,8 @@ import {
   type FieldValue,
 } from "./frontmatter";
 import { Wysiwyg, type EditorHandle } from "./editors/wysiwyg";
+import { HOME_PATH, urlForContentPath } from "../src/content/urls";
+import { HOME_SLOTS } from "../../app/lib/home";
 
 // Monaco is ~1.5 MB gzip — load it only when the editor switches to Raw mode.
 const Raw = lazy(() =>
@@ -37,8 +39,21 @@ const Raw = lazy(() =>
 const Preview = lazy(() =>
   import("./editors/preview").then((m) => ({ default: m.Preview })),
 );
+// And the home-page editor, which pulls in the site's home route — and with it
+// the events and posts corpus that route renders from.
+const HomePreview = lazy(() =>
+  import("./editors/home-preview").then((m) => ({ default: m.HomePreview })),
+);
 
-type Mode = "wysiwyg" | "raw" | "preview";
+/**
+ * `home` is the home page's own mode, and its only one: that page has no body,
+ * so Rich text and Preview would both show an empty document and Source would
+ * show an empty file. Its words are all frontmatter, edited on the page itself.
+ */
+type Mode = "wysiwyg" | "raw" | "preview" | "home";
+
+/** The frontmatter keys the home page renders as editable words on the page. */
+const HOME_SLOT_KEYS = new Set<string>(HOME_SLOTS.map((s) => s.key));
 
 /** Group branches by first path segment (theme/, draft/, …); rootless first. */
 function groupBranches(branches: string[]): {
@@ -80,6 +95,17 @@ export function App() {
   /** Blob sha the open file was loaded at — sent back to detect conflicts. */
   const [sha, setSha] = useState<string | undefined>();
   const [conflict, setConflict] = useState(false);
+
+  /**
+   * The home page's frontmatter with unsaved edits laid over it. Memoised
+   * because it is what the in-place editor renders the whole page from, and a
+   * fresh object every keystroke would re-render it for no reason.
+   */
+  const homeFrontmatter = useMemo(
+    (): Record<string, unknown> =>
+      item?.kind === "markdown" ? { ...item.frontmatter, ...fmValues } : {},
+    [item, fmValues],
+  );
 
   const [busy, setBusy] = useState<string | null>(null);
   const [msg, setMsg] = useState<{
@@ -176,14 +202,10 @@ export function App() {
     const target =
       (wantPath && items.find((p) => p === wantPath)) ||
       (wantUrl &&
-        items.find(
-          (p) =>
-            p.startsWith("content/pages/") &&
-            "/" +
-              p.replace(/^content\/pages\//, "").replace(/\.md$/, "") +
-              "/" ===
-              (wantUrl.endsWith("/") ? wantUrl : wantUrl + "/"),
-        ));
+        (() => {
+          const want = wantUrl.endsWith("/") ? wantUrl : wantUrl + "/";
+          return items.find((p) => urlForContentPath(p) === want);
+        })());
     if (target) void open(target);
     else
       setMsg({
@@ -210,7 +232,9 @@ export function App() {
         setSpecs([]);
       } else {
         setBody(d.body);
-        setMode("wysiwyg");
+        // The home page is a layout with fourteen word-shaped holes in it, not
+        // a document — so it opens on itself rather than on an empty body.
+        setMode(d.path === HOME_PATH ? "home" : "wysiwyg");
         setTitle(String(d.frontmatter.title ?? ""));
         setSpecs(classify(d.frontmatter));
       }
@@ -549,7 +573,17 @@ export function App() {
                     onChange={(e) => setTitle(e.target.value)}
                   />
                   <FrontmatterForm
-                    specs={specs}
+                    // On the home page the copy fields ARE the page, and you
+                    // edit them by typing on it. Showing them here as well
+                    // would be two controls for one value. They stay in
+                    // `specs` regardless — that's what `buildFrontmatter`
+                    // walks on save, and dropping them would silently discard
+                    // every edit.
+                    specs={
+                      item.path === HOME_PATH
+                        ? specs.filter((s) => !HOME_SLOT_KEYS.has(s.key))
+                        : specs
+                    }
                     values={fmValues}
                     anchorStart={String(item.frontmatter.start ?? "")}
                     onChange={(k, v) =>
@@ -583,7 +617,13 @@ export function App() {
 
               <div className="modebar">
                 <div className="tabs">
-                  {item.kind === "markdown" ? (
+                  {item.path === HOME_PATH ? (
+                    // One mode, so one tab — kept rather than hidden so the row
+                    // still says what you are looking at.
+                    <button className="on" disabled>
+                      Page
+                    </button>
+                  ) : item.kind === "markdown" ? (
                     <>
                       <button
                         className={mode === "wysiwyg" ? "on" : ""}
@@ -620,7 +660,19 @@ export function App() {
               </div>
 
               <div className="pane">
-                {mode === "preview" && item.kind === "markdown" ? (
+                {mode === "home" ? (
+                  <Suspense
+                    fallback={<p className="empty">loading the home page…</p>}
+                  >
+                    <HomePreview
+                      frontmatter={homeFrontmatter}
+                      siteOrigin={siteOrigin}
+                      onChange={(k, v) =>
+                        setFmValues((cur) => ({ ...cur, [k]: v }))
+                      }
+                    />
+                  </Suspense>
+                ) : mode === "preview" && item.kind === "markdown" ? (
                   <Suspense
                     fallback={<p className="empty">rendering preview…</p>}
                   >

@@ -16,7 +16,7 @@
  */
 
 import type { LintFinding } from "./lint";
-import { urlForContentPath } from "./newItem";
+import { urlForContentPath } from "./urls";
 
 /** Routes the app serves that aren't content files. */
 export const STATIC_ROUTES = [

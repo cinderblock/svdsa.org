@@ -115,6 +115,7 @@ Nothing here can be finished by a code change alone.
 | `plans/svdsa-editor-rich-ui.md`          | The three-mode editing surface, round by round        |
 | `plans/svdsa-editor-branches.md`         | Branch browser and the top bar                        |
 | `plans/svdsa-editor-wysiwyg-fidelity.md` | Making Rich text trustworthy on its own (not started) |
+| `plans/svdsa-home-inplace-editing.md`    | Editing the home page by typing on it                 |
 | `plans/calendar-recurrence-restore.md`   | Recovering the rules the WXR re-import dropped        |
 | `plans/i18n.md`                          | Multilingual site (not started)                       |
 

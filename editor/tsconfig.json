@@ -14,7 +14,13 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": true
+    "verbatimModuleSyntax": true,
+    // The home-page editor renders the site's own route, and the site's modules
+    // import each other through `~/`. Mirrors the alias in vite.config.ts and
+    // the root tsconfig, so the same code resolves the same way in all three.
+    "paths": {
+      "~/*": ["../app/*"]
+    }
   },
   "include": ["web", "src", "vite.config.ts"]
 }

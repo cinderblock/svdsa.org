@@ -14,6 +14,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { api, type ChangedFile, type ItemMeta, type SiteNav } from "./api";
 import { Picker } from "./picker";
+import { urlForContentPath } from "../src/content/urls";
 
 export type SortKey = "site" | "title" | "date" | "recent";
 
@@ -31,14 +32,26 @@ interface Group {
   items: string[];
   /** Collapsed unless it's small or the editor opened it. */
   openByDefault: boolean;
+  /**
+   * What "Site order" means for this group, when the alphabet isn't it. Used by
+   * Main pages so the home page leads rather than sorting fifth, behind
+   * `about`, `bylaws`, `contact` and `donate`.
+   */
+  order?: string[];
 }
 
 const stem = (p: string) => (p.split("/").pop() ?? p).replace(/\.md$/, "");
 const dateInName = (p: string) => stem(p).match(/\d{4}-\d{2}-\d{2}/)?.[0];
 
-/** content/pages/housing.md → /housing/ (the tree mirrors the URL). */
-const urlForPage = (p: string) =>
-  "/" + p.replace(/^content\/pages\//, "").replace(/\.md$/, "") + "/";
+/**
+ * A page's address on the site — content/pages/housing.md → /housing/.
+ *
+ * From the path, not from `meta.url`, because grouping has to happen before the
+ * per-directory metadata request has come back. The home page is the one file
+ * whose name doesn't give its address away; `urls.ts` is where that is written
+ * down, for the Worker and the browser both.
+ */
+const urlForPage = (p: string) => urlForContentPath(p) ?? "";
 
 /**
  * Build the group list. Pages follow the site's nav; everything else keeps the
@@ -63,7 +76,9 @@ function buildGroups(items: string[], nav: SiteNav | null): Group[] {
       groups.push({ id, label, icon, items: found, openByDefault: true });
   };
 
-  // The handful of pages the site's top level points at.
+  // The handful of pages the site's top level points at, in that order — so the
+  // home page is the first row of the first group, which is where someone
+  // looking for "the front page" will look first.
   const MAIN = ["/", "/about/", "/join/", "/donate/", "/contact/", "/bylaws/"];
   const main = pages.filter((p) => MAIN.includes(urlForPage(p)));
   main.forEach((p) => used.add(p));
@@ -74,6 +89,9 @@ function buildGroups(items: string[], nav: SiteNav | null): Group[] {
       icon: "🏠",
       items: main,
       openByDefault: true,
+      order: [...main].sort(
+        (a, b) => MAIN.indexOf(urlForPage(a)) - MAIN.indexOf(urlForPage(b)),
+      ),
     });
 
   bySection("wg", "Working groups", "✊", nav?.workingGroups);
@@ -203,7 +221,7 @@ export function FileList({
     (meta[p]?.title ?? "").toLowerCase().includes(q) ||
     (meta[p]?.url ?? "").toLowerCase().includes(q);
 
-  const sortItems = (list: string[]) => {
+  const sortItems = (list: string[], order?: string[]) => {
     const copy = [...list];
     const dateOf = (p: string) => meta[p]?.date ?? dateInName(p) ?? "";
     const titleOf = (p: string) => (meta[p]?.title ?? stem(p)).toLowerCase();
@@ -213,7 +231,13 @@ export function FileList({
       copy.sort((a, b) => dateOf(a).localeCompare(dateOf(b)));
     else if (sort === "recent")
       copy.sort((a, b) => dateOf(b).localeCompare(dateOf(a)));
-    else copy.sort((a, b) => a.localeCompare(b)); // "site" = repo/nav order
+    else if (order) {
+      // "Site order" where the group knows its own — anything unlisted trails
+      // the rest alphabetically rather than jumping to the front.
+      const rank = (p: string) =>
+        order.indexOf(p) === -1 ? order.length : order.indexOf(p);
+      copy.sort((a, b) => rank(a) - rank(b) || a.localeCompare(b));
+    } else copy.sort((a, b) => a.localeCompare(b)); // "site" = repo/nav order
     return copy;
   };
 
@@ -245,7 +269,7 @@ export function FileList({
       </div>
 
       {groups.map((g) => {
-        const shown = sortItems(g.items.filter(matches));
+        const shown = sortItems(g.items.filter(matches), g.order);
         if (!shown.length) return null;
         return (
           <details
