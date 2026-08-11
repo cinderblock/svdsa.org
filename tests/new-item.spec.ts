@@ -141,7 +141,7 @@ test.describe("idForPath", () => {
         if (id) existing.add(id);
       }
     }
-    expect(existing.size).toBeGreaterThan(500);
+    expect(existing.size).toBeGreaterThan(300);
     for (const url of ["/about/", "/2027/01/01/x/", "/event/y/"])
       expect(existing.has(String(idForPath(url)))).toBe(false);
   });

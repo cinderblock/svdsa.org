@@ -1,4 +1,19 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
+
+/**
+ * Barrier for "the calendar has hydrated".
+ *
+ * Subscribe is server-rendered as a plain .ics link and upgraded to webcal://
+ * on mount, so its href flipping is the cheapest observable proof that React
+ * has taken over. A click dispatched before that lands on markup the hydration
+ * is about to replace and is silently dropped — the navigation never happens.
+ */
+const calendarHydrated = (page: Page) =>
+  expect(page.getByRole("link", { name: "Subscribe" })).toHaveAttribute(
+    "href",
+    /^webcal:/,
+    { timeout: 15_000 },
+  );
 
 test.describe("Home Page", () => {
   test.beforeEach(async ({ page }) => {
@@ -41,10 +56,20 @@ test.describe("Content routes", () => {
   });
 
   test("calendar row links to an event detail page", async ({ page }) => {
+    // React Router holds the URL back until the event route's module and loader
+    // resolve, and this is the first test to reach /event/$slug, so it pays the
+    // dev server's cold compile for that route — tens of seconds when the whole
+    // suite is compiling in parallel. Every later /event/ test finds it warm.
+    test.slow();
     await page.goto("/calendar");
+    await calendarHydrated(page);
     await page.locator("a.ecard").first().click();
-    await expect(page).toHaveURL(/\/event\//);
-    await expect(page.getByRole("heading", { name: "When" })).toBeVisible();
+    await expect(page).toHaveURL(/\/event\//, { timeout: 30_000 });
+    // "Back to calendar" also appears on the route's not-found branch, so
+    // "When" is what actually proves the event resolved.
+    await expect(page.getByRole("heading", { name: "When" })).toBeVisible({
+      timeout: 30_000,
+    });
     await expect(
       page.getByRole("link", { name: "Back to calendar" }),
     ).toBeVisible();
@@ -117,6 +142,9 @@ test.describe("Recurring events", () => {
     // 3rd Saturday of Nov 2027 — well past the 90-day prerender horizon, so
     // this URL has no static page and must resolve from the rule client-side.
     await page.goto("/event/sjfreestore/2027-11-20/");
+    // No static page, so the route renders only after hydration — wait for it
+    // rather than asserting against a bare app shell (see the sibling below).
+    await expect(page.locator("#main")).toBeVisible({ timeout: 30_000 });
     await expect(page.getByRole("heading", { level: 1 })).toContainText(
       "Free Store",
     );
@@ -227,7 +255,11 @@ test.describe("Calendar subscription feeds", () => {
     page,
     request,
   }) => {
+    // Navigates an event page and then fetches a generated .ics, so it wears
+    // both the route's and the feed's first-hit compile under a loaded suite.
+    test.slow();
     await page.goto("/calendar");
+    await calendarHydrated(page);
     await page.locator("a.ecard").first().click();
     const link = page.getByRole("link", { name: "Add to calendar" });
     const href = await link.getAttribute("href");
@@ -277,15 +309,7 @@ test.describe("Calendar views", () => {
   }) => {
     await page.goto("/calendar?view=month");
     await expect(page.locator("table.cal-month").first()).toBeVisible();
-    // Wait for hydration before clicking: the webcal:// upgrade only happens
-    // after mount, so a click dispatched earlier would be dropped.
-    const hydrated = () =>
-      expect(page.getByRole("link", { name: "Subscribe" })).toHaveAttribute(
-        "href",
-        /^webcal:/,
-        { timeout: 15_000 },
-      );
-    await hydrated();
+    await calendarHydrated(page);
 
     // Switching view updates the URL; switching back to List clears it.
     await page.getByRole("button", { name: "Week" }).click();
@@ -295,7 +319,7 @@ test.describe("Calendar views", () => {
 
     // A facet filter narrows the calendar views too.
     await page.goto("/calendar?view=week");
-    await hydrated();
+    await calendarHydrated(page);
     const before = await page.locator(".cal-chip").count();
     await page.getByRole("button", { name: "Committees" }).click();
     const after = await page.locator(".cal-chip").count();

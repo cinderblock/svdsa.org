@@ -186,6 +186,9 @@ test.describe("new-content wizard", () => {
     const keep = page.getByRole("checkbox", { name: /Keep as a draft/ });
     await expect(keep).toBeChecked();
     await page.getByRole("button", { name: /Create blog post/i }).click();
+    // `created` is filled in by the stubbed route, so wait for the wizard to
+    // report the round-trip before reading it — otherwise this races the click.
+    await expect(page.locator(".msg.ok, .path")).toBeVisible();
     expect(created.draft).toBe(true);
   });
 
@@ -205,6 +208,7 @@ test.describe("new-content wizard", () => {
       page.getByRole("checkbox", { name: /Keep as a draft/ }),
     ).toHaveCount(0);
     await page.getByRole("button", { name: /Create blog post/i }).click();
+    await expect(page.locator(".msg.ok, .path")).toBeVisible();
     expect(created.draft).toBe(false);
   });
 });
