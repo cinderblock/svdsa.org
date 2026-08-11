@@ -76,6 +76,12 @@ It's `sandbox=""` — no `allow-same-origin`, no `allow-scripts` — so preview
 content can't reach back into the editor and `<script>` islands stay inert. And
 it's lazily loaded (72 kB gzip), so the pipeline only downloads if you open it.
 
+**Known gap:** having to flip to Preview to see what you're making is a cost,
+not a feature, and Rich text still has no honest way to show those raw-HTML
+islands. Closing both is planned in
+`plans/svdsa-editor-wysiwyg-fidelity.md` — including why the obvious fix
+(point Milkdown at the site's stylesheet) doesn't work as stated.
+
 ## Rescheduling a repeating meeting
 
 Recurring events are stored as one file with an iCalendar rule, and the editor

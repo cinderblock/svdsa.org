@@ -92,6 +92,9 @@ failures pre-date this work (reproduced on unmodified baseline).
 
 ## Next steps
 
+0. **Rich text should look like the real page, and show raw HTML honestly** —
+   its own doc: `plans/svdsa-editor-wysiwyg-fidelity.md`. Supersedes item 1
+   below, which is one of the options it weighs.
 1. remark-directive shortcodes (vetted component registry) for the 20
    raw-HTML files: ::canva, ::action-network, ::donate-button, ::embed-form.
 2. Recurrence exceptions (`skip:` dates / `moved:` map) → collapse the 5
