@@ -314,9 +314,63 @@ site-owned bucket.
 files are now a golden oracle. Implement the feature, re-import with
 `--out <tmp>`, and diff against them. An empty diff _is_ the no-op property.
 
-**Blocker:** no WXR export is committed and none was found on disk; `wxr.test.ts`
-uses an inline fixture with a single non-recurring event and no `_EventRecurrence`
-anywhere. Building this needs the real export (or a fresh one).
+**The export is at `~/Downloads/siliconvalleydsa.WordPress.2026-08-10.xml`**
+(7.2 MB). Nothing is committed as a fixture — `wxr.test.ts` uses an inline
+template literal with a single non-recurring event and no `_EventRecurrence`.
+
+What the real export actually contains, measured 2026-08-11:
+
+|                                      | count                                                         |
+| ------------------------------------ | ------------------------------------------------------------- |
+| `tribe_events` items                 | 305                                                           |
+| real `_EventRecurrence` meta entries | **79**                                                        |
+| …of those, carrying exclusions       | **8**                                                         |
+| inner rule types                     | Weekly 64, Monthly 28, Date 19 (the Date ones are exclusions) |
+
+79 rules against 21 series files — the rest are trashed / `tribe-ignored` / long
+past, and the existing status filter should account for the gap, but that must be
+proven against the oracle rather than assumed.
+
+**Exclusions are the blocker, and they are real, not hypothetical.** A decoded
+example — biweekly on Mondays, `end-type: On`, `end: 2025-12-31`, plus two
+excluded dates:
+
+```
+rules:      type=Custom custom{interval:2, week.day:[1], type:Weekly}
+            end-type:On end:2025-12-31
+exclusions: date 2025-09-22, date 2025-11-17
+```
+
+svdsa's `Recurrence` is `{ rrule: string }` (`app/lib/recurrence.ts:30-31`) with
+**no exclusion support at all**. Eight series cannot be imported faithfully until
+the schema gains `EXDATE`/an `exclude:` list. This must not be papered over —
+silently dropping exclusions would publish meetings that were cancelled.
+
+### The importer's filename is separately wrong
+
+`wxr.ts:505` writes `content/events/<year>/<slug>-<start-date>.md`, but the
+WordPress slug **already carries the date**, so the date lands twice:
+`2026-05-06-aceboardmeeting-2026-05-06.md`. **65 files** are like this. The URL
+is unaffected (`path: /event/2026-05-06-aceboardmeeting/` is clean), so this is
+filename-only cosmetics — but it does not match the convention documented at
+`editor/src/content/newItem.ts:8-17`, which is `content/events/<year>/<slug>.md`
+with the date already inside the slug.
+
+Worth being precise about what is and isn't a design flaw here: series and
+one-offs living at different paths is **correct**, because they are different
+URLs — `/event/<slug>/` for a series that has no single date versus
+`/event/<date>-<slug>/` for a one-off. That split is documented and was read off
+the corpus, not invented. The bug is only the doubled date, plus the fact that
+the importer has no concept of "series" and so can never write the flat path.
+
+### The `rm -rf` should go
+
+`scripts/fetch-wp-content.ts:291` deletes `content/{pages,posts,events}`
+wholesale before re-fetching, and `bun run migrate` invokes it directly. It is
+the obsolete REST importer, superseded by the WXR path, and it also re-introduces
+the `wptexturize`d typography `b34baca` exists to remove. The WXR importer has no
+`rm` anywhere, so this is isolated to a dead code path — which makes deleting it
+or hard-failing it a cheap, safe win.
 
 ## Alternative considered
 
