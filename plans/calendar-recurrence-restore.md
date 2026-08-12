@@ -194,7 +194,20 @@ collision assertions never run. Lower the guard to `300`.
       twice in a row, since every failure here was a flake and one green run
       proves nothing.
 - [x] Committed on `red`.
+- [x] Deleted the REST importer and `bun run migrate` (`fb34528`) — see below.
 - [ ] Not pushed. `origin/red` is still at `3184766`; pushing is yours to do.
+- [ ] Three series disagree with WordPress — needs a human decision, see above.
+
+**A peer session is actively working in this same worktree** (as of 2026-08-11
+13:27: `tests/home-editor.spec.ts`, `app/components/HomeSlot.tsx`,
+`editor/web/editors/home-preview.tsx`, plus edits to `app/lib/home.ts`,
+`app/routes/home.tsx` and `content/pages/home.md` — an in-place home-editing
+feature). The suite is therefore **not cleanly runnable right now**: the test
+count moved 483 → 501 (their six new tests × three browsers), and the dev
+servers on `:9999`/`:9998` are being cycled underneath any run, which surfaces as
+`ERR_CONNECTION_RESET` mid-suite. Failures seen in that state are theirs or the
+contention's, not this branch's. The restore's own green runs are the two
+483-passed runs recorded above.
 
 ### The restore destabilised six tests, and fixing them was the real work
 
@@ -310,12 +323,14 @@ go-ahead)" as unchecked. It also matters for the planned multilingual layer — 
 `plans/i18n.md` — because translation files are site-owned too and would be
 destroyed identically.
 
-Separately: **`bun run migrate` is now actively harmful.** It still points at the
-obsolete REST importer `scripts/fetch-wp-content.ts`, which `rm -rf`s the three
-content dirs at line 291 _and_ re-introduces the `wptexturize`d typography
-`b34baca` exists to remove. Consider making it refuse to run.
+~~Separately: **`bun run migrate` is now actively harmful.**~~ **DONE** in
+`fb34528` — `scripts/fetch-wp-content.ts` and the `migrate` script are deleted
+outright rather than guarded, since the WXR path had already superseded them and
+a script whose only remaining behaviour is "destroy content using a stale method"
+has no upside. The README gained an "Importing from WordPress" note in its place.
+`scripts/html-to-md.ts` was its sole consumer and is now orphaned but harmless.
 
-Both are follow-up work, not part of this restore.
+The site-owned/WordPress-owned distinction remains follow-up work.
 
 ### The importer needs a recurrence feature — investigated 2026-08-11
 
