@@ -15,9 +15,8 @@ categories:
   - newbie-friendly
   - SV DSA
   - WG - Mutual Aid
-repeats:
-  freq: monthly
-  byday: 4TU
+recurrence:
+  rrule: FREQ=MONTHLY;BYDAY=4TU
 ---
 
 Join the mutual aid working group to help support community-based efforts in the South Bay! No experience is required and everyone has something to contribute! We will be meeting at the San Jose Peace and Justice Center and a zoom link is available for those who cannot join in person.

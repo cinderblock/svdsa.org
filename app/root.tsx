@@ -46,6 +46,18 @@ export function Layout({ children }: { children: React.ReactNode }) {
             }}
           />
         )}
+        {/* Add `?edit` to any page to jump straight to editing it. The editor
+            lives on a sibling Worker (`edit.<subdomain>`), is behind Cloudflare
+            Access, and resolves ?url= back to the content file. Runs before
+            paint so it never flashes the page first. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              `if(new URLSearchParams(location.search).has('edit')){` +
+              `var h=location.host.split('.');h[0]='edit';` +
+              `location.replace('https://'+h.join('.')+'/?url='+encodeURIComponent(location.pathname));}`,
+          }}
+        />
       </head>
       <body>
         <a href="#main" className="skip-link">

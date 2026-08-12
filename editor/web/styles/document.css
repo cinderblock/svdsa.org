@@ -1,0 +1,109 @@
+/*
+ * The editing column: the open file's path, title, mode bar and pane.
+ *
+ * Widgets that live inside it have their own files — `frontmatter.css`,
+ * `recurrence.css`, `preview.css`.
+ */
+
+/* ---- editor pane ---- */
+#ed {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  /* Scrolls on its own, independently of the file list beside it. Normally the
+     pane absorbs the slack; this is the fallback for a short window or a very
+     tall metadata form, where the column genuinely doesn't fit. Half of the
+     pair described on `.wrap` in `shell.css` — don't drop it. */
+  min-height: 0;
+  overflow: auto;
+  padding: 1rem;
+  gap: 0.5rem;
+}
+#ed .empty {
+  color: var(--muted);
+}
+
+.path {
+  color: var(--muted);
+  font-size: 0.8rem;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+.chip {
+  background: var(--red-soft);
+  color: var(--red);
+  border-radius: 99px;
+  padding: 0.05rem 0.5rem;
+  font-size: 0.72rem;
+}
+#ed .title {
+  font: inherit;
+  font-size: 1.25rem;
+  font-weight: 600;
+  padding: 0.45rem;
+  background: var(--bg);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+
+/* ---- mode bar + editors ---- */
+.modebar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.tabs button {
+  font: inherit;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--ink);
+  padding: 0.35rem 0.8rem;
+  cursor: pointer;
+}
+.tabs button:first-child {
+  border-radius: 6px 0 0 6px;
+}
+.tabs button:last-child {
+  border-radius: 0 6px 6px 0;
+  border-left: 0;
+}
+.tabs button.on {
+  background: var(--red-soft);
+  font-weight: 600;
+}
+.save {
+  margin-left: auto;
+  background: var(--red);
+  color: #fff;
+  border: 0;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font: inherit;
+}
+.save:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.pane {
+  flex: 1 1 auto;
+  /* Now that #ed is height-bounded the pane would otherwise be squeezed to
+     nothing by a tall frontmatter form; below this it stops shrinking and #ed
+     scrolls instead. */
+  min-height: 14rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.pane .wysiwyg {
+  height: 100%;
+  overflow: auto;
+}
+
+.path .live {
+  margin-left: auto;
+  font-size: 0.8rem;
+}

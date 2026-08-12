@@ -1,14 +1,19 @@
 name: CI
 
-# Deploys + per-branch preview URLs are handled by Cloudflare Workers Builds
-# (connected in the Cloudflare dashboard), which runs `bun run build` and
-# `wrangler deploy` on push. This workflow only validates the code, so no
-# Cloudflare secrets are needed here.
+# Checks only — no deploying, and no Cloudflare credentials.
+#
+# BOTH Workers deploy via Cloudflare Workers Builds, connected in the dashboard:
+#   svdsa  root directory `/`       production branch red
+#   edit   root directory `editor`  production branch red, other branches OFF
+#
+# `edit` is its own workspace package (editor/package.json), so Workers Builds
+# runs the ordinary `bun install && bun run build` in that directory. There is
+# deliberately ONE editor deployment: it is a tool, not a per-branch artifact —
+# a single instance edits any base branch (`?base=`), and the previews it links
+# to are the SITE's branch previews.
 
 on:
   push:
-    branches:
-      - red
   pull_request:
   workflow_dispatch:
 

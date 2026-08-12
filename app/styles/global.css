@@ -133,7 +133,10 @@ h4 {
   font-weight: 600;
   letter-spacing: 0;
   margin: 0 0 0.5em;
+  /* Even line lengths instead of one long line and a short orphan. */
+  text-wrap: balance;
 }
+
 h1 {
   font-size: clamp(2rem, 5vw, 3rem);
 }
@@ -164,6 +167,19 @@ img {
 }
 .skip-link:focus {
   left: 0;
+}
+
+/* Visible to screen readers only (e.g. full weekday names in the month grid). */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
 }
 
 :focus-visible {
@@ -401,18 +417,24 @@ img {
 }
 .hero__grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  /* Favour the headline column so the two title lines each fit on one line. */
+  grid-template-columns: 1.3fr 0.7fr;
   gap: 2.5rem;
   align-items: center;
 }
-.hero__logo {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* The headline is a two-line couplet: size it so the longer line fits the
+   column, and let each line balance its own wrap when it must break. */
+.hero__title {
+  font-size: clamp(1.85rem, 4vw, 2.45rem);
+  text-wrap: balance;
 }
-.hero__logo img {
-  width: min(20rem, 70%);
-  height: auto;
+.hero__title span {
+  display: block;
+}
+.hero__art img {
+  width: 100%;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
   display: block;
   filter: drop-shadow(0 6px 24px rgba(0, 0, 0, 0.25));
 }
@@ -714,6 +736,32 @@ img {
   gap: 0.5rem;
   margin-bottom: 1.5rem;
 }
+
+/* Calendar subscription panel — feed matches the active filter. */
+.subscribe {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  margin-bottom: 2rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.subscribe p {
+  margin: 0.25rem 0 0;
+  font-size: 0.9rem;
+  max-width: 46ch;
+}
+.subscribe__links {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+  font-size: 0.9rem;
+}
 .filters button {
   font: inherit;
   font-size: 0.85rem;
@@ -849,4 +897,435 @@ a.event-row:hover {
 }
 .stack > * + * {
   margin-top: 1rem;
+}
+
+/* Recurring-series page: the list of upcoming occurrence dates. */
+.occurrences {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.occurrences li a {
+  display: block;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+/* ==========================================================================
+   Calendar views — List / Week / Month. Week and Month scroll vertically
+   forever rather than paging, so "next month" is just further down.
+   ========================================================================== */
+
+.viewtabs {
+  display: inline-flex;
+  margin-bottom: 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.viewtabs button {
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 0.4rem 1rem;
+  border: 0;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+.viewtabs button + button {
+  border-left: 1px solid var(--border);
+}
+.viewtabs button[aria-pressed="true"] {
+  background: var(--red);
+  color: #fff;
+}
+
+/* An event as it appears inside a week row or month cell. */
+.cal-chip {
+  display: flex;
+  gap: 0.4rem;
+  align-items: baseline;
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.35rem;
+  background: var(--surface-2);
+  border-left: 3px solid var(--red);
+  color: var(--text);
+  font-size: 0.85rem;
+  line-height: 1.3;
+}
+.cal-chip:hover {
+  text-decoration: none;
+  background: color-mix(in srgb, var(--red) 12%, var(--surface-2));
+}
+.cal-chip__time {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  font-size: 0.78rem;
+}
+.cal-chip__title {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.cal-chip__where {
+  margin-left: auto;
+}
+
+/* ---- Week view ---- */
+.cal-week {
+  margin-bottom: 2rem;
+}
+.cal-week__head {
+  display: flex;
+  gap: 0.75rem;
+  align-items: baseline;
+  font-size: 1rem;
+  margin: 0 0 0.5rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 2px solid var(--border);
+}
+.cal-week__head .muted {
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin-left: auto;
+}
+.cal-week__days {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.cal-day {
+  display: grid;
+  grid-template-columns: 4rem 1fr;
+  gap: 0.75rem;
+  align-items: start;
+  padding: 0.35rem 0.4rem;
+  border-radius: var(--radius);
+}
+.cal-day.is-today {
+  background: color-mix(in srgb, var(--red) 8%, transparent);
+  outline: 1px solid color-mix(in srgb, var(--red) 35%, transparent);
+}
+.cal-day.is-past {
+  opacity: 0.55;
+}
+.cal-day__label {
+  display: flex;
+  gap: 0.4rem;
+  align-items: baseline;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+.cal-day__label .dom {
+  font-weight: 800;
+  font-size: 1.05rem;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.cal-day.is-today .cal-day__label .dom {
+  color: var(--red);
+}
+.cal-day__events {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+.cal-day.is-empty .cal-day__label,
+.cal-day__none {
+  color: color-mix(in srgb, var(--muted) 60%, transparent);
+}
+
+/* ---- Month view ---- */
+.cal-month {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  margin-bottom: 2.5rem;
+}
+.cal-month caption {
+  text-align: left;
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  padding-bottom: 0.5rem;
+}
+.cal-month th {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  font-weight: 700;
+  padding: 0.25rem;
+  border-bottom: 1px solid var(--border);
+}
+.cal-month td {
+  vertical-align: top;
+  border: 1px solid var(--border);
+  padding: 0.25rem;
+  height: 5.5rem;
+}
+.cal-month td.is-outside {
+  background: var(--surface-2);
+  border-color: transparent;
+}
+.cal-month td.is-past {
+  opacity: 0.55;
+}
+.cal-month td.is-today {
+  background: color-mix(in srgb, var(--red) 10%, transparent);
+  outline: 2px solid var(--red);
+  outline-offset: -2px;
+}
+.cal-cell__date {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 0.15rem;
+}
+.cal-month td.is-today .cal-cell__date {
+  color: var(--red);
+}
+.cal-month .cal-chip {
+  margin-bottom: 0.15rem;
+  font-size: 0.72rem;
+  padding: 0.12rem 0.25rem;
+  flex-direction: column;
+  gap: 0;
+  align-items: stretch;
+}
+
+/* On phones a 7-column month grid is unreadable, so drop the day cells to a
+   comfortable height and hide the chip text in favour of a marker; the Week
+   view is the better small-screen choice and stays fully legible. */
+@media (max-width: 40rem) {
+  .cal-month td {
+    height: 3rem;
+  }
+  .cal-month .cal-chip {
+    height: 0.5rem;
+    padding: 0;
+    border-left: 0;
+    background: var(--red);
+    border-radius: 99px;
+    overflow: hidden;
+    text-indent: -999px;
+  }
+  .cal-day {
+    grid-template-columns: 3.5rem 1fr;
+  }
+}
+
+/* Weekday headers: full names by default, initials only when space is tight
+   (the full name stays available to assistive tech — see .dow-min/.dow-full). */
+.cal-month .dow-min {
+  display: none;
+}
+/* Past days inside the current month are dimmed AND tinted, so the empty top
+   of "this month" reads as already-happened rather than as nothing scheduled. */
+.cal-month td.is-past {
+  background: var(--surface-2);
+  opacity: 0.75;
+}
+.cal-day.is-past .cal-day__label {
+  text-decoration: line-through;
+  text-decoration-color: color-mix(in srgb, var(--muted) 45%, transparent);
+}
+@media (max-width: 48rem) {
+  .cal-month .dow-full {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .cal-month .dow-min {
+    display: inline;
+  }
+}
+
+/* Working-group / committee emoji (content/config/navigation.json). Decorative
+   only — the label always carries the meaning, so they're aria-hidden. */
+.nav__icon,
+.card__icon,
+.page-icon {
+  margin-right: 0.45rem;
+  font-style: normal;
+}
+.page-icon {
+  margin-right: 0.6rem;
+}
+
+/* Contact page: the social accounts as full-width red buttons (the footer keeps
+   its compact circles). Wraps into columns where there's room. */
+.social-buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 0.6rem;
+  margin: 0.5rem 0 2rem;
+}
+.social-buttons .btn {
+  justify-content: center;
+}
+
+/* ==========================================================================
+   Agenda (list view) — the date appears ONCE per day, however many events.
+   ========================================================================== */
+
+.agenda {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.agenda__day {
+  display: grid;
+  grid-template-columns: 4.5rem 1fr;
+  gap: 1rem;
+  padding: 1rem 0;
+  border-top: 1px solid var(--border);
+}
+.agenda__date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: start;
+  margin: 0;
+  position: sticky;
+  top: calc(var(--header-h) + 0.5rem);
+  align-self: start;
+  line-height: 1.05;
+}
+.agenda__dow {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  font-weight: 700;
+}
+.agenda__num {
+  font-size: 1.7rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.agenda__mon {
+  font-size: 0.78rem;
+  color: var(--muted);
+  font-weight: 700;
+}
+.agenda__events {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+/* ---- Event card (agenda + home) ---- */
+.ecard {
+  --cat-hue: 355;
+  display: grid;
+  grid-template-columns: 4.5rem 1fr;
+  gap: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  border-left: 4px solid hsl(var(--cat-hue) 65% 45%);
+  background: var(--surface);
+  color: var(--text);
+}
+.ecard:hover {
+  text-decoration: none;
+  background: color-mix(
+    in srgb,
+    hsl(var(--cat-hue) 65% 45%) 7%,
+    var(--surface)
+  );
+}
+.ecard__time {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--muted);
+  padding-top: 0.15rem;
+  white-space: nowrap;
+}
+.ecard__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+.ecard__title {
+  font-weight: 700;
+  line-height: 1.25;
+}
+.ecard__place {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.ecard__place--hybrid {
+  color: hsl(var(--cat-hue) 55% 38%);
+  font-weight: 600;
+}
+.ecard__excerpt {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.ecard__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.25rem;
+}
+
+/* Category-coloured tag. */
+.tag--cat {
+  --cat-hue: 355;
+  background: hsl(var(--cat-hue) 70% 94%);
+  color: hsl(var(--cat-hue) 60% 28%);
+  border: 1px solid hsl(var(--cat-hue) 60% 82%);
+}
+@media (prefers-color-scheme: dark) {
+  .tag--cat {
+    background: hsl(var(--cat-hue) 45% 18%);
+    color: hsl(var(--cat-hue) 70% 80%);
+    border-color: hsl(var(--cat-hue) 40% 32%);
+  }
+  .ecard {
+    border-left-color: hsl(var(--cat-hue) 60% 55%);
+  }
+  .ecard__place--hybrid {
+    color: hsl(var(--cat-hue) 70% 72%);
+  }
+}
+
+@media (max-width: 34rem) {
+  .agenda__day {
+    grid-template-columns: 3.2rem 1fr;
+    gap: 0.6rem;
+  }
+  .ecard {
+    grid-template-columns: 1fr;
+    gap: 0.15rem;
+  }
+}
+
+/* Colour the week/month chips by category too. */
+.cal-chip {
+  --cat-hue: 355;
+  border-left-color: hsl(var(--cat-hue) 65% 45%);
 }

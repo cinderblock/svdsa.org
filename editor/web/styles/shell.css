@@ -1,0 +1,25 @@
+/*
+ * The two-pane shell — the grid that holds the file list and the editor.
+ *
+ * The scroll behaviour here is load-bearing and interlocks with `filelist.css`
+ * and `document.css`; the comment on `.wrap` says how.
+ */
+
+.wrap {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 20rem 1fr;
+  /*
+   * Pin the row to the wrapper's height. Left implicit it is auto-sized, so an
+   * open document grew the row past the viewport and the two panes shared ONE
+   * page-level scrollbar — scrolling the file list dragged the editor with it,
+   * and the sidebar's own `overflow: auto` never had anything to do.
+   *
+   * This and `#ed`'s own overflow (in `document.css`) each independently
+   * prevent it; `tests/editor-layout.spec.ts` only reproduces the bug with
+   * BOTH reverted. Keep both — the redundancy is what makes it hard to
+   * re-break from either side.
+   */
+  grid-template-rows: minmax(0, 1fr);
+}

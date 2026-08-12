@@ -13,9 +13,8 @@ categories:
   - newbie-friendly
   - SV DSA
   - WG - Community Safety
-repeats:
-  freq: weekly
-  interval: 2
+recurrence:
+  rrule: FREQ=WEEKLY;INTERVAL=2;BYDAY=TU
 ---
 
 Join the [**Community Safety Working Group**](https://siliconvalleydsa.org/community-safety/) as we discuss our ongoing work to fight back against the American police state.

@@ -23,13 +23,20 @@ export const Wysiwyg = forwardRef<EditorHandle, { initial: string }>(
     }));
 
     useEffect(() => {
-      if (!host.current) return;
-      const c = new Crepe({ root: host.current, defaultValue: initial });
+      const parent = host.current;
+      if (!parent) return;
+      // Crepe.create() and .destroy() are both async, so a mount/unmount pair
+      // can interleave (React StrictMode does exactly this in dev). Two guards
+      // keep that safe: each instance owns its OWN container element, so one
+      // instance's teardown can never remove another's DOM; and destroy waits
+      // for create to finish, so we never tear down a half-built editor.
+      const root = parent.appendChild(document.createElement("div"));
+      const c = new Crepe({ root, defaultValue: initial });
       crepe.current = c;
-      c.create();
+      const ready = c.create();
       return () => {
-        c.destroy();
-        crepe.current = null;
+        if (crepe.current === c) crepe.current = null;
+        void ready.then(() => c.destroy()).finally(() => root.remove());
       };
       // Recreate only if the source doc identity changes (new file opened).
     }, [initial]);

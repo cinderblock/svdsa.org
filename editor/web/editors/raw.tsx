@@ -26,10 +26,10 @@ function useSystemDark(): boolean {
   );
 }
 
-export const Raw = forwardRef<EditorHandle, { initial: string }>(function Raw(
-  { initial },
-  ref,
-) {
+export const Raw = forwardRef<
+  EditorHandle,
+  { initial: string; language?: "markdown" | "yaml" }
+>(function Raw({ initial, language = "markdown" }, ref) {
   const model = useRef<editor.IStandaloneCodeEditor | null>(null);
   const dark = useSystemDark();
 
@@ -40,7 +40,7 @@ export const Raw = forwardRef<EditorHandle, { initial: string }>(function Raw(
   return (
     <Editor
       className="raw"
-      defaultLanguage="markdown"
+      defaultLanguage={language}
       defaultValue={initial}
       theme={dark ? "vs-dark" : "light"}
       onMount={(ed) => {

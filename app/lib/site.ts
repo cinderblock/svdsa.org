@@ -10,11 +10,12 @@
  * chapter already uses (Action Network, Zeffy, national DSA, Google Forms).
  */
 
-import siteData from "../../content/config/site.json";
-import externalData from "../../content/config/external.json";
-import socialsData from "../../content/config/socials.json";
-import navData from "../../content/config/navigation.json";
-import photosData from "../../content/config/photos.json";
+import siteData from "../../content/generated/config/site.json";
+import externalData from "../../content/generated/config/external.json";
+import socialsData from "../../content/generated/config/socials.json";
+import navData from "../../content/generated/config/navigation.json";
+import photosData from "../../content/generated/config/photos.json";
+import eventCategoriesData from "../../content/generated/config/event-categories.json";
 
 export interface SiteInfo {
   name: string;
@@ -30,7 +31,11 @@ export interface External {
   localDues: string;
   donate: string;
   newsletter: string;
-  contactForm: string;
+  /** General enquiries. The chapter has no contact FORM — it uses email. */
+  email: string;
+  /** Harassment grievances (a distinct, sensitive flow) + the policy doc. */
+  grievanceForm: string;
+  grievancePolicy: string;
 }
 export const EXTERNAL = externalData as External;
 
@@ -57,9 +62,30 @@ export interface ChapterPhoto {
  */
 export const CHAPTER_PHOTOS = photosData as ChapterPhoto[];
 
+/** One entry in the chapter's event-category vocabulary. */
+export interface EventCategory {
+  label: string;
+  /** 0–360, fixed so a category's colour survives renames of its neighbours. */
+  hue?: number;
+  note?: string;
+  /** Valid on existing events, but not offered for new ones. */
+  retired?: boolean;
+}
+
+/**
+ * The ONLY categories an event may carry
+ * (`content/config/event-categories.yaml`). One list serves three consumers:
+ * the calendar's colours, `lint:content`'s enforcement, and the editor's picker.
+ */
+export const EVENT_CATEGORIES = (
+  eventCategoriesData as { categories: EventCategory[] }
+).categories;
+
 export interface NavLink {
   label: string;
   to: string;
+  /** Emoji marker for working groups / committees (content/config/navigation.json). */
+  icon?: string;
 }
 export interface NavGroup {
   label: string;
@@ -75,6 +101,16 @@ const nav = navData as {
 export const WORKING_GROUPS = nav.workingGroups;
 export const COMMITTEES = nav.committees;
 export const RESOURCES = nav.resources;
+
+/**
+ * Emoji by page path, for the working-group / committee pages. Chapter-owned
+ * data (navigation.json) so adding a group means editing content, not code.
+ */
+export const PAGE_ICONS: Record<string, string> = Object.fromEntries(
+  [...WORKING_GROUPS, ...COMMITTEES]
+    .filter((l) => l.icon)
+    .map((l) => [l.to, l.icon as string]),
+);
 
 /** Primary nav composition (structure in code; the lists above are content). */
 export const NAV: NavGroup[] = [

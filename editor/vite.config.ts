@@ -2,13 +2,45 @@ import react from "@vitejs/plugin-react";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
 
-// Builds the editor SPA (web/) → dist/, served by the svdsa-edit Worker's
-// Static Assets binding. The Worker owns /api/*; assets serve everything else.
-// Paths are anchored to this config's directory (not the CWD), since it's run
-// from the repo root via `--config editor/vite.config.ts`.
+// Builds the editor SPA (web/) → dist/, served by the `edit` Worker's Static
+// Assets binding. The Worker owns /api/*; assets serve everything else.
+//
+// This is the `@svdsa/editor` workspace's OWN config, so `bun run dev|build`
+// from this directory is the normal entry point — which is what lets Cloudflare
+// Workers Builds use `editor` as its root directory with no custom flags.
+// Paths stay anchored to this file rather than the CWD, so the root-level
+// convenience scripts (`bun run editor:build`) behave identically.
 export default defineConfig({
   root: fileURLToPath(new URL("web", import.meta.url)),
+  // Keep the dep-optimization cache at the package root (Vite would otherwise
+  // put it under web/), and separate from the SITE's: when both dev servers
+  // shared one cache, concurrent optimize passes clobbered each other and broke
+  // client JS on whichever server lost the race.
+  cacheDir: fileURLToPath(new URL("node_modules/.vite", import.meta.url)),
   plugins: [react()],
+  // The home-page editor renders the SITE's own `app/routes/home.tsx`, so the
+  // thing you type on is the thing that ships. Two aliases make that possible:
+  //
+  //   ~/      the site's own import alias, which its modules use internally
+  //   react-router
+  //           a two-line stand-in (web/shims/) — the editor has no Router, and
+  //           a link inside a preview must not navigate. See that file.
+  //
+  // Nothing else in the editor imports either, so neither can leak sideways.
+  resolve: {
+    alias: [
+      {
+        find: /^~\//,
+        replacement: fileURLToPath(new URL("../app/", import.meta.url)),
+      },
+      {
+        find: /^react-router$/,
+        replacement: fileURLToPath(
+          new URL("web/shims/react-router.tsx", import.meta.url),
+        ),
+      },
+    ],
+  },
   build: {
     outDir: fileURLToPath(new URL("dist", import.meta.url)),
     emptyOutDir: true,
@@ -17,6 +49,10 @@ export default defineConfig({
     port: 9998,
     strictPort: true,
     // Proxy API calls to a locally-running `wrangler dev` during SPA dev.
-    proxy: { "/api": "http://127.0.0.1:8787" },
+    // NOTE the `^/api/` regex: a plain "/api" key matches by PREFIX, which also
+    // swallowed this app's own `api.ts` module and broke the dev server.
+    proxy: {
+      "^/api/": { target: "http://127.0.0.1:8787", changeOrigin: true },
+    },
   },
 });

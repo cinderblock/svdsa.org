@@ -59,3 +59,10 @@ export function startOfDay(d: Date): Date {
 export function isUpcoming(start: string, now: Date): boolean {
   return parse(start).getTime() >= startOfDay(now).getTime();
 }
+
+/** Parts of a 'YYYY-MM-DD' day key, for agenda date headings. */
+export const weekdayOf = (day: string) =>
+  new Date(`${day}T12:00:00`).toLocaleDateString("en-US", { weekday: "short" });
+export const monthOf = (day: string) =>
+  new Date(`${day}T12:00:00`).toLocaleDateString("en-US", { month: "short" });
+export const dayNumber = (day: string) => Number(day.slice(8, 10));

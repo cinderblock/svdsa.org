@@ -3,7 +3,7 @@ id: 3231
 slug: bookclub
 path: /political-education/bookclub/
 title: Silicon Valley DSA Book Club
-modified: '2019-06-17T22:51:59'
+modified: '2019-06-17 22:51:59'
 parent: 2750
 ---
 

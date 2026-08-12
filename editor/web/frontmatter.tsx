@@ -12,6 +12,8 @@
  */
 
 import { useState } from "react";
+import type { Recurrence } from "../../app/lib/recurrence";
+import { RecurrenceField } from "./recurrence-field";
 
 export type FieldKind =
   | "readonly"
@@ -19,14 +21,18 @@ export type FieldKind =
   | "datetime"
   | "list"
   | "text"
+  | "recurrence"
   | "json";
+
+/** What a widget can hold. `recurrence` is an object; the rest are scalars. */
+export type FieldValue = string | boolean | Recurrence | null;
 
 export interface FieldSpec {
   key: string;
   kind: FieldKind;
   advanced: boolean;
   /** editable value as shown in the widget */
-  initial: string | boolean;
+  initial: FieldValue;
 }
 
 const DATE_KEYS = new Set(["date", "modified", "start", "end"]);
@@ -53,6 +59,15 @@ export function classify(fm: Record<string, unknown>): FieldSpec[] {
     const advanced = ADVANCED_KEYS.has(key);
     if (key === "id") {
       specs.push({ key, kind: "readonly", advanced: true, initial: String(v) });
+    } else if (key === "recurrence") {
+      // A first-class widget, not a JSON blob — editors must be able to
+      // reschedule a meeting without touching an RRULE string.
+      specs.push({
+        key,
+        kind: "recurrence",
+        advanced: false,
+        initial: (v ?? null) as Recurrence | null,
+      });
     } else if (typeof v === "boolean") {
       specs.push({ key, kind: "toggle", advanced, initial: v });
     } else if (
@@ -80,6 +95,17 @@ export function classify(fm: Record<string, unknown>): FieldSpec[] {
       });
     }
   }
+  // Anything with a start time is an event, so offer the recurrence editor even
+  // when the item doesn't repeat yet — otherwise a one-off could never be TURNED
+  // INTO a recurring meeting from the browser.
+  if ("start" in fm && !specs.some((s) => s.kind === "recurrence"))
+    specs.push({
+      key: "recurrence",
+      kind: "recurrence",
+      advanced: false,
+      initial: null,
+    });
+
   // Editable basics first, advanced last.
   return specs.sort((a, b) => Number(a.advanced) - Number(b.advanced));
 }
@@ -88,7 +114,7 @@ export function classify(fm: Record<string, unknown>): FieldSpec[] {
 export function buildFrontmatter(
   original: Record<string, unknown>,
   specs: FieldSpec[],
-  values: Record<string, string | boolean>,
+  values: Record<string, FieldValue>,
   stampModified: boolean,
 ): Record<string, unknown> {
   const out: Record<string, unknown> = { ...original };
@@ -96,7 +122,11 @@ export function buildFrontmatter(
     const v = values[s.key];
     if (v === undefined || v === s.initial) continue; // untouched → keep verbatim
     const orig = original[s.key];
-    if (s.kind === "toggle") out[s.key] = v === true;
+    if (s.kind === "recurrence") {
+      // null means "stop repeating" — drop the key entirely.
+      if (v === null) delete out[s.key];
+      else out[s.key] = v;
+    } else if (s.kind === "toggle") out[s.key] = v === true;
     else if (s.kind === "datetime")
       out[s.key] = fromDatetimeLocal(String(v), String(orig));
     else if (s.kind === "list")
@@ -119,14 +149,19 @@ export function buildFrontmatter(
 export function FrontmatterForm({
   specs,
   values,
+  anchorStart,
   onChange,
 }: {
   specs: FieldSpec[];
-  values: Record<string, string | boolean>;
-  onChange: (key: string, value: string | boolean) => void;
+  values: Record<string, FieldValue>;
+  /** The item's `start`, so the recurrence widget knows the series anchor. */
+  anchorStart?: string;
+  onChange: (key: string, value: FieldValue) => void;
 }) {
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const basic = specs.filter((s) => !s.advanced);
+  // The recurrence editor is a full-width block, not an inline field.
+  const recurrence = specs.find((s) => s.kind === "recurrence");
+  const basic = specs.filter((s) => !s.advanced && s.kind !== "recurrence");
   const advanced = specs.filter((s) => s.advanced);
 
   const field = (s: FieldSpec) => {
@@ -136,7 +171,9 @@ export function FrontmatterForm({
       case "json":
         return (
           <span className="ro">
-            {String(v)}
+            {typeof v === "object" && v !== null
+              ? JSON.stringify(v)
+              : String(v)}
             {s.key === "id" && <em> (WordPress ID)</em>}
           </span>
         );
@@ -178,6 +215,19 @@ export function FrontmatterForm({
           {field(s)}
         </label>
       ))}
+      {recurrence && (
+        <RecurrenceField
+          // `in` rather than `??`: null is a MEANINGFUL value here ("stopped
+          // repeating"), and ?? would fall back to the stored rule.
+          value={
+            (recurrence.key in values
+              ? values[recurrence.key]
+              : recurrence.initial) as Recurrence | null
+          }
+          anchorStart={anchorStart ?? ""}
+          onChange={(next) => onChange(recurrence.key, next)}
+        />
+      )}
       {advanced.length > 0 && (
         <>
           <button

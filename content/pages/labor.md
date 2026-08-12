@@ -3,7 +3,7 @@ id: 728
 slug: labor
 path: /labor/
 title: Labor
-modified: '2026-05-21T22:08:21'
+modified: '2026-05-21 22:08:21'
 ---
 
 ## Projects

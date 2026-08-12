@@ -1,21 +1,16 @@
 ---
-id: 10002646
+id: 15149
 slug: tech-committee-working-session
-path: /event/tech-committee-working-session/2026-05-04/
+path: /event/tech-committee-working-session/2026-06-01/
 title: Tech Committee Working Session
 start: '2026-05-04 18:30:00'
 end: '2026-05-04 19:30:00'
-allDay: false
 timezone: America/Los_Angeles
-isVirtual: false
 venue:
   name: Zoom
 organizer: Silicon Valley DSA
-categories:
-  - Committee - Tech and Data
-  - SV DSA
 ---
 
 The Tech Committee has bi-weekly working session where folks can start an up-for-grabs item or make progress on current items. Co-chairs are available for office-hours assistance for any questions that come up or for help finding something to contribute to.
 
-Register for the Zoom: [https://us02web.zoom.us/meeting/register/XbMFPFzMQVGH1sXutjLxRg](https://us02web.zoom.us/meeting/register/XbMFPFzMQVGH1sXutjLxRg)
+Register for the Zoom: <a href="https://us02web.zoom.us/meeting/register/XbMFPFzMQVGH1sXutjLxRg">https://us02web.zoom.us/meeting/register/XbMFPFzMQVGH1sXutjLxRg</a>

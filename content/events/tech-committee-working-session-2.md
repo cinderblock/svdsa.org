@@ -14,9 +14,8 @@ organizer: Silicon Valley DSA
 categories:
   - Committee - Tech and Data
   - SV DSA
-repeats:
-  freq: weekly
-  interval: 2
+recurrence:
+  rrule: FREQ=WEEKLY;INTERVAL=2;BYDAY=MO
 ---
 
 The Tech Committee has bi-weekly working session where folks can start an up-for-grabs item or make progress on current items. Co-chairs are available for office-hours assistance for any questions that come up or for help finding something to contribute to.

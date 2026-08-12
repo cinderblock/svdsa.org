@@ -12,31 +12,48 @@ import {
   type DraftStatus,
   type ItemDetail,
   type LintFinding,
+  type SiteNav,
+  SaveConflict,
+  type EventCategory,
 } from "./api";
+import { Wizard } from "./wizard";
 import { FileList } from "./filelist";
+import { Picker, type PickerOption } from "./picker";
+import { BranchBrowser } from "./branches";
 import {
   buildFrontmatter,
   classify,
   FrontmatterForm,
   type FieldSpec,
+  type FieldValue,
 } from "./frontmatter";
 import { Wysiwyg, type EditorHandle } from "./editors/wysiwyg";
+import { HOME_PATH, urlForContentPath } from "../src/content/urls";
+import { HOME_SLOTS } from "../../app/lib/home";
 
 // Monaco is ~1.5 MB gzip — load it only when the editor switches to Raw mode.
 const Raw = lazy(() =>
   import("./editors/raw").then((m) => ({ default: m.Raw })),
 );
+// Likewise the preview: it pulls in the site's whole remark/rehype pipeline.
+const Preview = lazy(() =>
+  import("./editors/preview").then((m) => ({ default: m.Preview })),
+);
+// And the home-page editor, which pulls in the site's home route — and with it
+// the events and posts corpus that route renders from.
+const HomePreview = lazy(() =>
+  import("./editors/home-preview").then((m) => ({ default: m.HomePreview })),
+);
 
-type Mode = "wysiwyg" | "raw";
+/**
+ * `home` is the home page's own mode, and its only one: that page has no body,
+ * so Rich text and Preview would both show an empty document and Source would
+ * show an empty file. Its words are all frontmatter, edited on the page itself.
+ */
+type Mode = "wysiwyg" | "raw" | "preview" | "home";
 
-/** The production site's origin, derived from this editor's host
- * (svdsa-edit.<sub>.workers.dev → svdsa.<sub>.workers.dev). */
-function liveOrigin(): string {
-  const host = window.location.host;
-  if (host.startsWith("svdsa-edit."))
-    return `https://${host.replace(/^svdsa-edit\./, "svdsa.")}`;
-  return "https://svdsa.isozilla.workers.dev"; // local dev fallback
-}
+/** The frontmatter keys the home page renders as editable words on the page. */
+const HOME_SLOT_KEYS = new Set<string>(HOME_SLOTS.map((s) => s.key));
 
 /** Group branches by first path segment (theme/, draft/, …); rootless first. */
 function groupBranches(branches: string[]): {
@@ -58,19 +75,37 @@ function groupBranches(branches: string[]): {
 
 export function App() {
   const [email, setEmail] = useState("");
+  const [siteOrigin, setSiteOrigin] = useState("");
+  const [unprotected, setUnprotected] = useState<string | null>(null);
   const [branches, setBranches] = useState<string[]>([]);
   const [base, setBase] = useState("");
   const [items, setItems] = useState<string[]>([]);
+  const [nav, setNav] = useState<SiteNav | null>(null);
+  const [categories, setCategories] = useState<EventCategory[]>([]);
+  const [wizard, setWizard] = useState(false);
+  const [browsing, setBrowsing] = useState(false);
   const [status, setStatus] = useState<DraftStatus | null>(null);
 
   const [item, setItem] = useState<ItemDetail | null>(null);
   const [specs, setSpecs] = useState<FieldSpec[]>([]);
-  const [fmValues, setFmValues] = useState<Record<string, string | boolean>>(
-    {},
-  );
+  const [fmValues, setFmValues] = useState<Record<string, FieldValue>>({});
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [mode, setMode] = useState<Mode>("wysiwyg");
+  /** Blob sha the open file was loaded at — sent back to detect conflicts. */
+  const [sha, setSha] = useState<string | undefined>();
+  const [conflict, setConflict] = useState(false);
+
+  /**
+   * The home page's frontmatter with unsaved edits laid over it. Memoised
+   * because it is what the in-place editor renders the whole page from, and a
+   * fresh object every keystroke would re-render it for no reason.
+   */
+  const homeFrontmatter = useMemo(
+    (): Record<string, unknown> =>
+      item?.kind === "markdown" ? { ...item.frontmatter, ...fmValues } : {},
+    [item, fmValues],
+  );
 
   const [busy, setBusy] = useState<string | null>(null);
   const [msg, setMsg] = useState<{
@@ -93,6 +128,8 @@ export function App() {
     (async () => {
       const [me, b] = await Promise.all([api.me(), api.branches()]);
       setEmail(me.email);
+      setSiteOrigin(me.siteOrigin ?? "");
+      setUnprotected(me.unprotected ?? null);
       setBranches(b.branches.filter((x) => !x.startsWith("draft/")));
       setBase(
         (cur) =>
@@ -107,24 +144,101 @@ export function App() {
     setItem(null);
     api
       .list(base)
-      .then((d) => setItems(d.items))
+      .then((d) => {
+        setItems(d.items);
+        setNav(d.nav ?? null);
+        setCategories(d.categories ?? []);
+      })
       .catch((e) => setMsg({ ok: false, text: String(e) }));
     refreshStatus(base);
   }, [base, refreshStatus]);
 
-  const grouped = useMemo(() => groupBranches(branches), [branches]);
+  /** Branch picker options: rootless branches first, then one group per folder. */
+  const branchOptions = useMemo<PickerOption[]>(() => {
+    const g = groupBranches(branches);
+    return [
+      ...g.root.map((b) => ({ value: b, label: b })),
+      ...g.folders.flatMap(([folder, list]) =>
+        list.map((b) => ({
+          value: b,
+          label: b.slice(folder.length + 1),
+          group: folder,
+        })),
+      ),
+    ];
+  }, [branches]);
+
+  /** Existing page slugs (`about`, `political-education/bookclub`, …). */
+  const pageSlugs = useMemo(
+    () =>
+      items
+        .filter((p) => p.startsWith("content/pages/"))
+        .map((p) => p.slice("content/pages/".length).replace(/\.md$/, ""))
+        .sort(),
+    [items],
+  );
+
+  /**
+   * Deep links. A reader on the live site can append `?edit` to any page and
+   * land here with that page already open — `?url=/about/` is resolved against
+   * the file list (the pages tree mirrors the site's URLs), and `?path=` opens
+   * a repo path directly.
+   */
+  // `?branches` opens the branch browser straight away, so a link can point
+  // someone at the list of previews rather than at a file.
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).has("branches"))
+      setBrowsing(true);
+  }, []);
+
+  const jumped = useRef(false);
+  useEffect(() => {
+    if (jumped.current || !items.length) return;
+    const q = new URLSearchParams(window.location.search);
+    const wantPath = q.get("path");
+    const wantUrl = q.get("url");
+    if (!wantPath && !wantUrl) return;
+    jumped.current = true;
+    const target =
+      (wantPath && items.find((p) => p === wantPath)) ||
+      (wantUrl &&
+        (() => {
+          const want = wantUrl.endsWith("/") ? wantUrl : wantUrl + "/";
+          return items.find((p) => urlForContentPath(p) === want);
+        })());
+    if (target) void open(target);
+    else
+      setMsg({
+        ok: false,
+        text: `No editable file matches ${wantPath ?? wantUrl}`,
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items]);
 
   async function open(path: string) {
     setMsg(null);
     try {
       const d = await api.item(path, base);
       setItem(d);
-      setBody(d.body);
-      setMode("wysiwyg");
-      setTitle(String(d.frontmatter.title ?? ""));
-      setSpecs(classify(d.frontmatter));
-      setFmValues({});
+      setSha(d.sha);
+      setConflict(false);
       setLint([]);
+      if (d.kind === "yaml") {
+        // Config is data, not a document: no title, no frontmatter fields, and
+        // never the rich-text editor — it would rewrite the YAML as Markdown.
+        setBody(d.text);
+        setMode("raw");
+        setTitle("");
+        setSpecs([]);
+      } else {
+        setBody(d.body);
+        // The home page is a layout with fourteen word-shaped holes in it, not
+        // a document — so it opens on itself rather than on an empty body.
+        setMode(d.path === HOME_PATH ? "home" : "wysiwyg");
+        setTitle(String(d.frontmatter.title ?? ""));
+        setSpecs(classify(d.frontmatter));
+      }
+      setFmValues({});
     } catch (e) {
       setMsg({ ok: false, text: String(e) });
     }
@@ -132,6 +246,8 @@ export function App() {
 
   function switchMode(next: Mode) {
     if (next === mode) return;
+    // Pull the live text out of whichever editor owns it before swapping, so
+    // preview shows unsaved work and nothing is lost switching back.
     if (edRef.current) setBody(edRef.current.getValue());
     setMode(next);
   }
@@ -141,15 +257,28 @@ export function App() {
     setBusy("save");
     setMsg(null);
     try {
-      const latestBody = edRef.current?.getValue() ?? body;
-      const fm = buildFrontmatter(item.frontmatter, specs, fmValues, true);
-      if (title !== String(item.frontmatter.title ?? "")) fm.title = title;
-      const r = await api.save({
-        base,
-        path: item.path,
-        frontmatter: fm,
-        body: latestBody,
-      });
+      const latest = edRef.current?.getValue() ?? body;
+      const r = await api.save(
+        item.kind === "yaml"
+          ? { base, path: item.path, sha, text: latest }
+          : (() => {
+              const fm = buildFrontmatter(
+                item.frontmatter,
+                specs,
+                fmValues,
+                true,
+              );
+              if (title !== String(item.frontmatter.title ?? ""))
+                fm.title = title;
+              return {
+                base,
+                path: item.path,
+                sha,
+                frontmatter: fm,
+                body: latest,
+              };
+            })(),
+      );
       setMsg({
         ok: true,
         text:
@@ -160,10 +289,86 @@ export function App() {
           ` — preview builds in ~1–2 min`,
         href: r.previewUrl,
       });
+      setSha(r.sha);
+      setConflict(false);
       setLint(r.lint ?? []);
       refreshStatus(base);
     } catch (e) {
-      setMsg({ ok: false, text: String(e) });
+      if (e instanceof SaveConflict) setConflict(true);
+      setMsg({ ok: false, text: (e as Error).message });
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  /**
+   * Change the open item's address. The Worker leaves a 301 behind, so this is
+   * safe on published content — but say so, since it's the one edit that
+   * changes something outside the site.
+   */
+  async function rename() {
+    if (!item || item.kind !== "markdown") return;
+    const currentUrl = String(item.frontmatter.path ?? "");
+    const currentSlug =
+      String(item.frontmatter.slug ?? "") ||
+      (item.path.split("/").pop() ?? "").replace(/\.md$/, "");
+    const next = window.prompt(
+      `New address for this ${currentUrl ? `page (now ${currentUrl})` : "item"}.
+
+` + `The old address keeps working — a permanent redirect is recorded.`,
+      currentSlug,
+    );
+    if (!next || next.trim() === currentSlug) return;
+    setBusy("rename");
+    setMsg(null);
+    try {
+      const r = await api.rename({ base, from: item.path, slug: next.trim() });
+      const d = await api.list(base);
+      setItems(d.items);
+      refreshStatus(base);
+      await open(r.path);
+      setMsg({
+        ok: true,
+        text: r.redirected
+          ? `moved to ${r.url} — ${r.fromUrl} now redirects there`
+          : `moved to ${r.url} (it was never published, so no redirect was needed)`,
+      });
+    } catch (e) {
+      setMsg({ ok: false, text: (e as Error).message });
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  /** Discard local edits and re-open the file at whatever is there now. */
+  async function reloadOpen() {
+    if (item) await open(item.path);
+  }
+
+  /**
+   * Conflict escape hatch: fork the base into a new branch and save there, so
+   * BOTH versions survive and the difference can be settled in a PR. Switching
+   * base re-points the draft workspace, so the retry lands on the new branch.
+   */
+  async function saveToNewBranch() {
+    const name = window.prompt(
+      "Name a branch to keep your version on (from '" + base + "'):",
+      `rework/${(item?.path.split("/").pop() ?? "edit").replace(/\.[^.]+$/, "")}`,
+    );
+    if (!name) return;
+    setBusy("branch");
+    try {
+      const r = await api.createBranch(name.trim(), base);
+      const b = await api.branches();
+      setBranches(b.branches.filter((x) => !x.startsWith("draft/")));
+      setBase(r.branch);
+      setConflict(false);
+      setMsg({
+        ok: true,
+        text: `created ${r.branch} — reopen the file here and save your version`,
+      });
+    } catch (e) {
+      setMsg({ ok: false, text: (e as Error).message });
     } finally {
       setBusy(null);
     }
@@ -210,23 +415,16 @@ export function App() {
     }
   }
 
-  async function newBranch() {
-    const name = window.prompt(
-      `New branch name (created from '${base}') — e.g. theme/my-experiment:`,
+  /**
+   * Switch the branch being edited. Called by the picker and by the browser;
+   * a branch the browser just created won't be in `branches` yet, so add it
+   * rather than waiting for a refetch.
+   */
+  function pickBranch(name: string) {
+    setBranches((bs) =>
+      bs.includes(name) || name.startsWith("draft/") ? bs : [...bs, name],
     );
-    if (!name) return;
-    setBusy("branch");
-    try {
-      const r = await api.createBranch(name.trim(), base);
-      const b = await api.branches();
-      setBranches(b.branches.filter((x) => !x.startsWith("draft/")));
-      setBase(r.branch);
-      setMsg({ ok: true, text: `created branch ${r.branch}` });
-    } catch (e) {
-      setMsg({ ok: false, text: String(e) });
-    } finally {
-      setBusy(null);
-    }
+    setBase(name);
   }
 
   const changed = status?.exists ? status.changed : [];
@@ -234,31 +432,54 @@ export function App() {
   return (
     <>
       <header>
-        <b>🌹 SVDSA Editor</b>
-        <label>
-          base{" "}
-          <select value={base} onChange={(e) => setBase(e.target.value)}>
-            {grouped.root.map((b) => (
-              <option key={b} value={b}>
-                {b}
-              </option>
-            ))}
-            {grouped.folders.map(([folder, list]) => (
-              <optgroup key={folder} label={`${folder}/`}>
-                {list.map((b) => (
-                  <option key={b} value={b}>
-                    {b.slice(folder.length + 1)}
-                  </option>
-                ))}
-              </optgroup>
-            ))}
-          </select>
-        </label>
-        <button className="ghost" onClick={newBranch} disabled={busy !== null}>
-          + branch
+        <b className="brand">🌹 SVDSA Editor</b>
+        <Picker
+          className="pick--bar"
+          label="Branch"
+          value={base}
+          options={branchOptions}
+          onChange={pickBranch}
+          placeholder="Filter branches…"
+          footer={(close) => (
+            <button
+              type="button"
+              className="pick__action"
+              onClick={() => {
+                close();
+                setBrowsing(true);
+              }}
+            >
+              Browse all branches &amp; previews…
+            </button>
+          )}
+        />
+        <button
+          className="primary"
+          onClick={() => setWizard(true)}
+          disabled={busy !== null || !base}
+        >
+          + New
         </button>
         <span className="who">{email}</span>
       </header>
+
+      {browsing && (
+        <BranchBrowser
+          base={base}
+          onPick={pickBranch}
+          onClose={() => setBrowsing(false)}
+        />
+      )}
+
+      {unprotected && (
+        <div className="alarm" role="alert">
+          <b>⚠ This editor is not protected.</b> Anyone who knows the URL can
+          edit the site and commit as you — {unprotected}. Put a Cloudflare
+          Access application in front of it, set{" "}
+          <code>CF_ACCESS_TEAM_DOMAIN</code> and <code>CF_ACCESS_AUD</code>, and
+          remove <code>REQUIRE_ACCESS: "false"</code>.
+        </div>
+      )}
 
       {changed.length > 0 && (
         <div className="draftbar">
@@ -290,56 +511,144 @@ export function App() {
         <FileList
           base={base}
           items={items}
+          nav={nav}
           selected={item?.path ?? null}
           changed={changed}
           onOpen={open}
         />
 
         <main id="ed">
-          {!item ? (
+          {wizard ? (
+            <Wizard
+              base={base}
+              production="red"
+              categories={categories}
+              pages={pageSlugs}
+              onCancel={() => setWizard(false)}
+              onCreated={async (path) => {
+                setWizard(false);
+                // Refresh the list so the new file is there, then open it.
+                const d = await api.list(base);
+                setItems(d.items);
+                refreshStatus(base);
+                await open(path);
+              }}
+            />
+          ) : !item ? (
             <p className="empty">Select a file to edit.</p>
           ) : (
             <>
               <div className="path">
                 {item.path}
                 {item.fromDraft && <span className="chip">draft version</span>}
-                {typeof item.frontmatter.path === "string" && (
-                  <a
-                    className="live"
-                    href={`${liveOrigin()}${item.frontmatter.path}`}
-                    target="_blank"
-                    rel="noreferrer"
+                {siteOrigin &&
+                  item.kind === "markdown" &&
+                  typeof item.frontmatter.path === "string" && (
+                    <a
+                      className="live"
+                      href={`${siteOrigin}${item.frontmatter.path}`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      view live ↗
+                    </a>
+                  )}
+                {item.kind === "markdown" && (
+                  <button
+                    className="ghost tiny"
+                    onClick={rename}
+                    disabled={busy !== null}
                   >
-                    view live ↗
-                  </a>
+                    {busy === "rename" ? "moving…" : "change address"}
+                  </button>
                 )}
               </div>
-              <input
-                className="title"
-                placeholder="Title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-              />
-              <FrontmatterForm
-                specs={specs}
-                values={fmValues}
-                onChange={(k, v) => setFmValues((cur) => ({ ...cur, [k]: v }))}
-              />
+
+              {item.kind === "markdown" ? (
+                <>
+                  <input
+                    className="title"
+                    placeholder="Title"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                  />
+                  <FrontmatterForm
+                    // On the home page the copy fields ARE the page, and you
+                    // edit them by typing on it. Showing them here as well
+                    // would be two controls for one value. They stay in
+                    // `specs` regardless — that's what `buildFrontmatter`
+                    // walks on save, and dropping them would silently discard
+                    // every edit.
+                    specs={
+                      item.path === HOME_PATH
+                        ? specs.filter((s) => !HOME_SLOT_KEYS.has(s.key))
+                        : specs
+                    }
+                    values={fmValues}
+                    anchorStart={String(item.frontmatter.start ?? "")}
+                    onChange={(k, v) =>
+                      setFmValues((cur) => ({ ...cur, [k]: v }))
+                    }
+                  />
+                </>
+              ) : (
+                <p className="confignote">
+                  <b>Site settings.</b> This is a settings file, not a page, so
+                  it is edited as YAML — indentation matters. The comments at
+                  the top say what it controls. A file that doesn&rsquo;t parse
+                  is refused on save, so you can&rsquo;t break the site by typo.
+                </p>
+              )}
+
+              {conflict && (
+                <div className="conflict" role="alert">
+                  <span>
+                    <b>Someone else&rsquo;s version is newer.</b> Your changes
+                    are still here, unsaved.
+                  </span>
+                  <button onClick={reloadOpen} disabled={busy !== null}>
+                    Discard mine &amp; reload
+                  </button>
+                  <button onClick={saveToNewBranch} disabled={busy !== null}>
+                    Save mine to a new branch
+                  </button>
+                </div>
+              )}
 
               <div className="modebar">
                 <div className="tabs">
-                  <button
-                    className={mode === "wysiwyg" ? "on" : ""}
-                    onClick={() => switchMode("wysiwyg")}
-                  >
-                    Rich text
-                  </button>
-                  <button
-                    className={mode === "raw" ? "on" : ""}
-                    onClick={() => switchMode("raw")}
-                  >
-                    Markdown
-                  </button>
+                  {item.path === HOME_PATH ? (
+                    // One mode, so one tab — kept rather than hidden so the row
+                    // still says what you are looking at.
+                    <button className="on" disabled>
+                      Page
+                    </button>
+                  ) : item.kind === "markdown" ? (
+                    <>
+                      <button
+                        className={mode === "wysiwyg" ? "on" : ""}
+                        onClick={() => switchMode("wysiwyg")}
+                      >
+                        Rich text
+                      </button>
+                      <button
+                        className={mode === "raw" ? "on" : ""}
+                        onClick={() => switchMode("raw")}
+                      >
+                        Source
+                      </button>
+                      <button
+                        className={mode === "preview" ? "on" : ""}
+                        onClick={() => switchMode("preview")}
+                      >
+                        Preview
+                      </button>
+                    </>
+                  ) : (
+                    <button className="on" disabled>
+                      YAML
+                    </button>
+                  )}
                 </div>
                 <button
                   className="save"
@@ -351,7 +660,29 @@ export function App() {
               </div>
 
               <div className="pane">
-                {mode === "wysiwyg" ? (
+                {mode === "home" ? (
+                  <Suspense
+                    fallback={<p className="empty">loading the home page…</p>}
+                  >
+                    <HomePreview
+                      frontmatter={homeFrontmatter}
+                      siteOrigin={siteOrigin}
+                      onChange={(k, v) =>
+                        setFmValues((cur) => ({ ...cur, [k]: v }))
+                      }
+                    />
+                  </Suspense>
+                ) : mode === "preview" && item.kind === "markdown" ? (
+                  <Suspense
+                    fallback={<p className="empty">rendering preview…</p>}
+                  >
+                    <Preview
+                      body={body}
+                      siteOrigin={siteOrigin}
+                      title={title}
+                    />
+                  </Suspense>
+                ) : mode === "wysiwyg" && item.kind === "markdown" ? (
                   <Wysiwyg
                     key={`${item.path}:${item.sha}:wysiwyg`}
                     ref={edRef}
@@ -363,6 +694,7 @@ export function App() {
                       key={`${item.path}:${item.sha}:raw`}
                       ref={edRef}
                       initial={body}
+                      language={item.kind === "yaml" ? "yaml" : "markdown"}
                     />
                   </Suspense>
                 )}

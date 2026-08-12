@@ -19,9 +19,8 @@ categories:
   - newbie-friendly
   - SV DSA
   - WG - Mutual Aid
-repeats:
-  freq: monthly
-  byday: 3SA
+recurrence:
+  rrule: FREQ=MONTHLY;BYDAY=3SA
 ---
 
 Join Silicon Valley DSA, South Bay Mutual Aid, Food Not Bombs San José, San José Clothing Swap, and Art Pocket SJ, for a really really free goods event in the San José Peace and Justice Center parking lot. We’ll have cleaning supplies, clothes, fresh produce, fire preparedness kits, menstrual products, zines, and more available so that people can take what they need, for free.

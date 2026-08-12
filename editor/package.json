@@ -1,0 +1,35 @@
+{
+  "name": "@svdsa/editor",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "deploy": "bun run build && wrangler deploy",
+    "typecheck": "tsc"
+  },
+  "dependencies": {
+    "@milkdown/crepe": "^7.21.3",
+    "@monaco-editor/react": "^4.7.0",
+    "gray-matter": "^4.0.3",
+    "js-yaml": "^4.1.0",
+    "monaco-editor": "^0.56.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "rehype-raw": "^7.0.0",
+    "rehype-stringify": "^10.0.1",
+    "remark-gfm": "^4.0.1",
+    "remark-parse": "^11.0.0",
+    "remark-rehype": "^11.1.2",
+    "unified": "^11.0.5"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.4",
+    "typescript": "^6.0.3",
+    "vite": "^8.1.2",
+    "wrangler": "^4.112.0"
+  }
+}

@@ -1,13 +1,11 @@
 ---
-id: 10002912
+id: 15161
 slug: food-not-bombs-san-jose-sunday-serve
-path: /event/food-not-bombs-san-jose-sunday-serve/2026-05-10/
+path: /event/food-not-bombs-san-jose-sunday-serve/2026-08-16/
 title: Food Not Bombs San José Sunday Serve
 start: '2026-05-10 14:00:00'
 end: '2026-05-10 15:30:00'
-allDay: false
 timezone: America/Los_Angeles
-isVirtual: false
 venue:
   name: St. James Park
   address: N. 2nd St.
@@ -15,10 +13,6 @@ venue:
   state: CA
   zip: '95112'
 organizer: Silicon Valley DSA
-categories:
-  - External
-  - newbie-friendly
-  - WG - Mutual Aid
 ---
 
 Join Food not Bombs San José in providing free food, hygiene supplies, fresh produce, and clothing to the community no questions asked.
@@ -39,6 +33,6 @@ There is street parking and parking garages close by at San Pedro
 
 Bus: 2nd & Santa Clara (72, 73), 1st & Santa Clara (72, 73)
 
-Light Rail: St. James Station – Blue Line South and Green Line North
+Light Rail: St. James Station - Blue Line South and Green Line North
 
-Train: San Jose Diridon Station – take Line 64A to Santa Clara & 2nd
+Train: San Jose Diridon Station - take Line 64A to Santa Clara & 2nd

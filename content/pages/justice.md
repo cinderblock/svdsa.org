@@ -3,7 +3,7 @@ id: 1648
 slug: justice
 path: /justice/
 title: Justice
-modified: '2020-10-23T11:32:00'
+modified: '2020-10-23 11:32:00'
 ---
 
 *The Justice Working Group was officially chartered on 7/14/2018.The Justice Working Group charter was updated on 8/16/2020.*
@@ -50,7 +50,7 @@ In order to build a more just and equal society, where opportunity is available 
 
 *   DSA Brake Light Clinics.
 *   Remove police from traffic enforcement, replacing them with an unarmed civilian force.
-*   Oppose local campaigns such as San Jose’s “Vision Zero” which increases police budgets and encourages over policing.
+*   Oppose local campaigns such as San Jose's "Vision Zero" which increases police budgets and encourages over policing.
 
 Using these initial strategies:
 

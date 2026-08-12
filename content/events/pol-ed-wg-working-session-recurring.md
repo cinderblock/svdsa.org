@@ -14,9 +14,8 @@ organizer: Silicon Valley DSA
 categories:
   - SV DSA
   - WG - Political Education
-repeats:
-  freq: monthly
-  byday: 3WE
+recurrence:
+  rrule: FREQ=MONTHLY;BYDAY=3WE
 ---
 
 This is our once monthly working session, where we collaborate on developing curriculum, curating educational content, building presentations, performing other tasks related to our strategic plan.

@@ -19,9 +19,8 @@ categories:
   - External
   - newbie-friendly
   - WG - Mutual Aid
-repeats:
-  freq: weekly
-  interval: 1
+recurrence:
+  rrule: FREQ=WEEKLY;BYDAY=SU
 ---
 
 Join Food not Bombs San José in providing free food, hygiene supplies, fresh produce, and clothing to the community no questions asked.

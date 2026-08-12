@@ -1,0 +1,14 @@
+# URL redirects. Every entry is a promise that an old address keeps working.
+#
+# `build-content.ts` turns this into `public/_redirects`, which Cloudflare's
+# static-asset router serves as a real 301 at the edge — verified, not assumed
+# (see the README). Nothing here is optional cleanup: the whole rebuild is
+# premised on old links continuing to resolve.
+#
+# The editor appends to this file automatically when someone renames a page, so
+# a rename can never quietly break an address that is already out in the world.
+#
+#   - from: /old-address/     the path that must keep working
+#     to:   /new-address/     where it goes now
+#     why:  renamed 2026-08   optional note, for whoever reads this in a year
+redirects: []

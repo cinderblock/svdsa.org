@@ -12,9 +12,8 @@ organizer: Silicon Valley DSA
 categories:
   - SV DSA
   - WG - Labor
-repeats:
-  freq: monthly
-  byday: 1TH
+recurrence:
+  rrule: FREQ=MONTHLY;BYDAY=1TH
 ---
 
 Join the Labor Working Group in organizing workers of Silicon Valley as we fight for the basic human dignity of all laborers! We will discuss the chapter’s involvement in local labor actions and our own programming. If you have topics you’d like to bring up, please share in the chapter Slack We meet on the first Thursday of every month. Our meetings are hybrid, taking place both on Zoom and at the San Jose Peace & Justice Center.

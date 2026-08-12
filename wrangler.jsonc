@@ -4,7 +4,13 @@
   // prerendered files in build/client from its edge. A Worker script can be
   // added later (e.g. a D1-backed events API) without changing hosting.
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "svdsa",
+  // Named `site` rather than `svdsa`: the account subdomain already says svdsa,
+  // so the hostname would otherwise stutter — site.cameron-test-svdsa.workers.dev.
+  "name": "site",
+  // Pinned deliberately. This login reaches three Cloudflare accounts, and with
+  // no account_id wrangler picks one — which is how a deploy silently lands in
+  // the wrong place. This is the DSA test account.
+  "account_id": "4ce5029d216dd48d4516b29665d12e5a",
   "compatibility_date": "2026-07-01",
   "assets": {
     "directory": "./build/client",

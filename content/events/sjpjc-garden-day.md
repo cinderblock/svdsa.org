@@ -19,9 +19,8 @@ categories:
   - newbie-friendly
   - SV DSA
   - WG - Mutual Aid
-repeats:
-  freq: weekly
-  interval: 1
+recurrence:
+  rrule: FREQ=WEEKLY;BYDAY=SA
 ---
 
 The Silicon Valley DSA Mutual Aid Working group, in association with San Jose Food Not Bombs and South Bay Mutual Aid, is hosting a garden and build day this Saturday at the San Jose Peace and Justice Center (SJPJC)! We will be moving soil, planting plants, garden maintenance, and finishing the drip irrigation! Be sure to bring gloves, a hat, earplugs, sunglasses, and sunscreen! If you have tools like a shovel, they will be needed!

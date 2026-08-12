@@ -16,14 +16,14 @@ flowchart TD
     HowEdit -->|"I know Markdown"| W1
     HowEdit -->|"I live in git"| G1[Clone the repo<br/>branch off <code>red</code>]
 
-    W1 --> W2["Pick a file → edit in<br/><b>Rich text</b> (WYSIWYG) or<br/><b>Markdown</b> (VS Code engine)"]
+    W1 --> W2["Pick a file → edit in<br/><b>Rich text</b> (WYSIWYG) or<br/><b>Source</b> (VS Code engine)"]
     W2 --> W3[Save draft<br/>auto-fixes style rules<br/>commits to <code>draft/you/red</code>]
     W3 --> W4[Preview link<br/>your own live copy of the site<br/>rebuilds ~1–2 min per save]
     W4 -->|more edits,<br/>any number of files| W2
     W4 --> W5[Publish → opens a PR]
 
     G1 --> G2["Edit content/*.md in your editor<br/>(bun run dev for live preview,<br/>bun run lint:content for style checks)"]
-    G2 --> G3[Push your branch<br/>every branch gets a preview at<br/><code>&lt;branch&gt;-svdsa.…workers.dev</code>]
+    G2 --> G3[Push your branch<br/>every branch gets a preview at<br/><code>&lt;branch&gt;-site.…workers.dev</code>]
     G3 --> G4[Open a PR to <code>red</code>]
 
     Code --> C1["app/ (React), styles, editor/<br/>theme experiments live on<br/><code>theme/*</code> branches"]
@@ -39,20 +39,38 @@ flowchart TD
 
 ## The rungs, in words
 
-| You are…                 | You use…                                                                                                                                                                     | Your safety net                                                                                                                         |
-| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| **WYSIWYG-only**         | [the editor](https://svdsa-edit.isozilla.workers.dev) in Rich text mode. No git, no Markdown, no accounts to create — sign in with whatever you have (Google, email OTP, …). | Nothing you do touches the live site. Saves go to your personal draft; Publish just _asks_ (opens a PR). Discard throws the draft away. |
-| **Markdown-comfortable** | the same editor, Markdown mode (the VS Code engine — find/replace, multi-cursor).                                                                                            | Same draft/PR flow. Modes toggle losslessly, use both.                                                                                  |
-| **Git-comfortable**      | a clone; edit `content/**/*.md` directly. One file per page/post/event; add a file to add content.                                                                           | Branch + PR. Every pushed branch gets its own full preview site.                                                                        |
-| **Developer**            | `app/` (React Router), `editor/`, `scripts/`. Theme experiments on `theme/*` branches.                                                                                       | Same PRs, plus typecheck/tests/lint in the repo.                                                                                        |
+| You are…                 | You use…                                                                                                                                                                         | Your safety net                                                                                                                         |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| **WYSIWYG-only**         | [the editor](https://edit.cameron-test-svdsa.workers.dev) in Rich text mode. No git, no Markdown, no accounts to create — sign in with whatever you have (Google, email OTP, …). | Nothing you do touches the live site. Saves go to your personal draft; Publish just _asks_ (opens a PR). Discard throws the draft away. |
+| **Markdown-comfortable** | the same editor, Source mode (the VS Code engine — find/replace, multi-cursor).                                                                                                  | Same draft/PR flow. Modes toggle losslessly, use both.                                                                                  |
+| **Git-comfortable**      | a clone; edit `content/**/*.md` directly. One file per page/post/event; add a file to add content.                                                                               | Branch + PR. Every pushed branch gets its own full preview site.                                                                        |
+| **Developer**            | `app/` (React Router), `editor/`, `scripts/`. Theme experiments on `theme/*` branches.                                                                                           | Same PRs, plus typecheck/tests/lint in the repo.                                                                                        |
+
+**Every branch is published as its own complete copy of the site**, at
+`<branch>-site.…workers.dev`. You don't have to work out that URL: the editor's
+**Branches** view (branch picker → _Browse all branches_, or `/?branches`)
+lists every branch with its preview link, what changed there last, how far it
+has drifted from `red`, and whether a PR is already open. That's how you show
+someone a design experiment or a draft without merging anything.
 
 Style rules (the San José é, inclusive language, …) live in
 `content/config/style-rules.json` and apply to **everyone the same way**: the
 editor auto-fixes what it can on every save and warns about the rest;
 git users run `bun run lint:content` (`--fix` to apply).
 
-Recurring events are ONE file with a `repeats:` rule (see
-`scripts/expand-recurring.ts`); don't create per-date copies.
+Recurring meetings are **one file** with a `recurrence:` rule — never per-date
+copies. To skip a date (holiday) add it to `exdate:`; to move one, add the new
+date to `rdate:` as well:
+
+```yaml
+recurrence:
+  rrule: FREQ=WEEKLY;INTERVAL=2;BYDAY=WE # every other Wednesday
+  exdate: ["2026-11-25"] # skipped
+  rdate: ["2026-11-18"] # met here instead
+```
+
+Members subscribed to the calendar get the change automatically — see
+`app/lib/recurrence.ts`.
 
 ## Merge rights
 
