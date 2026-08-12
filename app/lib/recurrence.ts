@@ -258,9 +258,15 @@ export function describeRecurrence(rec: Recurrence): string {
     if (p.interval === 2) return `Every other ${days || "week"}`;
     return `Every ${p.interval} weeks on ${days}`;
   }
-  const which = p.byday
-    .map((b) => (b.nth === -1 ? "last" : ORD[b.nth ?? 1]))
-    .join(" & ");
   const every = p.interval === 1 ? "monthly" : `every ${p.interval} months`;
-  return `${which} ${days} ${every}`;
+  const ordOf = (b: ParsedRRule["byday"][number]) =>
+    b.nth === -1 ? "last" : ORD[b.nth ?? 1];
+  // A rule like BYDAY=2WE,4WE names one weekday twice, so gather the ordinals
+  // and say the day once — "2nd & 4th Wednesday", not "…Wednesday & Wednesday".
+  const distinct = [...new Set(p.byday.map((b) => b.day))];
+  const which =
+    distinct.length === 1
+      ? `${p.byday.map(ordOf).join(" & ")} ${NAMES[distinct[0]]}`
+      : p.byday.map((b) => `${ordOf(b)} ${NAMES[b.day]}`).join(" & ");
+  return `${which} ${every}`;
 }

@@ -15,7 +15,7 @@ categories:
   - SV DSA
   - WG - Electoral
 recurrence:
-  rrule: FREQ=WEEKLY;INTERVAL=2;BYDAY=TH
+  rrule: FREQ=MONTHLY;BYDAY=2TH,4TH
   exdate:
     - '2026-11-05'
     - '2026-11-19'

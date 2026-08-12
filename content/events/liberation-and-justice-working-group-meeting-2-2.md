@@ -15,7 +15,7 @@ categories:
   - SV DSA
   - WG - Liberation and Justice
 recurrence:
-  rrule: FREQ=WEEKLY;INTERVAL=2;BYDAY=WE
+  rrule: FREQ=MONTHLY;BYDAY=2WE,4WE
   exdate:
     - '2026-10-07'
     - '2026-10-21'

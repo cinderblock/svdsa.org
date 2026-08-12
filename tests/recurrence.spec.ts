@@ -171,5 +171,14 @@ test.describe("recurrence extras", () => {
     expect(describeRecurrence({ rrule: "FREQ=MONTHLY;BYDAY=-1SU" })).toBe(
       "last Sunday monthly",
     );
+    // Several working groups meet twice a month on the same weekday, which
+    // names that weekday twice in the rule. Say it once.
+    expect(describeRecurrence({ rrule: "FREQ=MONTHLY;BYDAY=2WE,4WE" })).toBe(
+      "2nd & 4th Wednesday monthly",
+    );
+    // ...but when the weekdays genuinely differ, each keeps its own ordinal.
+    expect(describeRecurrence({ rrule: "FREQ=MONTHLY;BYDAY=1MO,3TH" })).toBe(
+      "1st Monday & 3rd Thursday monthly",
+    );
   });
 });

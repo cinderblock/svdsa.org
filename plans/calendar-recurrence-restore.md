@@ -81,17 +81,58 @@ FREQ=MONTHLY;BYDAY=2WE,4WE
   → 2026-08-12 08-26 09-09 09-23 10-14 10-28 11-11 11-25 12-09 12-23
 ```
 
-Two caveats before changing anything:
+### RESOLVED — the published instance dates settle it
 
-1. **Do not assume WordPress is right.** Its rules carry `EventStartDate`s from
-   2025 and `until 2027-05-01`, while our files carry 2026 start dates — the two
-   have been maintained separately, so a working group may genuinely have moved
-   to biweekly and WordPress is the stale one. This needs a human who knows when
-   these groups actually meet. It is a question for the chapter, not a silent fix.
-2. `describeRecurrence()` renders a multi-nth rule as
-   "2nd & 4th Wednesday **& Wednesday** monthly" — a display bug that would show
-   on the series page the moment these rules are corrected. Fix it in the same
-   pass.
+The first draft of this section said "do not assume WordPress is right, a
+working group may genuinely have moved to biweekly" and left it as a question
+for the chapter. A second, independent source answers it without needing anyone:
+**the old REST import expanded these series into dated instance files**, and
+those are what the chapter's members actually saw. They are still in git at
+`3184766`.
+
+```
+electoral                2025-12-11=2TH 2025-12-25=4TH 2026-01-08=2TH 2026-01-22=4TH
+                         2026-02-12=2TH 2026-02-26=4TH 2026-03-12=2TH 2026-03-26=4TH
+                         2026-04-09=2TH 2026-04-23=4TH 2026-05-14=2TH 2026-05-28=4TH
+                         2026-06-11=2TH 2026-07-09=2TH 2026-07-23=4TH
+    gaps (days):         14 14 14 21 14 14 14 14 14 21 14 14 28 14   ← NOT biweekly
+international-solidarity 2026-06-16=3TU 2026-07-07=1TU 2026-07-21=3TU
+    gaps (days):         21 14                                        ← NOT biweekly
+liberation-and-justice   2026-07-08=2WE 2026-07-22=4WE
+labor (the control)      2026-05-07=1TH 2026-06-04=1TH 2026-07-02=1TH  ← matches ours
+```
+
+Fifteen electoral instances, every one a 2nd or 4th Thursday, with 21- and
+28-day gaps that `INTERVAL=2` **cannot produce**. The `labor` control returns
+exactly the rule already in our file, which is what validates reading the dates
+this way. Two independent sources — the decoded `_EventRecurrence` and the
+published instances — agree, so this is settled, not a judgement call.
+
+**Fixed.** All three now carry nth-monthly rules, and each file's existing
+`start:` was already a valid occurrence of its corrected rule, so no first date
+moved:
+
+| series                             | was                          | now                     |
+| ---------------------------------- | ---------------------------- | ----------------------- |
+| `electoral-wg-meeting-recurring-2` | `WEEKLY;INTERVAL=2;BYDAY=TH` | `MONTHLY;BYDAY=2TH,4TH` |
+| `international-solidarity-…`       | `WEEKLY;INTERVAL=2;BYDAY=TU` | `MONTHLY;BYDAY=1TU,3TU` |
+| `liberation-and-justice-…`         | `WEEKLY;INTERVAL=2;BYDAY=WE` | `MONTHLY;BYDAY=2WE,4WE` |
+
+`describeRecurrence()` was fixed in the same pass — it rendered a multi-nth rule
+as "2nd & 4th Wednesday **& Wednesday** monthly", since the weekday is named once
+per ordinal in `BYDAY=2WE,4WE`. It now collapses a shared weekday ("2nd & 4th
+Wednesday monthly") while still pairing genuinely different ones ("1st Monday &
+3rd Thursday monthly"). Both spellings are pinned in `tests/recurrence.spec.ts`.
+
+Two things deliberately NOT carried over from WordPress:
+
+- **`UNTIL`.** WordPress ends these series on `2027-05-01`. Our files have no
+  end, and that is the point — the README's "the calendar can't go stale"
+  property depends on subscriptions generating occurrences indefinitely rather
+  than expiring at a horizon. Importing the `UNTIL` faithfully would break it.
+- **`electoral`'s two single-date exclusions** (2025-09-22, 2025-11-17). Both are
+  long past and the series now starts 2026-08-13, so they can never appear.
+  `exdate` is available if they are ever wanted.
 
 This also reframes the import question: a faithful importer would not merely be
 idempotent, it would **correct** three wrong rules.
@@ -196,7 +237,7 @@ collision assertions never run. Lower the guard to `300`.
 - [x] Committed on `red`.
 - [x] Deleted the REST importer and `bun run migrate` (`fb34528`) — see below.
 - [ ] Not pushed. `origin/red` is still at `3184766`; pushing is yours to do.
-- [ ] Three series disagree with WordPress — needs a human decision, see above.
+- [x] Three series that disagreed with WordPress — corrected, proof in the section above.
 
 **A peer session is actively working in this same worktree** (as of 2026-08-11
 13:27: `tests/home-editor.spec.ts`, `app/components/HomeSlot.tsx`,

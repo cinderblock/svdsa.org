@@ -15,7 +15,7 @@ categories:
   - SV DSA
   - WG - International Solidarity
 recurrence:
-  rrule: FREQ=WEEKLY;INTERVAL=2;BYDAY=TU
+  rrule: FREQ=MONTHLY;BYDAY=1TU,3TU
   exdate:
     - '2026-09-29'
     - '2026-10-13'
