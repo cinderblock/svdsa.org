@@ -1,23 +1,17 @@
 ---
-id: 10001658
+id: 13786
 slug: admin-committee-meeting-recurring
-path: /event/admin-committee-meeting-recurring/2025-09-08/
+path: /event/admin-committee-meeting-recurring/2025-12-29/
 title: Administrative Committee Meeting
 start: '2025-09-08 19:00:00'
 end: '2025-09-08 20:00:00'
-allDay: false
 timezone: America/Los_Angeles
 website: 'https://us02web.zoom.us/j/81176574306?pwd=srCbVnSdST6bb9YpeJrtKVrM2EjaNL.1'
-isVirtual: false
 venue:
   name: Zoom
-organizer: SV DSA – Committee – Admin
-categories:
-  - SV DSA
+organizer: SV DSA - Committee - Admin
 ---
 
-## ![](https://siliconvalleydsa.org/wp-content/uploads/2020/03/sv_dsa_logo_text_red.png)
+## ![](/media/2020/03/sv_dsa_logo_text_red.png)
 
-A lot of work goes into keeping our chapter running behind the scenes. We need to communicate with members through our newsletters and social media, and perform many necessary administrative tasks. The Administrative Committee will have a meeting that is open to all interested in helping keep the Chapter running smoothly.
-
-Register for the Zoom here: [https://us02web.zoom.us/j/81176574306?pwd=srCbVnSdST6bb9YpeJrtKVrM2EjaNL.1](https://us02web.zoom.us/j/81176574306?pwd=srCbVnSdST6bb9YpeJrtKVrM2EjaNL.1)
+A lot of work goes into keeping our chapter running behind the scenes. We need to communicate with members through our newsletters and social media, and perform many necessary administrative tasks. The Administrative Committee will have a meeting that is open to all interested in helping keep the Chapter running smoothly. Register for the Zoom here: [https://us02web.zoom.us/j/81176574306?pwd=srCbVnSdST6bb9YpeJrtKVrM2EjaNL.1](https://us02web.zoom.us/j/81176574306?pwd=srCbVnSdST6bb9YpeJrtKVrM2EjaNL.1)

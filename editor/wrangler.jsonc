@@ -2,8 +2,12 @@
   // The WYSIWYG editor — a SEPARATE Worker from production `svdsa` (which stays
   // pure static). Deployed to its own domain behind Cloudflare Access.
   // See plans/svdsa-wysiwyg-phase0.md.
-  "$schema": "../node_modules/wrangler/config-schema.json",
-  "name": "svdsa-edit",
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  // Named `edit` rather than `svdsa-edit` — the account subdomain already says
+  // svdsa, so this reads edit.cameron-test-svdsa.workers.dev.
+  "name": "edit",
+  // Pinned so a deploy can't land in the wrong account. DSA test account.
+  "account_id": "4ce5029d216dd48d4516b29665d12e5a",
   "main": "src/index.ts",
   "compatibility_date": "2026-07-01",
   // gray-matter (frontmatter serialize) needs Node Buffer at runtime.
@@ -20,13 +24,27 @@
   // by `bun run setup:editor`. The ONLY secret is GH_PRIVATE_KEY (and, for the
   // GitLab host, GITLAB_TOKEN), set via `wrangler secret put` — never committed.
   "vars": {
+    // REQUIRE_ACCESS is deliberately absent: an unset variable means ENFORCE,
+    // so the insecure state is the one that has to be written down. Do not add
+    // it back to "silence" a lockout — a lockout means the two CF_ACCESS_*
+    // values below are wrong, and disabling the check hands write access to
+    // the repo to anyone who can reach the Worker.
     "GIT_HOST": "github",
     "EDITOR_DEFAULT_BASE": "red",
+    // The production site Worker's name on this account. Used to derive the
+    // live-site and per-branch preview URLs from this Worker's own hostname, so
+    // moving accounts is a config change rather than a code change.
+    "SITE_WORKER": "site",
     "GH_REPO": "cinderblock/svdsa.org",
     "GH_APP_ID": "4368113",
     "GH_INSTALLATION_ID": "148335084",
     "GITLAB_PROJECT_ID": "",
-    "CF_ACCESS_TEAM_DOMAIN": "",
-    "CF_ACCESS_AUD": "",
+    // Cloudflare Access, on the SVDSA *test* account. Both change when the
+    // chapter approves the move to their own account — re-run setup:editor
+    // there rather than hand-editing. Team domain fetches the JWT signing
+    // keys; AUD is this application's audience tag, and is what stops a token
+    // minted for a DIFFERENT app on the same team from opening the editor.
+    "CF_ACCESS_TEAM_DOMAIN": "calm-glade-6362.cloudflareaccess.com",
+    "CF_ACCESS_AUD": "0a33d922ce6cbb3f5edc50609af349f97838e7309c3595e4209c52315a949c42",
   },
 }

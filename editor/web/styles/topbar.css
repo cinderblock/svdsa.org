@@ -1,0 +1,54 @@
+/*
+ * The application's top bar — brand, branch picker, + New, identity.
+ */
+
+/*
+ * Scoped to the app's own top bar. As a bare `header` this styled EVERY
+ * <header> in the app — which painted the branch browser's heading red on red
+ * and made its subtitle unreadable.
+ */
+#root > header {
+  background: var(--bar);
+  color: var(--ink);
+  border-bottom: 1px solid var(--line);
+  padding: 0.6rem 1rem;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+  flex: 0 0 auto;
+}
+#root > header .brand {
+  font-size: 1.1rem;
+  color: var(--red);
+}
+#root > header .who {
+  margin-left: auto;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+#root > header .primary {
+  font: inherit;
+  font-size: 0.85rem;
+  background: var(--red);
+  color: #fff;
+  border: 0;
+  border-radius: 6px;
+  padding: 0.3rem 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+#root > header .primary:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+#root > header .ghost {
+  font: inherit;
+  font-size: 0.85rem;
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0.2rem 0.6rem;
+  cursor: pointer;
+}

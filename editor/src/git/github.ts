@@ -7,6 +7,18 @@
  * key on the way into the secret.
  */
 
+import { isEditablePath } from "../content/serialize";
+
+/**
+ * The file changed under the editor between load and save. Carries the sha that
+ * is actually there now, so the UI can offer to show the difference.
+ */
+export class ConflictError extends Error {
+  constructor(readonly currentSha: string | undefined) {
+    super("file changed since it was opened");
+  }
+}
+
 interface GhEnv {
   GH_REPO?: string; // "owner/repo"
   GH_APP_ID?: string;
@@ -17,6 +29,32 @@ interface GhEnv {
 export interface Author {
   name: string;
   email: string;
+}
+
+/** A pull request as the branch browser shows it. */
+export interface BranchPull {
+  number: number;
+  url: string;
+  title: string;
+  state: string;
+  isDraft: boolean;
+  baseRefName: string;
+}
+
+/** Everything the branch browser needs to describe one branch. */
+export interface BranchDetail {
+  name: string;
+  /** Null only for the exotic case of a branch pointing at a non-commit. */
+  commit: {
+    oid: string;
+    subject: string;
+    committedDate: string;
+    author: string;
+  } | null;
+  /** Commits this branch has that the comparison branch doesn't, and vice versa. */
+  ahead: number;
+  behind: number;
+  pull: BranchPull | null;
 }
 
 const API = "https://api.github.com";
@@ -115,13 +153,22 @@ async function installationToken(env: GhEnv): Promise<string> {
 
 // ---- client -----------------------------------------------------------------
 
+/** What the file browser shows for one content item. */
+export interface ItemMeta {
+  title?: string;
+  /** The page's URL on the live site, from frontmatter `path`. */
+  url?: string;
+  /** Event start, post date, or last-modified — whichever the item has. */
+  date?: string;
+  /** True for a recurring event series. */
+  recurs?: boolean;
+}
+
 export interface RawItem {
   path: string;
   sha: string; // blob sha at the read ref (for optimistic concurrency)
   text: string; // raw .md (frontmatter + body)
 }
-
-const CONTENT_RE = /^content\/(pages|posts|events|config)\/.+\.md$/;
 
 /** A GitHub client bound to one installation token (mint once per request). */
 export async function createGitHub(env: GhEnv) {
@@ -213,6 +260,120 @@ export async function createGitHub(env: GhEnv) {
       }[];
       return branches.map((b) => b.name);
     },
+    /**
+     * Every branch with the facts a human needs to choose between them — last
+     * commit, divergence from `compareTo`, open PR — in ONE GraphQL round-trip.
+     * (The REST equivalent is a compare and a PR search per branch.)
+     *
+     * The divergence numbers arrive INVERTED. `Ref.compare` treats the ref it
+     * hangs off as the *base*, so asking each branch to compare against
+     * production yields `aheadBy` = how far production has moved past this
+     * branch, i.e. this branch's "behind". Comparing the other way round would
+     * mean knowing the branch names before building the query — a second
+     * round-trip — so we accept the twist and swap it here.
+     */
+    async branchDetails(compareTo: string): Promise<BranchDetail[]> {
+      interface GqlCommit {
+        oid: string;
+        messageHeadline: string;
+        committedDate: string;
+        author?: { name?: string; user?: { login?: string } | null } | null;
+        associatedPullRequests?: {
+          nodes: (BranchPull & { headRefName: string })[];
+        };
+      }
+      const data = await graphql<{
+        repository: {
+          refs: {
+            nodes: {
+              name: string;
+              target: GqlCommit | null;
+              compare: { aheadBy: number; behindBy: number } | null;
+            }[];
+          };
+        };
+      }>(
+        `
+          query ($owner: String!, $repo: String!, $head: String!) {
+            repository(owner: $owner, name: $repo) {
+              refs(
+                refPrefix: "refs/heads/"
+                first: 100
+                orderBy: { field: TAG_COMMIT_DATE, direction: DESC }
+              ) {
+                nodes {
+                  name
+                  target {
+                    ... on Commit {
+                      oid
+                      messageHeadline
+                      committedDate
+                      author {
+                        name
+                        user {
+                          login
+                        }
+                      }
+                      associatedPullRequests(
+                        first: 5
+                        orderBy: { field: UPDATED_AT, direction: DESC }
+                      ) {
+                        nodes {
+                          number
+                          url
+                          title
+                          state
+                          isDraft
+                          baseRefName
+                          headRefName
+                        }
+                      }
+                    }
+                  }
+                  compare(headRef: $head) {
+                    aheadBy
+                    behindBy
+                  }
+                }
+              }
+            }
+          }
+        `,
+        { owner, repo, head: compareTo },
+      );
+
+      return data.repository.refs.nodes.map((ref) => {
+        const c = ref.target;
+        const pulls = c?.associatedPullRequests?.nodes ?? [];
+        // A commit can carry several PRs (it may have been merged onward).
+        // Prefer one still open FROM this branch; otherwise the most recent.
+        const pull =
+          pulls.find((p) => p.state === "OPEN" && p.headRefName === ref.name) ??
+          pulls.find((p) => p.headRefName === ref.name) ??
+          null;
+        return {
+          name: ref.name,
+          commit: c
+            ? {
+                oid: c.oid,
+                subject: c.messageHeadline,
+                committedDate: c.committedDate,
+                author: c.author?.user?.login || c.author?.name || "",
+              }
+            : null,
+          ahead: ref.compare?.behindBy ?? 0,
+          behind: ref.compare?.aheadBy ?? 0,
+          pull: pull && {
+            number: pull.number,
+            url: pull.url,
+            title: pull.title,
+            state: pull.state,
+            isDraft: pull.isDraft,
+            baseRefName: pull.baseRefName,
+          },
+        };
+      });
+    },
     /** Editable content files (content/{pages,posts,events,config}/*.md) at ref. */
     async listContent(ref: string): Promise<string[]> {
       const sha = await branchSha(ref);
@@ -220,7 +381,7 @@ export async function createGitHub(env: GhEnv) {
         tree: { path: string; type: string }[];
       };
       return t.tree
-        .filter((n) => n.type === "blob" && CONTENT_RE.test(n.path))
+        .filter((n) => n.type === "blob" && isEditablePath(n.path))
         .map((n) => n.path)
         .sort();
     },
@@ -240,12 +401,16 @@ export async function createGitHub(env: GhEnv) {
         body: JSON.stringify({ ref: `refs/heads/${branch}`, sha }),
       });
     },
-    /** Frontmatter titles for every .md directly inside `dir` at `ref` — ONE
-     * GraphQL round-trip for the whole directory (vs N Contents calls). */
-    async titlesForDir(
+    /**
+     * Frontmatter metadata for every .md directly inside `dir` at `ref` — ONE
+     * GraphQL round-trip for the whole directory (vs N Contents calls). Returns
+     * what the file browser needs to show and sort a useful list: the title, a
+     * date, and the page's URL on the site.
+     */
+    async metaForDir(
       ref: string,
       dir: string,
-    ): Promise<Record<string, string>> {
+    ): Promise<Record<string, ItemMeta>> {
       const data = await graphql<{
         repository: {
           object: {
@@ -278,23 +443,35 @@ export async function createGitHub(env: GhEnv) {
         `,
         { owner, repo, expr: `${ref}:${dir}` },
       );
-      const titles: Record<string, string> = {};
+      const out: Record<string, ItemMeta> = {};
       for (const e of data.repository.object?.entries ?? []) {
-        if (e.type !== "blob" || !e.name.endsWith(".md")) continue;
+        if (
+          e.type !== "blob" ||
+          !(e.name.endsWith(".md") || e.name.endsWith(".yaml"))
+        )
+          continue;
         const text = e.object?.text ?? "";
         const fmEnd = text.indexOf("\n---", 3);
-        const fm = fmEnd === -1 ? text.slice(0, 2000) : text.slice(0, fmEnd);
-        const m = fm.match(/^title:\s*(.*)$/m);
-        if (!m) continue;
-        let t = m[1].trim();
-        if (
-          (t.startsWith("'") && t.endsWith("'")) ||
-          (t.startsWith('"') && t.endsWith('"'))
-        )
-          t = t.slice(1, -1).replace(/''/g, "'");
-        titles[`${dir}/${e.name}`] = t;
+        const fm = fmEnd === -1 ? text.slice(0, 4000) : text.slice(0, fmEnd);
+        const field = (name: string) => {
+          const m = fm.match(new RegExp(`^${name}:\\s*(.*)$`, "m"));
+          if (!m) return undefined;
+          let v = m[1].trim();
+          if (
+            (v.startsWith("'") && v.endsWith("'")) ||
+            (v.startsWith('"') && v.endsWith('"'))
+          )
+            v = v.slice(1, -1).replace(/''/g, "'");
+          return v || undefined;
+        };
+        out[`${dir}/${e.name}`] = {
+          title: field("title"),
+          url: field("path"),
+          date: field("start") ?? field("date") ?? field("modified"),
+          recurs: /^recurrence:/m.test(fm),
+        };
       }
-      return titles;
+      return out;
     },
     async deleteBranch(branch: string): Promise<void> {
       await api(`${base}/git/refs/heads/${encPath(branch)}`, {
@@ -353,15 +530,31 @@ export async function createGitHub(env: GhEnv) {
         throw e;
       }
     },
-    /** Commit `text` to `path` on `branch`, authored by the editor. */
+    /** Blob sha of `path` at `ref`, or undefined if it isn't there. */
+    fileSha,
+    /**
+     * Commit `text` to `path` on `branch`, authored by the editor.
+     *
+     * `expectedSha` is the blob sha the editor loaded. Passing it makes this an
+     * optimistic-concurrency write: if the file has moved on since (the same
+     * person editing in two tabs, or a stale tab left open across a publish),
+     * the write is REFUSED rather than silently overwriting the newer copy.
+     * Pass `null` to assert the file does not exist yet (a create).
+     */
     async commit(args: {
       branch: string;
       path: string;
       text: string;
       message: string;
       author: Author;
-    }): Promise<{ commitSha: string }> {
+      expectedSha?: string | null;
+    }): Promise<{ commitSha: string; sha: string }> {
       const sha = await fileSha(args.path, args.branch);
+      if (
+        args.expectedSha !== undefined &&
+        sha !== (args.expectedSha ?? undefined)
+      )
+        throw new ConflictError(sha);
       const r = (await api(`${base}/contents/${encPath(args.path)}`, {
         method: "PUT",
         body: JSON.stringify({
@@ -371,8 +564,55 @@ export async function createGitHub(env: GhEnv) {
           sha,
           author: args.author,
         }),
-      })) as { commit: { sha: string } };
-      return { commitSha: r.commit.sha };
+      })) as { commit: { sha: string }; content: { sha: string } };
+      return { commitSha: r.commit.sha, sha: r.content.sha };
+    },
+    /**
+     * Commit several file changes as ONE commit (`text: null` deletes).
+     *
+     * Rename needs this. Writing the new file, deleting the old one, and
+     * recording the redirect are three edits that must land together — done as
+     * separate Contents-API calls, an interruption between them leaves the page
+     * at two addresses, or at none, or live with no redirect behind it.
+     */
+    async commitTree(args: {
+      branch: string;
+      message: string;
+      author: Author;
+      changes: { path: string; text: string | null }[];
+    }): Promise<{ commitSha: string }> {
+      const parent = await branchSha(args.branch);
+      const head = (await api(`${base}/git/commits/${parent}`)) as {
+        tree: { sha: string };
+      };
+      const tree = (await api(`${base}/git/trees`, {
+        method: "POST",
+        body: JSON.stringify({
+          base_tree: head.tree.sha,
+          tree: args.changes.map((c) => ({
+            path: c.path,
+            mode: "100644",
+            type: "blob",
+            // A null sha against an existing path is how the Git Data API
+            // expresses "remove this entry".
+            ...(c.text === null ? { sha: null } : { content: c.text }),
+          })),
+        }),
+      })) as { sha: string };
+      const created = (await api(`${base}/git/commits`, {
+        method: "POST",
+        body: JSON.stringify({
+          message: args.message,
+          tree: tree.sha,
+          parents: [parent],
+          author: args.author,
+        }),
+      })) as { sha: string };
+      await api(`${base}/git/refs/heads/${encPath(args.branch)}`, {
+        method: "PATCH",
+        body: JSON.stringify({ sha: created.sha }),
+      });
+      return { commitSha: created.sha };
     },
   };
 }

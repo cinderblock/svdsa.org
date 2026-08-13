@@ -1,5 +1,9 @@
 {
   "include": ["**/*.ts", "**/*.tsx", ".react-router/types/**/*"],
+  // The editor is its own workspace with its own tsconfig (browser + Worker
+  // libs, not the site's). `bun run typecheck` runs both. Files under editor/
+  // that the tests import are still checked — as imports, under these options.
+  "exclude": ["editor", "node_modules", "build"],
   "compilerOptions": {
     "lib": ["DOM", "DOM.Iterable", "ES2022"],
     "types": ["vite/client"],

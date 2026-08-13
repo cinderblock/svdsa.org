@@ -2,6 +2,8 @@ import type { MetaFunction } from "react-router";
 import { Link, useLocation } from "react-router";
 import { getEvent } from "~/lib/events";
 import { longDate, time } from "~/lib/format";
+import { describeRecurrence } from "~/lib/recurrence";
+import { useNow } from "~/lib/useNow";
 import { Prose } from "~/components/Prose";
 import { SITE } from "~/lib/site";
 
@@ -21,6 +23,32 @@ export const meta: MetaFunction = ({ location }) => {
   ];
 };
 
+/** '2026-08-15 14:00:00' → '20260815T140000' (local wall clock, for Google). */
+const stamp = (s: string) =>
+  s.slice(0, 19).replace(/[-:]/g, "").replace(" ", "T");
+
+/** The prerendered per-event .ics: /event/mawg/2026-07-28/ → mawg-2026-07-28. */
+const icsStem = (path: string) =>
+  path
+    .replace(/^\/event\//, "")
+    .replace(/\/$/, "")
+    .replace(/\//g, "-");
+
+function googleTemplate(
+  ev: NonNullable<ReturnType<typeof getEvent>>,
+  where: string,
+): string {
+  const p = new URLSearchParams({
+    action: "TEMPLATE",
+    text: ev.title,
+    dates: `${stamp(ev.start)}/${stamp(ev.end || ev.start)}`,
+    ctz: ev.timezone || "America/Los_Angeles",
+    details: ev.descriptionHtml.replace(/<[^>]*>/g, "").slice(0, 900),
+    location: where,
+  });
+  return `https://calendar.google.com/calendar/render?${p}`;
+}
+
 function locationLabel(ev: NonNullable<ReturnType<typeof getEvent>>): string {
   if (ev.isVirtual || ev.venue?.name === "Zoom") return "Online";
   if (!ev.venue) return "Location TBA";
@@ -30,7 +58,10 @@ function locationLabel(ev: NonNullable<ReturnType<typeof getEvent>>): string {
 
 export default function Event() {
   const { pathname } = useLocation();
-  const ev = getEvent(pathname);
+  const now = useNow();
+  // Resolve against the client's date once hydrated, so a series page shows the
+  // genuinely-next occurrence rather than the one that was next at build time.
+  const ev = getEvent(pathname, now?.toISOString().slice(0, 10));
 
   if (!ev) {
     return (
@@ -76,6 +107,11 @@ export default function Event() {
                 : `${time(ev.start)} – ${time(ev.end)}`}{" "}
               <span className="muted">Pacific</span>
             </p>
+            {ev.recurrence && (
+              <p className="muted" style={{ marginTop: "0.35rem" }}>
+                🔁 {describeRecurrence(ev.recurrence)}
+              </p>
+            )}
           </div>
           <div>
             <h4>Where</h4>
@@ -98,18 +134,53 @@ export default function Event() {
           )}
         </div>
 
-        {registerLink && (
-          <p style={{ margin: "1.5rem 0" }}>
+        <p
+          style={{
+            margin: "1.5rem 0",
+            display: "flex",
+            gap: "0.75rem",
+            flexWrap: "wrap",
+            alignItems: "center",
+          }}
+        >
+          {registerLink && (
             <a className="btn btn-primary" href={registerLink}>
               {online ? "Join / register" : "RSVP"}
             </a>
-          </p>
-        )}
+          )}
+          <a
+            className="btn"
+            href={`/calendar/event/${icsStem(ev.path)}.ics`}
+            download
+          >
+            Add to calendar
+          </a>
+          <a
+            href={googleTemplate(ev, online ? "Online" : locationLabel(ev))}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Google Calendar
+          </a>
+        </p>
 
         {ev.descriptionHtml ? (
           <Prose html={ev.descriptionHtml} />
         ) : (
           <p className="muted">No description provided.</p>
+        )}
+
+        {ev.upcomingDates && ev.upcomingDates.length > 1 && (
+          <section style={{ marginTop: "2rem" }}>
+            <h2 style={{ fontSize: "1.1rem" }}>Upcoming dates</h2>
+            <ul className="occurrences">
+              {ev.upcomingDates.map((d) => (
+                <li key={d}>
+                  <Link to={`${ev.path}${d}/`}>{longDate(d)}</Link>
+                </li>
+              ))}
+            </ul>
+          </section>
         )}
 
         <div style={{ margin: "1.5rem 0" }}>

@@ -14,9 +14,8 @@ organizer: Silicon Valley DSA
 categories:
   - Committee - Communications
   - SV DSA
-repeats:
-  freq: weekly
-  interval: 2
+recurrence:
+  rrule: FREQ=WEEKLY;INTERVAL=2;BYDAY=MO
 ---
 
 <span style="font-size: 16px;">A lot of work goes into keeping our chapter running behind the scenes. The Comms Committee focuses on outreach and communication, including the monthly newsletter and social media acounts. Please feel free to join and learn about what it takes to reach out to our community.</span>

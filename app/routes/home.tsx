@@ -1,8 +1,12 @@
 import type { MetaFunction } from "react-router";
 import { Link } from "react-router";
-import { postsIndex, upcomingEvents } from "~/lib/data";
-import { dateParts, isUpcoming, shortDate, time } from "~/lib/format";
+import { expandEvents, postsIndex, upcomingEvents } from "~/lib/data";
+import { isUpcoming, shortDate } from "~/lib/format";
 import { useNow } from "~/lib/useNow";
+import { EventCard } from "~/components/EventCard";
+// Every word on this page is a <Slot>, so the browser editor can render this
+// very component with live values and make each one editable in place.
+import { Slot } from "~/components/HomeSlot";
 import { CHAPTER_PHOTOS, EXTERNAL, SITE, WORKING_GROUPS } from "~/lib/site";
 
 export const meta: MetaFunction = () => {
@@ -23,7 +27,9 @@ export default function Home() {
   // hydration (now === null) render the build snapshot.
   const nextEvents = (
     now
-      ? upcomingEvents.filter((e) => isUpcoming(e.start, now))
+      ? expandEvents(now.toISOString().slice(0, 10), 120).filter((e) =>
+          isUpcoming(e.start, now),
+        )
       : upcomingEvents
   ).slice(0, 4);
   const latest = postsIndex.slice(0, 3);
@@ -33,27 +39,31 @@ export default function Home() {
       <section className="hero">
         <div className="container hero__grid">
           <div>
-            <p className="kicker">Silicon Valley · South Bay</p>
-            <h1>
-              Building working-class power,
-              <br />
-              for the many — not the few.
+            <p className="kicker">
+              <Slot k="kicker" />
+            </p>
+            {/* Two deliberate lines. Spans (not <br/>) so each clause is its
+                own block and can balance its own wrap on narrow screens. */}
+            <h1 className="hero__title">
+              <span>
+                <Slot k="headline" />
+              </span>
+              <span>
+                <Slot k="headlineTwo" />
+              </span>
             </h1>
             <p className="lead">
-              We're not a political party — we're a community building
-              working-class power while fighting for a radically equitable
-              society. DSA is the largest socialist organization in America,
-              with 100,000+ members nationwide.
+              <Slot k="lead" />
             </p>
             <div className="hero__actions">
               <Link className="btn btn-primary" to="/join/">
-                Join us
+                <Slot k="ctaPrimary" />
               </Link>
               <Link className="btn btn-outline" to="/calendar">
-                See upcoming events
+                <Slot k="ctaEvents" />
               </Link>
               <a className="btn btn-outline" href={EXTERNAL.donate}>
-                Donate
+                <Slot k="ctaDonate" />
               </a>
             </div>
           </div>
@@ -81,7 +91,9 @@ export default function Home() {
         <section className="section">
           <div className="container">
             <div className="section__head">
-              <h2>In the streets</h2>
+              <h2>
+                <Slot k="photosHeading" />
+              </h2>
             </div>
             <div className="photo-strip">
               {CHAPTER_PHOTOS.map((p) => (
@@ -99,36 +111,15 @@ export default function Home() {
       <section className="section">
         <div className="container">
           <div className="section__head">
-            <h2>Upcoming events</h2>
+            <h2>
+              <Slot k="eventsHeading" />
+            </h2>
             <Link to="/calendar">Full calendar →</Link>
           </div>
           <div className="stack">
-            {nextEvents.map((e) => {
-              const { month, day } = dateParts(e.start);
-              return (
-                <Link className="event-row" key={e.id} to={e.path}>
-                  <div className="event-row__date">
-                    <div className="m">{month}</div>
-                    <div className="d">{day}</div>
-                    <div className="t">
-                      {e.allDay ? "all day" : time(e.start)}
-                    </div>
-                  </div>
-                  <div>
-                    <h3>{e.title}</h3>
-                    <p className="where">
-                      {e.isVirtual || e.venue === "Zoom" ? "🖥 Online" : "📍 "}
-                      {e.venue && e.venue !== "Zoom" ? e.venue : ""}
-                    </p>
-                    {e.categories.slice(0, 2).map((c) => (
-                      <span className="tag" key={c}>
-                        {c}
-                      </span>
-                    ))}
-                  </div>
-                </Link>
-              );
-            })}
+            {nextEvents.map((e) => (
+              <EventCard key={e.id} e={e} compact />
+            ))}
           </div>
         </div>
       </section>
@@ -137,15 +128,16 @@ export default function Home() {
       <section className="section section--alt">
         <div className="container">
           <div className="section__head">
-            <h2>Where the work happens</h2>
+            <h2>
+              <Slot k="groupsHeading" />
+            </h2>
             <Link to="/about/">About the chapter →</Link>
           </div>
           <p
             className="muted"
             style={{ maxWidth: "44rem", marginTop: "-0.75rem" }}
           >
-            Members organize through working groups. Jump in wherever your
-            energy is — no experience required.
+            <Slot k="groupsIntro" />
           </p>
           <div className="grid grid--cards" style={{ marginTop: "1.5rem" }}>
             {WORKING_GROUPS.map((w) => (
@@ -155,7 +147,14 @@ export default function Home() {
                 className="card"
                 style={{ textDecoration: "none" }}
               >
-                <h3>{w.label}</h3>
+                <h3>
+                  {w.icon && (
+                    <span className="card__icon" aria-hidden="true">
+                      {w.icon}
+                    </span>
+                  )}
+                  {w.label}
+                </h3>
                 <span className="card__more">Learn more →</span>
               </Link>
             ))}
@@ -167,7 +166,9 @@ export default function Home() {
       <section className="section">
         <div className="container">
           <div className="section__head">
-            <h2>Latest dispatches</h2>
+            <h2>
+              <Slot k="dispatchesHeading" />
+            </h2>
             <Link to="/blog">All posts →</Link>
           </div>
           <div className="grid grid--cards">
@@ -191,13 +192,14 @@ export default function Home() {
       {/* Join CTA */}
       <section className="section section--alt">
         <div className="container text-center">
-          <h2>Ready to get organized?</h2>
+          <h2>
+            <Slot k="closingHeading" />
+          </h2>
           <p
             className="muted"
             style={{ maxWidth: "38rem", margin: "0 auto 1.5rem" }}
           >
-            Come to an event, sign up for the newsletter, or become a member
-            today. Solidarity Forever!
+            <Slot k="closingIntro" />
           </p>
           <div className="hero__actions" style={{ justifyContent: "center" }}>
             <Link className="btn btn-primary" to="/join/">

@@ -3,142 +3,341 @@ id: 15340
 slug: sv-tenant-rights
 path: /sv-tenant-rights/
 title: City-Specific Tenant Protections
-modified: '2026-06-29T18:43:07'
+modified: '2026-06-29 18:43:07'
 ---
 
-[Return to main page](https://siliconvalleydsa.org/?page_id=15284)
+<!-- wp:paragraph -->
+<p><a href="https://siliconvalleydsa.org/?page_id=15284" type="link" id="https://siliconvalleydsa.org/?page_id=15284">Return to main page</a></p>
+<!-- /wp:paragraph -->
 
-**California Statewide Protections**
+<!-- wp:paragraph -->
+<p></p>
+<!-- /wp:paragraph -->
 
-**California state law**, including the **Tenant Protection Act (AB 1482)**, which limits annual rent increases to 5% plus local inflation (or 10% total, whichever is lower) and requires “just cause” for evictions after 12 months. Project Sentinel provides local mediation and fair housing services to address disputes and discrimination.
+<!-- wp:details {"fontSize":"medium"} -->
+<details class="wp-block-details has-medium-font-size"><summary><strong>California Statewide Protections</strong></summary><!-- wp:paragraph {"placeholder":"Type / to add a hidden block"} -->
+<p><strong>California state law</strong>, including the <strong>Tenant Protection Act (AB 1482)</strong>, which limits annual rent increases to 5% plus local inflation (or 10% total, whichever is lower) and requires "just cause" for evictions after 12 months. Project Sentinel provides local mediation and fair housing services to address disputes and discrimination.</p>
+<!-- /wp:paragraph -->
 
-### **What is “just cause”?**
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading"><strong>What is "just cause"?</strong></h3>
+<!-- /wp:heading -->
 
-After 12 months of continuous and lawful occupancy by all tenants, or 24 months by at least one tenant, the landlord must state a statutory reason in the notice.
+<!-- wp:paragraph -->
+<p>After 12 months of continuous and lawful occupancy by all tenants, or 24 months by at least one tenant, the landlord must state a statutory reason in the notice.</p>
+<!-- /wp:paragraph -->
 
-The statute splits those reasons into **at-fault** grounds and **no-fault** grounds. 
+<!-- wp:paragraph -->
+<p>The statute splits those reasons into <strong>at-fault</strong> grounds and <strong>no-fault</strong> grounds.&nbsp;</p>
+<!-- /wp:paragraph -->
 
-At-fault grounds include nonpayment of rent, material lease breaches, nuisance, waste, certain criminal activity, unlawful subletting, refusal of lawful entry, unlawful use, and a few other listed situations. 
+<!-- wp:paragraph -->
+<p>At-fault grounds include nonpayment of rent, material lease breaches, nuisance, waste, certain criminal activity, unlawful subletting, refusal of lawful entry, unlawful use, and a few other listed situations.&nbsp;</p>
+<!-- /wp:paragraph -->
 
-No-fault grounds include owner/family move-in, withdrawal from the rental market, compliance with a government/court order or local ordinance requiring vacancy, and demolition or substantial remodel. 
+<!-- wp:paragraph -->
+<p>No-fault grounds include owner/family move-in, withdrawal from the rental market, compliance with a government/court order or local ordinance requiring vacancy, and demolition or substantial remodel.&nbsp;</p>
+<!-- /wp:paragraph -->
 
-For curable violations, the tenant must first get a chance to cure; for no-fault notices, relocation assistance or a final-month rent waiver is mandatory, and failure to comply makes the notice void.
+<!-- wp:paragraph -->
+<p>For curable violations, the tenant must first get a chance to cure; for no-fault notices, relocation assistance or a final-month rent waiver is mandatory, and failure to comply makes the notice void.</p>
+<!-- /wp:paragraph -->
 
-### **Here is a plain-language version:**
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading"><strong>Here is a plain-language version:</strong></h3>
+<!-- /wp:heading -->
 
-**“Just cause” means the landlord needs a real legal reason to evict you.** It cannot just be because they want you out.
+<!-- wp:paragraph -->
+<p><strong>"Just cause" means the landlord needs a real legal reason to evict you.</strong> It cannot just be because they want you out.</p>
+<!-- /wp:paragraph -->
 
-Common reasons that may count:
+<!-- wp:paragraph -->
+<p>Common reasons that may count:</p>
+<!-- /wp:paragraph -->
 
-*   You do not pay rent.
-*   You seriously break the lease and do not fix it after notice.
-*   You damage the home badly.
-*   You seriously bother or threaten other people.
-*   You use the unit for illegal activity.
-*   The landlord or a close family member is truly moving in.
-*   The landlord is truly taking the unit off the rental market.
-*   The building must be emptied because of a government order, demolition, or a major remodel.
+<!-- wp:list -->
+<ul class="wp-block-list"><!-- wp:list-item -->
+<li>You do not pay rent.</li>
+<!-- /wp:list-item -->
 
-Reasons that may **not** count:
+<!-- wp:list-item -->
+<li>You seriously break the lease and do not fix it after notice.</li>
+<!-- /wp:list-item -->
 
-*   The landlord gives a fake reason.
-*   The landlord says they will move in, but they really do not plan to live there.
-*   The landlord says you broke the lease, but it was only a small or minor issue.
-*   The landlord is really trying to punish you for asking for repairs or standing up for your rights.
+<!-- wp:list-item -->
+<li>You damage the home badly.</li>
+<!-- /wp:list-item -->
 
-**Rent Increase Caps:** Under the California Tenant Protection Act of 2019 (AB 1482), rent increases are limited for many rental units. The cap is 5% + local CPI, or 10% total, whichever is lower.
+<!-- wp:list-item -->
+<li>You seriously bother or threaten other people.</li>
+<!-- /wp:list-item -->
 
-**Project Sentinel** is a non-profit founded in 1976, operating as one of the largest Northern California agencies providing comprehensive housing services. We are dedicated to safeguarding the availability and stability of housing.
+<!-- wp:list-item -->
+<li>You use the unit for illegal activity.</li>
+<!-- /wp:list-item -->
 
-Project Sentinel: Offers mediation, counseling, and education on tenant-landlord disputes regarding security deposits, repairs, and eviction.
+<!-- wp:list-item -->
+<li>The landlord or a close family member is truly moving in.</li>
+<!-- /wp:list-item -->
 
-In addition to the tenant protections offered by the State, several cities in our region offer additional rights.
+<!-- wp:list-item -->
+<li>The landlord is truly taking the unit off the rental market.</li>
+<!-- /wp:list-item -->
 
-**San Jose**
+<!-- wp:list-item -->
+<li>The building must be emptied because of a government order, demolition, or a major remodel.</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
 
-### [**Tenant Protection Ordinance (TPO)**](https://www.sanjoseca.gov/your-government/departments-offices/housing/developers/affordable-housing-plans-policies/tenant-protection?utm_source=chatgpt.com) 
+<!-- wp:paragraph -->
+<p>Reasons that may <strong>not</strong> count:</p>
+<!-- /wp:paragraph -->
 
-In San José, landlords of many apartments, guesthouses, and some unpermitted units can only end a tenancy for one of [**13 legal reasons**](https://www.sanjoseca.gov/your-government/departments-offices/housing/rental-rights/eviction-process).
+<!-- wp:list -->
+<ul class="wp-block-list"><!-- wp:list-item -->
+<li>The landlord gives a fake reason.</li>
+<!-- /wp:list-item -->
 
-#### **Reasons based on tenant actions**
+<!-- wp:list-item -->
+<li>The landlord says they will move in, but they really do not plan to live there.</li>
+<!-- /wp:list-item -->
 
-1.  Not paying rent
-2.  Repeatedly or seriously breaking the lease
-3.  Damaging the unit
-4.  Refusing to sign a similar new lease
-5.  Disturbing neighbors or causing serious problems
-6.  Refusing legal entry to the unit
-7.  Having an unapproved subtenant staying after the main tenant leaves
-8.  Criminal activity
+<!-- wp:list-item -->
+<li>The landlord says you broke the lease, but it was only a small or minor issue.</li>
+<!-- /wp:list-item -->
 
-### **Reasons based on landlord decisions**
+<!-- wp:list-item -->
+<li>The landlord is really trying to punish you for asking for repairs or standing up for your rights.</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
 
-9.  Major rehab work on the unit
-10.  Taking the unit off the rental market
-11.  Owner move-in
-12.  City code action that requires the tenant to move out
-13.  Converting an unpermitted unit into a permitted use
+<!-- wp:paragraph -->
+<p><strong>Rent Increase Caps:</strong> Under the California Tenant Protection Act of 2019 (AB 1482), rent increases are limited for many rental units. The cap is 5% + local CPI, or 10% total, whichever is lower.</p>
+<!-- /wp:paragraph -->
 
-### **Relocation money**
+<!-- wp:paragraph -->
+<p><strong>Project Sentinel</strong> is a non-profit founded in 1976, operating as one of the largest Northern California agencies providing comprehensive housing services. We are dedicated to safeguarding the availability and stability of housing.</p>
+<!-- /wp:paragraph -->
 
-If a tenant is forced to move out for reasons **9–13**, the landlord must pay relocation money.
+<!-- wp:paragraph {"placeholder":"Type / to add a hidden block"} -->
+<p>Project Sentinel: Offers mediation, counseling, and education on tenant-landlord disputes regarding security deposits, repairs, and eviction.</p>
+<!-- /wp:paragraph --></details>
+<!-- /wp:details -->
 
-*   Studio: **$6,925**
-*   1-bedroom: **$8,400**
-*   2-bedroom: **$10,353**
+<!-- wp:paragraph -->
+<p>In addition to the tenant protections offered by the State, several cities in our region offer additional rights. </p>
+<!-- /wp:paragraph -->
 
-3-bedroom: **$12,414**
+<!-- wp:details {"fontSize":"medium"} -->
+<details class="wp-block-details has-medium-font-size"><summary><strong>San Jose</strong></summary><!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading"><a href="https://www.sanjoseca.gov/your-government/departments-offices/housing/developers/affordable-housing-plans-policies/tenant-protection?utm_source=chatgpt.com"><strong>Tenant Protection Ordinance (TPO)&nbsp;</strong></a></h3>
+<!-- /wp:heading -->
 
-**Santa Clara**
+<!-- wp:paragraph -->
+<p>In San José, landlords of many apartments, guesthouses, and some unpermitted units can only end a tenancy for one of <a href="https://www.sanjoseca.gov/your-government/departments-offices/housing/rental-rights/eviction-process"><strong>13 legal reasons</strong></a>.</p>
+<!-- /wp:paragraph -->
 
-[https://www.santaclaraca.gov/our-city/departments-a-f/community-development/housing-community-services-division/renters/tenant-landlord-mediation-counseling-services](https://www.santaclaraca.gov/our-city/departments-a-f/community-development/housing-community-services-division/renters/tenant-landlord-mediation-counseling-services)
+<!-- wp:heading {"level":4} -->
+<h4 class="wp-block-heading"><strong>Reasons based on tenant actions</strong></h4>
+<!-- /wp:heading -->
 
-**Just Cause Evictions:** Landlords must have a valid reason (“just cause”) to evict tenants who have lived in their unit for 12 months or more.
+<!-- wp:list {"ordered":true} -->
+<ol class="wp-block-list"><!-- wp:list-item -->
+<li>Not paying rent</li>
+<!-- /wp:list-item -->
 
-**Relocation Assistance:** For “no-fault” evictions (e.g., owner move-in, repairs), landlords may be required to provide relocation assistance, typically one month’s rent, though local proposals for expanded assistance are under consideration.
+<!-- wp:list-item -->
+<li>Repeatedly or seriously breaking the lease</li>
+<!-- /wp:list-item -->
 
-**Fair Housing/Anti-Discrimination:** Discrimination based on race, color, religion, sex, national origin, family status, or disability is prohibited. Project Sentinel provides services to help renters with these issues.
+<!-- wp:list-item -->
+<li>Damaging the unit</li>
+<!-- /wp:list-item -->
 
-**Habitability:** Landlords are required to maintain rental units in a habitable condition, including working plumbing, electricity, and safety standards.
+<!-- wp:list-item -->
+<li>Refusing to sign a similar new lease</li>
+<!-- /wp:list-item -->
 
-**City of Santa Clara Housing Division:** Offers an Affordable Rental Program and an Affordable Housing Resource Guide.
+<!-- wp:list-item -->
+<li>Disturbing neighbors or causing serious problems</li>
+<!-- /wp:list-item -->
 
-**Mountain View**
+<!-- wp:list-item -->
+<li>Refusing legal entry to the unit</li>
+<!-- /wp:list-item -->
 
-AB1482 does not apply – it is overridden by the Community Stabilization and Fair Rent Act. Protections vary depending on the type and date of construction. 
+<!-- wp:list-item -->
+<li>Having an unapproved subtenant staying after the main tenant leaves</li>
+<!-- /wp:list-item -->
 
-*   Units built before 1995 with three or more units are fully covered.
-*   Units built after 1995 with three or more units are partially covered (only eviction protections, no rent stabilization). 
+<!-- wp:list-item -->
+<li>Criminal activity</li>
+<!-- /wp:list-item --></ol>
+<!-- /wp:list -->
 
-Single family homes, condominiums, newer constructions, and buildings with fewer than three units are not covered.
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading"><strong>Reasons based on landlord decisions</strong></h3>
+<!-- /wp:heading -->
 
-Rent stabilization: The maximum allowable rent increase is equal to 60% of the CPI for the SF-SJ-Oakland area, with a cap of 3% maximum. 
+<!-- wp:list {"ordered":true,"start":9} -->
+<ol start="9" class="wp-block-list"><!-- wp:list-item -->
+<li>Major rehab work on the unit</li>
+<!-- /wp:list-item -->
 
-Eviction protection: only qualified ‘just cause’ reasons can be provided for evicting a tenant, and a written notice is required when initiating the eviction process.  
+<!-- wp:list-item -->
+<li>Taking the unit off the rental market</li>
+<!-- /wp:list-item -->
 
-Units that are exempt from CSFRA are still covered under AB1482. 
+<!-- wp:list-item -->
+<li>Owner move-in</li>
+<!-- /wp:list-item -->
 
-Additionally, Mountain View has a [Tenant Relocation Assistance Ordinance (TRAO)](https://www.tobenerlaw.com/mountain-view-tenant-relocation-assistance-program/). Tenants who are evicted for no-fault reasons such as owner move-in are eligible for relocation assistance (if they also meet household income restriction). The maximum income is 120% of the median household income for Santa Clara County. 
+<!-- wp:list-item -->
+<li>City code action that requires the tenant to move out</li>
+<!-- /wp:list-item -->
 
-[MV Rent Control](https://rentcheckme.com/articles/rent-control-in-mountain-view)
+<!-- wp:list-item -->
+<li>Converting an unpermitted unit into a permitted use</li>
+<!-- /wp:list-item --></ol>
+<!-- /wp:list -->
 
-**Sunnyvale**
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading"><strong>Relocation money</strong></h3>
+<!-- /wp:heading -->
 
-Sunnyvale does not have rent control above AB1482. Sunnyvale’s Tenant Protections Program (TPP) includes relocation support in case of no-fault eviction and provides renters the right to a lease. Landlords may not retaliate against tenants who exercise their rights.
+<!-- wp:paragraph -->
+<p>If a tenant is forced to move out for reasons <strong>9–13</strong>, the landlord must pay relocation money.</p>
+<!-- /wp:paragraph -->
 
-If your landlord evicts you for no fault, you could get two months of rent to help you move.
+<!-- wp:list -->
+<ul class="wp-block-list"><!-- wp:list-item -->
+<li>Studio: <strong>$6,925</strong></li>
+<!-- /wp:list-item -->
 
-Your landlord is required to offer a yearlong lease before offering a lease of shorter term.
+<!-- wp:list-item -->
+<li>1-bedroom: <strong>$8,400</strong></li>
+<!-- /wp:list-item -->
 
-You have the right to ask for different lease length terms.
+<!-- wp:list-item -->
+<li>2-bedroom: <strong>$10,353</strong></li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
 
-Landlords must:
+<!-- wp:paragraph {"placeholder":"Type / to add a hidden block"} -->
+<p>3-bedroom: <strong>$12,414</strong></p>
+<!-- /wp:paragraph --></details>
+<!-- /wp:details -->
 
-*   Provide a lease addendum or a written notice signed by the tenant.
-*   Display a posting summarizing the TPP and the California Tenant Protections Act of 2019. The poster must be in a noticeable area where all tenants can easily see and read it.
+<!-- wp:details {"fontSize":"medium"} -->
+<details class="wp-block-details has-medium-font-size"><summary><strong>Santa Clara</strong></summary><!-- wp:paragraph {"placeholder":"Type / to add a hidden block"} -->
+<p><a href="https://www.santaclaraca.gov/our-city/departments-a-f/community-development/housing-community-services-division/renters/tenant-landlord-mediation-counseling-services">https://www.santaclaraca.gov/our-city/departments-a-f/community-development/housing-community-services-division/renters/tenant-landlord-mediation-counseling-services</a></p>
+<!-- /wp:paragraph -->
 
-Summary on [City Website](https://www.sunnyvale.ca.gov/homes-streets-and-property/housing). Full text is in the Municipal Code found [here](https://ecode360.com/42732261#42732261).
+<!-- wp:paragraph -->
+<p><strong>Just Cause Evictions:</strong> Landlords must have a valid reason ("just cause") to evict tenants who have lived in their unit for 12 months or more.</p>
+<!-- /wp:paragraph -->
 
-The city is currently considering improving TPP to require 3 months rent for no-fault evictions. 
+<!-- wp:paragraph -->
+<p><strong>Relocation Assistance:</strong> For "no-fault" evictions (e.g., owner move-in, repairs), landlords may be required to provide relocation assistance, typically one month's rent, though local proposals for expanded assistance are under consideration.</p>
+<!-- /wp:paragraph -->
 
-Housing safety concerns (plumbing, electrical, heating) can be reported online [here](https://sunnyvale.dynamics365portals.us/neighborhood-complaints/). For fire safety concerns, [email](mailto:fireprevention@sunnyvale.ca.gov) or call Fire Prevention Services (408-730-7212).
+<!-- wp:paragraph -->
+<p><strong>Fair Housing/Anti-Discrimination:</strong> Discrimination based on race, color, religion, sex, national origin, family status, or disability is prohibited. Project Sentinel provides services to help renters with these issues.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><strong>Habitability:</strong> Landlords are required to maintain rental units in a habitable condition, including working plumbing, electricity, and safety standards.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph {"placeholder":"Type / to add a hidden block"} -->
+<p><strong>City of Santa Clara Housing Division:</strong> Offers an Affordable Rental Program and an Affordable Housing Resource Guide.</p>
+<!-- /wp:paragraph --></details>
+<!-- /wp:details -->
+
+<!-- wp:details {"fontSize":"medium"} -->
+<details class="wp-block-details has-medium-font-size"><summary><strong>Mountain View</strong></summary><!-- wp:paragraph -->
+<p>AB1482 does not apply - it is overridden by the Community Stabilization and Fair Rent Act. Protections vary depending on the type and date of construction.&nbsp;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list -->
+<ul class="wp-block-list"><!-- wp:list-item -->
+<li>Units built before 1995 with three or more units are fully covered.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Units built after 1995 with three or more units are partially covered (only eviction protections, no rent stabilization). </li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+<!-- wp:paragraph -->
+<p>Single family homes, condominiums, newer constructions, and buildings with fewer than three units are not covered.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Rent stabilization: The maximum allowable rent increase is equal to 60% of the CPI for the SF-SJ-Oakland area, with a cap of 3% maximum.&nbsp;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Eviction protection: only qualified 'just cause' reasons can be provided for evicting a tenant, and a written notice is required when initiating the eviction process.&nbsp;&nbsp;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Units that are exempt from CSFRA are still covered under AB1482.&nbsp;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Additionally, Mountain View has a <a href="https://www.tobenerlaw.com/mountain-view-tenant-relocation-assistance-program/">Tenant Relocation Assistance Ordinance (TRAO)</a>. Tenants who are evicted for no-fault reasons such as owner move-in are eligible for relocation assistance (if they also meet household income restriction). The maximum income is 120% of the median household income for Santa Clara County.&nbsp;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><a href="https://rentcheckme.com/articles/rent-control-in-mountain-view">MV Rent Control</a></p>
+<!-- /wp:paragraph --></details>
+<!-- /wp:details -->
+
+<!-- wp:details {"fontSize":"medium"} -->
+<details class="wp-block-details has-medium-font-size"><summary><strong>Sunnyvale</strong></summary><!-- wp:paragraph {"placeholder":"Type / to add a hidden block"} -->
+<p>Sunnyvale does not have rent control above AB1482. Sunnyvale's Tenant Protections Program (TPP) includes relocation support in case of no-fault eviction and provides renters the right to a lease. Landlords may not retaliate against tenants who exercise their rights.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>If your landlord evicts you for no fault, you could get two months of rent to help you move.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Your landlord is required to offer a yearlong lease before offering a lease of shorter term.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>You have the right to ask for different lease length terms.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Landlords must:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list -->
+<ul class="wp-block-list"><!-- wp:list-item -->
+<li>Provide a lease addendum or a written notice signed by the tenant.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Display a posting summarizing the TPP and the California Tenant Protections Act of 2019. The poster must be in a noticeable area where all tenants can easily see and read it.</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+<!-- wp:paragraph -->
+<p>Summary on <a href="https://www.sunnyvale.ca.gov/homes-streets-and-property/housing">City Website</a>. Full text is in the Municipal Code found <a href="https://ecode360.com/42732261#42732261">here</a>.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The city is currently considering improving TPP to require 3 months rent for no-fault evictions.&nbsp;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph {"placeholder":"Type / to add a hidden block"} -->
+<p>Housing safety concerns (plumbing, electrical, heating) can be reported online <a href="https://sunnyvale.dynamics365portals.us/neighborhood-complaints/">here</a>. For fire safety concerns, <a href="mailto:fireprevention@sunnyvale.ca.gov">email</a> or call Fire Prevention Services (408-730-7212).&nbsp;&nbsp;</p>
+<!-- /wp:paragraph --></details>
+<!-- /wp:details -->
+
+<!-- wp:paragraph -->
+<p></p>
+<!-- /wp:paragraph -->

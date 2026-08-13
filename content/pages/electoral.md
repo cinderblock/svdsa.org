@@ -3,7 +3,7 @@ id: 1641
 slug: electoral
 path: /electoral/
 title: Electoral
-modified: '2026-05-21T22:36:49'
+modified: '2026-05-21 22:36:49'
 ---
 
 ## Endorsements & Recommendations
@@ -13,7 +13,7 @@ To view recent endorsements and ballot recommendations, check out our [SV DSA Vo
 ## Projects
 
 *   Supporting Ranked Choice Voting in Santa Clara County to end the 2-party duopoly.
-*   Investigating ballot measures and democratic socialist candidates for the Chapter as a whole to vote on endorsing. An endorsement from SV DSA carries weight; we carefully pick our electoral battles to maximize our impact, and turn out the most volunteers and energy that we can, to only support races that address the working class’s material needs.
+*   Investigating ballot measures and democratic socialist candidates for the Chapter as a whole to vote on endorsing. An endorsement from SV DSA carries weight; we carefully pick our electoral battles to maximize our impact, and turn out the most volunteers and energy that we can, to only support races that address the working class's material needs.
 *   Researching and publishing voter guides including recommendations (a much lower priority than endorsements) for upcoming elections.
 
 ## Upcoming Events
@@ -22,9 +22,7 @@ To view recent endorsements and ballot recommendations, check out our [SV DSA Vo
 
 ## Charter
 
-*The Electoral Working Group was officially chartered on 8/30/2018.*
-
-As members of Silicon Valley DSA, we propose the creation of an
+*The Electoral Working Group was officially chartered on 8/30/2018.* As members of Silicon Valley DSA, we propose the creation of an
 
 1.  Electoral Working Group
 2.  Which would report to the Silicon Valley DSA chapter
@@ -37,7 +35,7 @@ As members of Silicon Valley DSA, we propose the creation of an
     *   Advocate for initiatives and reforms that create a more equitable electoral system.
 4.  Using these initial strategies:
     *   Research and Endorsements:
-        *   Research currently elected official’s policy positions and voting history for use by the chapter.
+        *   Research currently elected official's policy positions and voting history for use by the chapter.
         *   Create a recurring city-council watch, which will attend local city council meetings and keep the chapter appraised of the actions of local city governments.
         *   Research and provide recommendations to the chapter on candidates and initiatives seeking our endorsement.
         *   Research and evaluate candidates and initiatives not immediately seeking our endorsement, but which may be of interest to the chapter, and provide a recommendation on their endorsement.

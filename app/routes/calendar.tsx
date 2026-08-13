@@ -1,8 +1,11 @@
 import type { MetaFunction } from "react-router";
-import { useMemo, useState } from "react";
-import { Link } from "react-router";
-import { upcomingEvents } from "~/lib/data";
-import { dateParts, isUpcoming, longDate, time } from "~/lib/format";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useSearchParams } from "react-router";
+import { MonthView, WeekView } from "~/components/CalendarViews";
+import { EventCard } from "~/components/EventCard";
+import { expandEvents, upcomingEvents } from "~/lib/data";
+import { FACETS, matchesFacet, type FacetKey } from "~/lib/eventFacets";
+import { dayNumber, isUpcoming, monthOf, weekdayOf } from "~/lib/format";
 import { useNow } from "~/lib/useNow";
 import { SITE } from "~/lib/site";
 
@@ -13,49 +16,63 @@ export const meta: MetaFunction = () => [
     content:
       "Upcoming Silicon Valley DSA meetings, actions, and social events.",
   },
+  // Feed autodiscovery for calendar clients.
+  {
+    tagName: "link",
+    rel: "alternate",
+    type: "text/calendar",
+    href: "/calendar/all.ics",
+    title: `${SITE.name} events`,
+  },
 ];
 
-type FilterKey = "all" | "wg" | "committee" | "social" | "newbie" | "online";
+/** Absolute origin, available only after mount (keeps prerender/hydrate equal). */
+function useOrigin(): string | null {
+  const [origin, setOrigin] = useState<string | null>(null);
+  useEffect(() => setOrigin(window.location.origin), []);
+  return origin;
+}
 
-const FILTERS: { key: FilterKey; label: string }[] = [
-  { key: "all", label: "All" },
-  { key: "wg", label: "Working Groups" },
-  { key: "committee", label: "Committees" },
-  { key: "social", label: "Social" },
-  { key: "newbie", label: "Newbie-friendly" },
-  { key: "online", label: "Online" },
+type ViewKey = "list" | "week" | "month";
+const VIEWS: { key: ViewKey; label: string }[] = [
+  { key: "list", label: "List" },
+  { key: "week", label: "Week" },
+  { key: "month", label: "Month" },
 ];
 
-function matches(ev: (typeof upcomingEvents)[number], key: FilterKey): boolean {
-  const cats = ev.categories.map((c) => c.toLowerCase());
-  switch (key) {
-    case "all":
-      return true;
-    case "wg":
-      return cats.some((c) => c.startsWith("wg"));
-    case "committee":
-      return cats.some((c) => c.includes("committee"));
-    case "social":
-      return cats.some((c) => c.includes("social"));
-    case "newbie":
-      return cats.some((c) => c.includes("newbie"));
-    case "online":
-      return ev.isVirtual || ev.venue === "Zoom";
-  }
+/** 'YYYY-MM-DD' in local time. */
+function localDay(d: Date): string {
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
 }
 
 export default function Calendar() {
-  const [filter, setFilter] = useState<FilterKey>("all");
+  const [filter, setFilter] = useState<FacetKey>("all");
   const [q, setQ] = useState("");
   const now = useNow();
+  const origin = useOrigin();
 
-  // Drop events that have already passed, relative to the *client's* current
-  // day — so the list stays correct between deploys and as a left-open tab
-  // crosses midnight. Before hydration (now === null) show the build snapshot.
+  // The view lives in the URL so a member can share "the month view".
+  const [params, setParams] = useSearchParams();
+  const raw = params.get("view");
+  const view: ViewKey = raw === "week" || raw === "month" ? raw : "list";
+  const setView = (next: ViewKey) => {
+    const p = new URLSearchParams(params);
+    if (next === "list") p.delete("view");
+    else p.set("view", next);
+    setParams(p, { replace: true, preventScrollReset: true });
+  };
+
+  // Recompute the whole list from the recurrence rules against the *client's*
+  // clock: drops past events, and extends recurring series a year out — so the
+  // calendar is right even if the site hasn't been rebuilt in months. Before
+  // hydration (now === null) we show the build snapshot.
   const upcoming = useMemo(
     () =>
       now
-        ? upcomingEvents.filter((e) => isUpcoming(e.start, now))
+        ? expandEvents(now.toISOString().slice(0, 10)).filter((e) =>
+            isUpcoming(e.start, now),
+          )
         : upcomingEvents,
     [now],
   );
@@ -64,12 +81,33 @@ export default function Calendar() {
     const needle = q.trim().toLowerCase();
     return upcoming.filter(
       (e) =>
-        matches(e, filter) &&
+        matchesFacet(e, filter) &&
         (!needle || e.title.toLowerCase().includes(needle)),
     );
   }, [upcoming, filter, q]);
 
-  let lastMonth = "";
+  // Subscription feed for whatever filter is active (search isn't part of it).
+  const facet = FACETS.find((f) => f.key === filter) ?? FACETS[0];
+  const feedPath = `/calendar/${facet.slug}.ics`;
+  const feedHttps = origin ? `${origin}${feedPath}` : null;
+  const feedWebcal = feedHttps
+    ? feedHttps.replace(/^https?:/, "webcal:")
+    : null;
+
+  // Group the agenda by DAY so the date appears once, however many events it
+  // holds — three events on Aug 1 read as one dated block, not three "Aug 1"s.
+  const byDay = useMemo(() => {
+    const map = new Map<string, typeof shown>();
+    for (const e of shown) {
+      const key = e.start.slice(0, 10);
+      (map.get(key) ?? map.set(key, []).get(key)!).push(e);
+    }
+    return [...map.entries()];
+  }, [shown]);
+
+  const firstDay = now
+    ? localDay(now)
+    : (shown[0]?.start.slice(0, 10) ?? localDay(new Date()));
 
   return (
     <main id="main">
@@ -81,8 +119,21 @@ export default function Calendar() {
       </div>
 
       <div className="container" style={{ paddingBottom: "3rem" }}>
+        <div className="viewtabs" role="group" aria-label="Calendar view">
+          {VIEWS.map((v) => (
+            <button
+              key={v.key}
+              type="button"
+              aria-pressed={view === v.key}
+              onClick={() => setView(v.key)}
+            >
+              {v.label}
+            </button>
+          ))}
+        </div>
+
         <div className="filters">
-          {FILTERS.map((f) => (
+          {FACETS.map((f) => (
             <button
               key={f.key}
               type="button"
@@ -113,63 +164,71 @@ export default function Calendar() {
           }}
         />
 
+        <div className="subscribe">
+          <div>
+            <strong>Subscribe to this calendar</strong>
+            <p className="muted">
+              {facet.key === "all"
+                ? "All chapter events"
+                : `Only “${facet.label}”`}{" "}
+              — updates automatically in your calendar app. Repeating meetings
+              subscribe as real recurring events.
+            </p>
+          </div>
+          <div className="subscribe__links">
+            {/* Progressive enhancement: server-renders as a plain .ics link
+                (which most OSes hand to the calendar app), then upgrades to
+                webcal:// after mount so it subscribes instead of downloading.
+                Never depends on JS to exist. */}
+            <a className="btn btn-primary" href={feedWebcal ?? feedPath}>
+              Subscribe
+            </a>
+            {feedHttps && (
+              <a
+                href={`https://calendar.google.com/calendar/r?cid=${encodeURIComponent(feedHttps)}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Google Calendar
+              </a>
+            )}
+            <a href={feedPath} download>
+              Download .ics
+            </a>
+          </div>
+        </div>
+
         {shown.length === 0 && (
           <p className="muted">No events match that filter.</p>
         )}
 
-        {shown.map((e) => {
-          const { month, day } = dateParts(e.start);
-          const monthLabel = longDate(e.start).replace(/^\w+, /, "");
-          const monthKey = monthLabel.replace(/\d+,?\s?/g, "").trim();
-          const showDivider = monthKey !== lastMonth;
-          lastMonth = monthKey;
-          const online = e.isVirtual || e.venue === "Zoom";
-          return (
-            <div key={e.id}>
-              {showDivider && (
-                <h2
-                  style={{
-                    fontSize: "1.1rem",
-                    marginTop: "2rem",
-                    color: "var(--muted)",
-                  }}
-                >
-                  {monthKey}
+        {view === "week" && shown.length > 0 && (
+          <WeekView events={shown} from={firstDay} weeks={16} />
+        )}
+        {view === "month" && shown.length > 0 && (
+          <MonthView events={shown} from={firstDay} months={6} />
+        )}
+
+        {view === "list" && (
+          <ol className="agenda">
+            {byDay.map(([day, list]) => (
+              <li key={day} className="agenda__day">
+                {/* One heading per DAY — the date isn't repeated for each of
+                    that day's events, and same-day events read as a set. */}
+                <h2 className="agenda__date">
+                  <span className="agenda__dow">{weekdayOf(day)}</span>
+                  <span className="agenda__num">{dayNumber(day)}</span>
+                  <span className="agenda__mon">{monthOf(day)}</span>
                 </h2>
-              )}
-              <Link to={e.path} className="event-row">
-                <div className="event-row__date">
-                  <div className="m">{month}</div>
-                  <div className="d">{day}</div>
-                  <div className="t">
-                    {e.allDay ? "all day" : time(e.start)}
-                  </div>
+                <div className="agenda__events">
+                  {list.map((e) => (
+                    <EventCard key={e.id} e={e} />
+                  ))}
                 </div>
-                <div>
-                  <h3>{e.title}</h3>
-                  <p className="where">
-                    {online ? "🖥 Online" : "📍 "}
-                    {e.venue && e.venue !== "Zoom" ? e.venue : ""}
-                  </p>
-                  {e.excerpt && (
-                    <p className="muted" style={{ margin: "0.25rem 0 0.5rem" }}>
-                      {e.excerpt.slice(0, 160)}
-                      {e.excerpt.length > 160 ? "…" : ""}
-                    </p>
-                  )}
-                  {e.categories
-                    .filter((c) => c !== "SV DSA")
-                    .slice(0, 3)
-                    .map((c) => (
-                      <span className="tag" key={c}>
-                        {c}
-                      </span>
-                    ))}
-                </div>
-              </Link>
-            </div>
-          );
-        })}
+              </li>
+            ))}
+          </ol>
+        )}
       </div>
     </main>
   );

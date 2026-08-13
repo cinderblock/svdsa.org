@@ -193,19 +193,31 @@ async function stepAccessVars(): Promise<void> {
   console.log("       'Access Groups' were replaced by reusable policies.)");
   console.log("   2) Access → Applications → Add → Self-hosted; domain =");
   console.log(
-    "      svdsa-edit.<subdomain>.workers.dev; enable the IdPs editors",
-  );
-  console.log("      will use (Google, GitHub, Microsoft, …); attach the");
-  console.log("      'SVDSA editors' policy.");
-  console.log(
-    c.dim(
-      "   The two values below are OPTIONAL — only for stricter JWT pinning (a",
-    ),
+    `      ${c.bold("the hostname this Worker actually serves on")} — the Worker is`,
   );
   console.log(
-    c.dim(
-      "   later hardening step). The editor uses the Access-injected email for now.",
-    ),
+    `      named ${c.bold(getVar(t, "name") || "edit")}, so it is edit.<subdomain>.workers.dev,`,
+  );
+  console.log("      NOT svdsa-edit.… . An Access application is scoped to a");
+  console.log("      hostname: point it at the wrong one and the editor is");
+  console.log("      still open. Enable the IdPs editors will use (Google,");
+  console.log(
+    "      GitHub, Microsoft, …); attach the 'SVDSA editors' policy.",
+  );
+  console.log(
+    c.dim("   The two values below are REQUIRED to protect the editor. The"),
+  );
+  console.log(
+    c.dim("   Worker verifies the SIGNED Access JWT — the team domain fetches"),
+  );
+  console.log(
+    c.dim("   the signing keys, the AUD stops a token minted for a DIFFERENT"),
+  );
+  console.log(
+    c.dim("   app on your team from opening this one. Without both it refuses"),
+  );
+  console.log(
+    c.dim("   to serve (503) rather than trusting a forgeable header."),
   );
   console.log(
     c.dim(
@@ -215,18 +227,55 @@ async function stepAccessVars(): Promise<void> {
   const team = await askValue(
     "Access team domain",
     TEAM,
-    "optional — Enter to skip; e.g. yourteam.cloudflareaccess.com",
+    "e.g. yourteam.cloudflareaccess.com",
     getVar(t, "CF_ACCESS_TEAM_DOMAIN"),
   );
   const aud = await askValue(
     "Access application AUD",
     AUD,
-    "optional — Enter to skip; 64 hex chars",
+    "64 hex chars",
     getVar(t, "CF_ACCESS_AUD"),
   );
   const teamHost = team.replace(/^https?:\/\//i, "").replace(/\/$/, "");
   if (teamHost) await setVar("CF_ACCESS_TEAM_DOMAIN", teamHost);
   if (aud) await setVar("CF_ACCESS_AUD", aud);
+
+  // Filling the vars in isn't enough: REQUIRE_ACCESS: "false" overrides them,
+  // so following this script to the end used to leave the editor wide open.
+  // Enforcement is the default — the escape hatch has to be REMOVED, not
+  // flipped, which is also why access.ts treats an absent variable as "yes".
+  if (teamHost && aud) await dropRequireAccessOverride();
+  else
+    console.log(
+      c.dim(
+        '   ⚠ skipped — REQUIRE_ACCESS stays "false" and the editor stays open\n' +
+          "     to anyone with the URL until BOTH values are set.",
+      ),
+    );
+}
+
+/**
+ * Delete the `REQUIRE_ACCESS: "false"` var (and the comment block explaining
+ * why it was there) from editor/wrangler.jsonc. Idempotent: a config that has
+ * already been secured is left alone.
+ */
+async function dropRequireAccessOverride(): Promise<void> {
+  const text = await readWrangler();
+  if (!/"REQUIRE_ACCESS":\s*"false"/.test(text))
+    return ok("REQUIRE_ACCESS override is already gone — Access is enforced");
+  const stripped = text.replace(
+    /(?:[ \t]*\/\/[^\n]*\n)*[ \t]*"REQUIRE_ACCESS":\s*"false",\n/,
+    "",
+  );
+  if (stripped === text)
+    return console.log(
+      c.dim(
+        "   ⚠ could not remove REQUIRE_ACCESS automatically — delete the\n" +
+          '     "REQUIRE_ACCESS": "false" line from editor/wrangler.jsonc by hand.',
+      ),
+    );
+  await writeFile(WRANGLER, stripped);
+  ok("removed REQUIRE_ACCESS override — Access is now enforced on next deploy");
 }
 
 async function stepDeploy(): Promise<void> {

@@ -1,0 +1,128 @@
+/*
+ * `Wizard` (`web/wizard.tsx`) — the new-content flow.
+ */
+
+/* ---- New-content wizard --------------------------------------------------- */
+.wiz {
+  max-width: 40rem;
+  padding: 0.5rem 0 2rem;
+}
+.wiz h2 {
+  margin: 0.2rem 0 1rem;
+  font-size: 1.15rem;
+}
+.wiz__kinds {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.6rem;
+}
+.wiz__kinds button {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  width: 100%;
+  padding: 0.8rem 0.9rem;
+  text-align: left;
+  border: 1px solid var(--line, #3a3a3a);
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+}
+.wiz__kinds button:hover {
+  border-color: var(--red, #c00);
+}
+.wiz__icon {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+.wiz__blurb,
+.wiz__hint {
+  display: block;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.45;
+  margin-top: 0.15rem;
+}
+.wiz__field {
+  display: block;
+  margin: 0 0 0.85rem;
+}
+.wiz__field > span:first-child {
+  display: block;
+  font-size: 0.8rem;
+  margin-bottom: 0.25rem;
+}
+.wiz__field input,
+.wiz__field select,
+.wiz__field textarea {
+  width: 100%;
+  box-sizing: border-box;
+  font: inherit;
+}
+.wiz__row {
+  display: flex;
+  gap: 0.75rem;
+}
+.wiz__row .wiz__field {
+  flex: 1;
+}
+.wiz__check {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  margin: 0 0 0.85rem;
+  font-size: 0.9rem;
+}
+.wiz__cats {
+  border: 1px solid var(--line, #3a3a3a);
+  border-radius: 6px;
+  padding: 0.6rem 0.75rem 0.8rem;
+  margin: 0 0 0.9rem;
+}
+.wiz__cats legend {
+  font-size: 0.8rem;
+  padding: 0 0.3rem;
+}
+.wiz__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.4rem;
+}
+.wiz__chip {
+  padding: 0.2rem 0.55rem;
+  border: 1px solid var(--line, #3a3a3a);
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.wiz__chip.on {
+  background: var(--red, #c00);
+  border-color: var(--red, #c00);
+  color: #fff;
+}
+.wiz__note {
+  margin: 0.5rem 0 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.wiz__url {
+  margin: 0.2rem 0 0.9rem;
+  font-size: 0.9rem;
+}
+.wiz__actions {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  margin-top: 1.1rem;
+}
+.wiz__actions .save {
+  margin-left: auto;
+}

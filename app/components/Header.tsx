@@ -45,7 +45,14 @@ export function Header() {
                   <ul className="nav__menu">
                     {group.children.map((c) => (
                       <li key={c.to}>
-                        <NavLink to={c.to}>{c.label}</NavLink>
+                        <NavLink to={c.to}>
+                          {c.icon && (
+                            <span className="nav__icon" aria-hidden="true">
+                              {c.icon}
+                            </span>
+                          )}
+                          {c.label}
+                        </NavLink>
                       </li>
                     ))}
                   </ul>
@@ -81,7 +88,14 @@ export function Header() {
                     <ul className="sub">
                       {group.children.map((c) => (
                         <li key={c.to}>
-                          <NavLink to={c.to}>{c.label}</NavLink>
+                          <NavLink to={c.to}>
+                            {c.icon && (
+                              <span className="nav__icon" aria-hidden="true">
+                                {c.icon}
+                              </span>
+                            )}
+                            {c.label}
+                          </NavLink>
                         </li>
                       ))}
                     </ul>

@@ -1,0 +1,78 @@
+name: Nightly rebuild
+
+# Redeploy the SITE unchanged, so its prerendered HTML carries today's date.
+#
+# WHY THIS EXISTS. The site is prerendered, and the home page bakes the event
+# list that was upcoming AT BUILD TIME:
+#
+#   const nextEvents = (now ? expandEvents(...) : upcomingEvents).slice(0, 4)
+#
+# `useNow()` deliberately returns null on the server and the first client render
+# so prerender and hydration agree — which means the HTML holds the build-time
+# snapshot and the browser corrects it after mount (and again at local
+# midnight). So a reader with JS is never wrong, and recurring events never
+# decay: the rules are expanded against the reader's own clock.
+#
+# What DOES go stale without this job:
+#   - crawlers and JS-less readers see last build's "upcoming events"
+#   - the 90-day prerender horizon (PRERENDER_DAYS) stops sliding, so dated
+#     occurrence pages past it render client-side instead of being crawlable
+#
+# That makes this a FRESHNESS optimisation, not a correctness requirement —
+# worth saying plainly, because if this job breaks the site stays correct.
+#
+# WHY A TOKEN, when ci.yml deliberately has none. That decision was "don't
+# double-deploy on push" — Workers Builds already handles pushes. A nightly
+# rebuild is not a push deploy, so it doesn't reopen that reasoning. If Workers
+# Builds turns out to offer a deploy hook (a capability URL that only triggers a
+# build), prefer it: replace the deploy step with a POST and drop the secret.
+#
+# Skips itself when CLOUDFLARE_API_TOKEN isn't configured, so this file is inert
+# rather than a nightly failure email until someone sets it.
+
+on:
+  schedule:
+    # 08:00 UTC = 01:00 PDT / 00:00 PST — just after local midnight either way,
+    # so the first Pacific reader of the day gets HTML built for that day.
+    - cron: "0 8 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: nightly-rebuild
+  cancel-in-progress: false
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - name: Checkout red
+        uses: actions/checkout@v4
+        with:
+          ref: red
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install
+        run: bun install --frozen-lockfile
+
+      # `bun run build` runs build:content, which is also the content's own
+      # integrity check — it fails on a duplicate id, an unsupported recurrence
+      # rule, or a broken redirect. A nightly run therefore doubles as a canary
+      # on content that was committed but never rebuilt.
+      - name: Build
+        run: bun run build
+
+      - name: Deploy
+        if: env.CLOUDFLARE_API_TOKEN != ''
+        run: bunx wrangler deploy
+
+      - name: Explain the skip
+        if: env.CLOUDFLARE_API_TOKEN == ''
+        run: |
+          echo "::notice::CLOUDFLARE_API_TOKEN is not set, so nothing was" \
+            "deployed. The build above still verified the content."

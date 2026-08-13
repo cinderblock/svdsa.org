@@ -1,0 +1,165 @@
+/*
+ * `Picker` (`web/picker.tsx`) — the app's replacement for `<select>`.
+ *
+ * Used in the top bar (`pick--bar`), the file list's sort control and the
+ * wizard's parent chooser (`pick--block`), so it is styled here once and the
+ * per-context differences are modifiers.
+ */
+
+/* ---- picker (our <select> replacement) ---- */
+
+.pick {
+  position: relative;
+}
+/* Default: a control on the app's own background. */
+.pick__trigger {
+  font: inherit;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.45rem;
+  background: var(--bg);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+  max-width: 22rem;
+  text-align: left;
+}
+.pick__trigger:hover {
+  background: var(--hover);
+}
+
+/*
+ * `pick--bar`: sitting on the top bar. The bar is a neutral surface rather than
+ * a red slab, so this no longer inverts the colours — it only takes the pill
+ * shape that distinguishes bar chrome from an in-form control.
+ */
+.pick--bar .pick__trigger {
+  border-radius: 999px;
+  padding: 0.25rem 0.75rem;
+}
+
+/* `pick--block`: fills its slot in a form or sidebar, popover matching. */
+.pick--block {
+  display: block;
+  flex: 1;
+  min-width: 0;
+}
+.pick--block .pick__trigger {
+  width: 100%;
+  max-width: none;
+}
+.pick--block .pick__value {
+  flex: 1;
+}
+.pick--block .pick__pop {
+  width: 100%;
+  min-width: 12rem;
+}
+.pick__label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.75;
+}
+.pick__value {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pick__caret {
+  font-size: 0.7rem;
+  opacity: 0.8;
+}
+
+.pick__pop {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 0.4rem);
+  left: 0;
+  width: 20rem;
+  max-width: 90vw;
+  background: var(--bg);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: 0 12px 32px rgb(0 0 0 / 0.22);
+  overflow: hidden;
+}
+.pick__filter {
+  font: inherit;
+  font-size: 0.9rem;
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg-raised);
+  color: inherit;
+  padding: 0.5rem 0.7rem;
+}
+.pick__filter:focus {
+  outline: 2px solid var(--red);
+  outline-offset: -2px;
+}
+.pick__list {
+  max-height: 18rem;
+  overflow: auto;
+  padding: 0.25rem 0;
+}
+.pick__grouphead {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  padding: 0.45rem 0.7rem 0.15rem;
+}
+.pick__opt {
+  padding: 0.35rem 0.7rem;
+  cursor: pointer;
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+  font-size: 0.9rem;
+}
+.pick__opt.is-active {
+  background: var(--hover);
+}
+.pick__opt.is-current .pick__opttext {
+  font-weight: 700;
+  color: var(--red);
+}
+.pick__opt.is-current::after {
+  content: "✓";
+  margin-left: auto;
+  color: var(--red);
+}
+.pick__hint {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+.pick__none {
+  margin: 0;
+  padding: 0.6rem 0.7rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.pick__footer {
+  border-top: 1px solid var(--line);
+  background: var(--bg-raised);
+}
+.pick__action {
+  font: inherit;
+  font-size: 0.85rem;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  color: var(--red);
+  border: 0;
+  padding: 0.55rem 0.7rem;
+  cursor: pointer;
+}
+.pick__action:hover {
+  background: var(--hover);
+}

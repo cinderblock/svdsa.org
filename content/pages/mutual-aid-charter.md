@@ -3,10 +3,10 @@ id: 7903
 slug: mutual-aid-charter
 path: /mutual-aid-charter/
 title: Mutual Aid Working Group Charter
-modified: '2020-12-20T12:11:33'
+modified: '2020-12-20 12:11:33'
 ---
 
-*This charter was adopted at the SV DSA  Chapter Meeting on 9/20/2020.*
+*This charter was adopted at the SV DSA  Chapter Meeting on 9/20/2020.*
 
 As members of Silicon Valley DSA, we propose the creation of a
 
@@ -17,7 +17,7 @@ As members of Silicon Valley DSA, we propose the creation of a
 (iii) With the following objectives:
 
 *   **Build person-to-person economic and social relationships and network between groups in the South Bay** to directly address the harmful consequences of capitalism and empower people to take control of their own economic life.
-    *   Build community defense and the community’s ability to defend itself from attacks whether from capitalism, racism, patriarchy, ableism, and or other related systems of oppression.
+    *   Build community defense and the community's ability to defend itself from attacks whether from capitalism, racism, patriarchy, ableism, and or other related systems of oppression.
 *   **Focus aid on helping groups that are the most negatively impacted by capitalism** and more likely to be overlooked by existing aid systems.
     *   We will prioritize the aid that is requested of us ahead of our own perceived aid objectives or priorities. We will work to listen to people receiving aid and adjust our aid efforts to match their stated needs to the extent that is possible for us.
 *   **Bring the South Bay local communities into aid efforts** so that the community is organizing alongside us. We are not separate from our community.
@@ -29,7 +29,7 @@ As members of Silicon Valley DSA, we propose the creation of a
 
 *   **Offer community aid** including but not limited to crisis and disaster response.
     *   Poll SVDSA members for other areas of expertise that we can provide for other community members.
-    *   Determine unmet needs in the community that we can help provide – for example, tech assistance.
+    *   Determine unmet needs in the community that we can help provide - for example, tech assistance.
 *   **Organize town halls** with wide community participation to work on consensus-based decision-making in the community.
 *   **Provide ways for the community to provide feedback** to us such as town halls with people who have requested aid and feedback forms so we can actively determine ways to better meet community needs and improve our organizing.
 *   **Organize and network with and between other groups** working on similar projects:

@@ -2,6 +2,7 @@ import type { Config } from "@react-router/dev/config";
 import pages from "./content/generated/pages.json";
 import posts from "./content/generated/posts.json";
 import events from "./content/generated/events-upcoming.json";
+import series from "./content/generated/events-series.json";
 
 // Every path that gets prerendered to static HTML. Preserves the legacy
 // WordPress URLs (pages at their own paths, posts at /YYYY/MM/DD/slug/, events
@@ -24,8 +25,15 @@ const pagePaths = (pages as { path: string }[])
 
 const postPaths = (posts as { path: string }[]).map((p) => p.path);
 
-// Only upcoming events get detail pages (past events aren't in the slim file).
-const eventPaths = (events as { path: string }[]).map((e) => e.path);
+// Event pages: every upcoming one-off, plus recurring occurrences inside the
+// prerendered window (see PRERENDER_DAYS in scripts/build-content.ts), plus one
+// page per recurring SERIES (/event/<slug>/ — "when does this meet?").
+// Occurrences beyond the window resolve client-side from the rule via the SPA
+// fallback, so no dated URL 404s.
+const eventPaths = [
+  ...(events as { path: string }[]).map((e) => e.path),
+  ...(series as { path: string }[]).map((s) => s.path),
+];
 
 export default {
   ssr: false,

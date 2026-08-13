@@ -10,6 +10,9 @@ Vite + Bun, prerendered).
 **Want to change something on the site?** See **[docs/editing.md](docs/editing.md)**
 — one flowchart from "I only want a WYSIWYG" to full git workflows.
 
+**Looking for what's outstanding?** **[TODO.md](TODO.md)** — every open item in
+one list, each pointing at the plan doc that holds the detail.
+
 ## Why
 
 The current site is WordPress + The Events Calendar. Almost none of it needs a
@@ -32,26 +35,168 @@ file (no merge conflicts, no unbounded growth):
 ```
 content/
   posts/<year>/<date>-<slug>.md      # bucketed by publish year
-  events/<slug>.md                    # RECURRING series (repeats: rule, expanded at build)
+  events/<slug>.md                    # RECURRING series (recurrence: rule — see below)
   events/<year>/<slug>-<date>.md      # one-off / irregular instances, bucketed by year
   pages/<url-path>.md                 # mirrors the page URL path
-  config/*.json                       # site config + style-rules.json (content lint rules)
+  config/*.yaml                       # chapter config: menus, socials, style rules
 ```
 
 Bodies are **Markdown** (things Markdown can't express — embeds, forms — are
-raw HTML islands, rendered via rehype-raw). Recurring events are ONE file with
-a `repeats:` rule; the daily rebuild expands a rolling window of instances.
+raw HTML islands, rendered via rehype-raw).
+
+**Config is YAML, not JSON**, because people read and edit it: it takes comments
+and doesn't punish a trailing comma. `build-content.ts` parses it and emits
+`content/generated/config/*.json`, which is what the app imports — so YAML never
+reaches the browser bundle and the imports stay typed. JSON in this repo is
+always a generated artifact, never something you hand-edit.
+
+### Link checking
+
+`editor/src/content/links.ts` checks internal links against the content that
+actually exists — on every save and in `bun run lint:content`. Deliberately
+**no network**: external URLs go stale on someone else's schedule and would make
+saving slow and intermittently wrong, so they belong in a scheduled job.
+
+The corpus taught this check its most important lesson. It has only ~15
+genuinely relative internal links — the WordPress migration wrote the rest as
+**absolute URLs to the live domain**. A checker that dismissed those as
+"external" would have reported a clean bill of health. Treating same-host
+absolutes as internal turns up two real problems:
+
+| Finding              | Level | Count | What it is                                                                                                                |
+| -------------------- | ----- | ----- | ------------------------------------------------------------------------------------------------------------------------- |
+| `wordpress-asset`    | error | 58    | `/wp-content/uploads/…` images that **are broken in the current build** — 18 distinct files across 11 pages serve nothing |
+| `dead-internal-link` | warn  | 91    | `/events/` (the old WP calendar), `/donations/` (the site has `/donate/`), and pre-2025 events the migration didn't carry |
+
+A dead link is a **warning**, because a draft may legitimately link to a page it
+adds in the same change and blocking a save on that teaches editors to distrust
+the check. A WordPress upload is an **error**: it's a visible defect in shipped
+output, not a future risk. `cleanHtml` strips the `siliconvalleydsa.org` origin
+before render, so those URLs resolve to `/wp-content/…` — an address this site
+does not serve. The file has to be committed to the repo.
+
+Asset references (`src=`) are checked for WordPress dependence but not for
+dead-ness, since files in `public/` are real addresses no content path predicts.
+
+**A resolving absolute self-link is deliberately not reported.** An earlier
+version flagged all 86, claiming they'd leave a branch preview for the live
+domain — wrong: `cleanHtml` rewrites them and the built output contains zero.
+Unwrapping them in the extractor still matters, since it's the only way the dead
+ones become visible.
+
+### Redirects — old addresses keep working
+
+Preserving the old URLs is a founding premise here, so renaming is never just a
+move. `content/config/redirects.yaml` is the chapter's list of promises;
+`build-content.ts` renders it to `public/_redirects`, which Cloudflare's
+static-asset router serves as a **real 301 at the edge** — no JS, no
+meta-refresh, no 200-then-hop. Confirmed against `wrangler dev`:
+
+```
+$ curl -sI http://127.0.0.1:8799/old-housing-page/
+HTTP 301   Location: /housing/
+```
+
+`scripts/redirects.ts` **fails the build** rather than shipping a rule that
+can't work: a relative path (silently never matches), a self-redirect, a
+duplicated source, or a chain (`/a/`→`/b/`→`/c/`, which costs two hops and can
+loop). The editor appends to this file automatically on rename, so an address
+already out in the world can't be quietly broken — and it skips the entry when
+the old address was never published, rather than accruing promises about URLs
+nobody ever had.
+
+### Recurring events
+
+A repeating meeting is **one file** carrying an iCalendar recurrence rule.
+Occurrences are **derived**, never stored:
+
+```yaml
+recurrence:
+  rrule: FREQ=MONTHLY;BYDAY=3SA # 3rd Saturday
+  exdate: ["2026-12-19"] # ...except this one
+  rdate: ["2026-12-12"] # ...which moved here
+```
+
+`app/lib/recurrence.ts` is the single engine, shared by the build, the browser
+and the `.ics` feeds. Consequences worth knowing:
+
+- **The calendar can't go stale.** The browser expands the rules against the
+  reader's own clock, so a site that hasn't been rebuilt in months still lists
+  correct upcoming dates. A scheduled rebuild is a freshness optimization, not a
+  correctness requirement.
+- The build prerenders a bounded window (`PRERENDER_DAYS`, 90) of dated
+  occurrence pages plus one page per series; dated URLs beyond the window render
+  client-side from the rule, so no `/event/<slug>/<date>/` link 404s.
+- `EXDATE`/`RDATE` express holiday skips and reschedules — several working
+  groups genuinely need them.
+- Unsupported rules **fail the build** rather than silently dropping meetings.
+  Supported: `FREQ=WEEKLY|MONTHLY` with `INTERVAL`, `BYDAY` (incl. `3SA`,
+  `-1SU`), `UNTIL`, `COUNT`.
+- The engine is hand-written (so the browser doesn't download an RRULE library)
+  and conformance-tested against the reference `rrule` package, with the feeds
+  cross-checked against Mozilla's ICAL.js — see `tests/recurrence.spec.ts` and
+  `tests/feeds.spec.ts`.
 
 These files are the **source of truth**. The aggregate JSON the app imports is
 a **generated, git-ignored build artifact** (`content/generated/`) — never
 hand-edited, never committed, so two people adding content never conflict on a
 shared file.
 
-| Script                        | Command                 | What it does                                                                                                                                                                                                       |
-| ----------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `scripts/fetch-wp-content.ts` | `bun run migrate`       | One-time / on-demand migration. Pulls WordPress → the per-item Markdown tree above (clears + rewrites the three dirs). Re-run to re-sync until WP is retired.                                                      |
-| `scripts/build-content.ts`    | `bun run build:content` | Network-free. Renders Markdown → HTML, expands recurring events, and assembles `content/generated/*.json` (full + slim splits) plus `sitemap.xml`/`robots.txt` (all git-ignored). Runs before dev/typecheck/build. |
-| `scripts/lint-content.ts`     | `bun run lint:content`  | Style checks from `content/config/style-rules.json` (San José accent, inclusive language, …). `--fix` applies suggestions. The in-browser editor runs the same rules on every save.                                |
+| Script                     | Command                 | What it does                                                                                                                                                                                                       |
+| -------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `scripts/build-content.ts` | `bun run build:content` | Network-free. Renders Markdown → HTML, expands recurring events, and assembles `content/generated/*.json` (full + slim splits) plus `sitemap.xml`/`robots.txt` (all git-ignored). Runs before dev/typecheck/build. |
+| `scripts/lint-content.ts`  | `bun run lint:content`  | Style checks from `content/config/style-rules.yaml` (San José accent, inclusive language, …). `--fix` applies suggestions. The in-browser editor runs the same rules on every save.                                |
+
+#### Importing from WordPress
+
+There is deliberately **no importer in this repo**. Importing is done from
+WebPress (`scripts/import-wxr.ts`) against a WXR export file, and its output is
+merged in — never landed by replacing `content/`.
+
+The old REST importer (`scripts/fetch-wp-content.ts`, `bun run migrate`) was
+removed: it began by `rm -rf`-ing `content/{pages,posts,events}`, which destroys
+everything WordPress does not know about — the hand-authored `recurrence:` rules,
+the draft canaries, `pages/home.md`, and any future translation files. It also
+re-introduced the `wptexturize`d typography the WXR import exists to remove. It
+is in git history if it is ever wanted back; do not resurrect it without
+replacing the wholesale delete with a merge.
+
+### Calendar views
+
+`/calendar` offers **List**, **Week** and **Month**. Week and Month are
+**continuously vertically scrolling** — periods stack in order and you scroll
+into the future, so there is no prev/next paging to hunt through (which also
+suits a phone). Month is a real `<table>` grid so screen readers get row/column
+semantics; for the current month it starts at the current week rather than the
+1st, since past weeks would otherwise open the view on empty rows. The active
+view lives in the URL (`?view=week`) so it can be shared, and the facet filters
+and search apply to every view. See `app/components/CalendarViews.tsx`.
+
+Both grids step by **calendar day** (`new Date(y, m, d + n)`), never by adding
+86,400,000 ms — on a daylight-saving boundary local midnight + 24 h is 23:00 on
+the _same_ date, which repeats a day and drops the next one. `tests/calendar-grid.spec.ts`
+pins the invariant in Pacific time.
+
+### Calendar subscription feeds
+
+`build-content.ts` also prerenders static iCalendar feeds (`scripts/ics.ts`), so
+members can subscribe in Apple Calendar / Google Calendar / Outlook — parity with
+the WordPress site's "Subscribe to calendar", including its per-category
+filtering:
+
+| Feed                                                                      | Contents                                   |
+| ------------------------------------------------------------------------- | ------------------------------------------ |
+| `/calendar/all.ics`                                                       | Every event                                |
+| `/calendar/{working-groups,committees,social,newbie-friendly,online}.ics` | One per on-site filter button              |
+| `/calendar/category/<slug>.ics`                                           | One per event category (e.g. `wg-housing`) |
+| `/calendar/event/<slug>.ics`                                              | One per event page ("Add to calendar")     |
+
+Facet feeds and the calendar UI share one definition (`app/lib/eventFacets.ts`),
+so a subscribed feed always matches what the equivalent filter shows.
+**Recurring series are emitted as a single `VEVENT` with an `RRULE`**, so
+subscriptions keep generating occurrences indefinitely rather than running out at
+the build's horizon. Times carry `TZID=America/Los_Angeles` with a `VTIMEZONE`
+block. Cloudflare serves `.ics` as `text/calendar` with no config needed.
 
 Data delivery is split for performance:
 
@@ -80,14 +225,35 @@ HTML at build.
 
 ## Getting started
 
+This is a **Bun workspace with two packages**, one per deployed Worker:
+
+| Package         | Directory | Worker  | What it is                                |
+| --------------- | --------- | ------- | ----------------------------------------- |
+| `svdsa`         | `.`       | `svdsa` | The static site (this README)             |
+| `@svdsa/editor` | `editor/` | `edit`  | The in-browser editor for chapter editors |
+
+They are split so the site never carries the editor's dependencies — Milkdown
+and Monaco are ~4 MB that belong to the editor Worker alone. It also means each
+Worker's Workers Builds connection is a plain root-directory setting.
+
 ```sh
-bun install
+bun install          # one lockfile, installs both packages
 bun run dev          # dev server at http://localhost:9999
 bun run build        # assemble content + prerender all pages
 bun run preview      # preview the built static site
+bun run editor:dev   # the editor SPA at http://localhost:9998
 ```
 
 Other scripts: `bun run typecheck`, `bun run fmt`, `bun run test`.
+
+`bun run test` drives real browsers, so it waits for its share of the machine
+before starting — 3 workers by default (`PW_WORKERS` to override), claimed from
+a machine-wide budget shared with every other project. This is not politeness:
+under load an ordinary wait becomes a timeout, and a timeout reads exactly like
+a regression. Measured 2026-08-11 — 14 specs failed with two concurrent runs and
+every one passed when run alone. See `tests/compute-budget.ts`; it degrades to
+running unthrottled if the broker isn't installed, so CI and fresh clones are
+unaffected.
 
 Append `?light` to any URL in dev to force light mode.
 
@@ -132,6 +298,30 @@ Git integration for Workers):
 5. Push to `red` → production; open a PR / push a branch → a preview URL.
 
 `.github/workflows/ci.yml` runs format/typecheck/test/build on every push and
-PR (no Cloudflare secrets needed there — Workers Builds does the deploying).
+PR. Workers Builds does the site's deploying, so no Cloudflare secrets are
+needed for that.
+
+### The editor Worker
+
+The editor is a **second Worker** (`edit`) built from a **separate workspace
+package**, `editor/` — see [editor/README.md](editor/README.md). It deploys via
+its own Workers Builds connection using the standard monorepo setup:
+
+| Setting                 | Value                          |
+| ----------------------- | ------------------------------ |
+| Root directory          | `editor`                       |
+| Build command           | `bun install && bun run build` |
+| Deploy command          | `bunx wrangler deploy`         |
+| Production branch       | `red`                          |
+| Non-production branches | **off**                        |
+
+No custom flags and no `CLOUDFLARE_API_TOKEN` anywhere — `ci.yml` runs checks
+only. `bun run editor:deploy` still works locally.
+
+**There is exactly one editor deployment, on purpose**, which is why
+non-production branch builds are off. The editor is a tool, not a per-branch
+artifact: one instance edits any base branch (`?base=`), and the preview links
+it hands out point at the _site's_ per-branch previews. Per-branch editor copies
+would only create versions to reason about.
 
 > The default/production branch is **`red`** (chapter theming), not `main`/`master`.

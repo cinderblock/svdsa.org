@@ -92,6 +92,9 @@ failures pre-date this work (reproduced on unmodified baseline).
 
 ## Next steps
 
+0. **Rich text should look like the real page, and show raw HTML honestly** —
+   its own doc: `plans/svdsa-editor-wysiwyg-fidelity.md`. Supersedes item 1
+   below, which is one of the options it weighs.
 1. remark-directive shortcodes (vetted component registry) for the 20
    raw-HTML files: ::canva, ::action-network, ::donate-button, ::embed-form.
 2. Recurrence exceptions (`skip:` dates / `moved:` map) → collapse the 5
@@ -222,3 +225,105 @@ editor/
   the imperative getValue handoff.
 - Don't put frontmatter into the rich editor.
 - Don't add a CDN loader for Monaco (self-contained bundle only).
+
+## 2026-07-27 round 5 — recurring events become first-class
+
+Prompted by the .ics work: since a subscription's RRULE never runs dry, the
+site should derive occurrences the same way instead of baking them.
+
+- **Storage is now iCalendar-native**: `recurrence: {rrule, exdate, rdate}`
+  replaces the bespoke `repeats:`. `scripts/expand-recurring.ts` and
+  `scripts/ics.ts:rruleFor` are gone (no translation layer).
+- **`app/lib/recurrence.ts` is the one engine** — build, browser and feeds.
+  Hand-written to keep an RRULE library off the client; conformance-tested
+  against `rrule` (23 rule shapes incl. 5th-weekday, last-weekday, COUNT,
+  UNTIL, leap Feb) and the feeds cross-checked against Mozilla ICAL.js.
+- **All 21 series now have rules** — EXDATE/RDATE let the five holiday-shifted
+  WG series collapse at last (electoral, intl-solidarity, liberation & justice,
+  both transit ones). The two transit series turned out to be exactly 4-weekly;
+  the earlier inference just never tried a 28-day interval.
+- **Verified no published date moved**: all 267 previously-baked dates within
+  the old 180-day window are reproduced exactly (0 missing, 0 changed).
+- Prerender: 90-day window of dated pages + one page per series (390 → 255
+  pages). Dated URLs beyond the window render client-side from the rule.
+- **The decay risk is closed by design.** The browser expands rules against the
+  reader's clock, so the missing cron is now only a freshness optimization.
+  Regression test asserts the calendar still lists meetings with the clock set
+  to 2099.
+
+### Known gaps after round 5
+
+- The **editor shows `recurrence` as a read-only JSON blob** (the metadata form
+  only has widgets for primitives). A proper recurrence editor is the obvious
+  next editor slice.
+- The three phase-shifting series carry their known deviations as EXDATE/RDATE
+  through ~2027-04; **beyond that they generate clean biweekly dates that no WG
+  has confirmed.** Worth asking those WGs.
+- Still open from earlier rounds: directive shortcodes, socials regression
+  (3 of ~8 accounts), 857 unaccented "San Jose", scheduled rebuild.
+
+## 2026-07-27 round 6 — recurrence editor in the WYSIWYG (closes the round-5 gap)
+
+`recurrence` was showing as a read-only JSON blob, so a WYSIWYG-only member
+could not reschedule a meeting. Now a first-class widget
+(`editor/web/recurrence-field.tsx` + pure model in `recurrence-model.ts`):
+repeat switch, weekly/monthly, weekday chips, optional end date, and
+skip-a-date / add-a-date for cancellations and moves. Previews upcoming dates
+with the SAME engine as the site and feeds, so the editor can't disagree with
+what members see. A one-off can be promoted to a series and back.
+
+**Three real bugs found only by driving the UI in a browser** (worth remembering
+— none were visible to typecheck, build, or the site's own tests):
+
+1. `values[key] ?? initial` in the frontmatter form treated `null` as nullish,
+   so **"stop repeating" silently fell back to the stored rule** — the toggle
+   couldn't be turned off.
+2. `editor:dev` was broken from the day it was added: the Vite proxy key
+   `"/api"` matches by PREFIX, so it swallowed the SPA's own `api.ts` module and
+   the app never booted in dev. Fixed with the `^/api/` regex form. (It had
+   never been noticed because local testing always went through
+   `wrangler dev` against built assets.)
+3. Running the site's and the editor's Vite dev servers concurrently made them
+   **clobber each other's `node_modules/.vite` dep-optimization cache**, which
+   broke client JS on whichever lost the race — this failed 5 site tests that
+   depend on hydration. Fixed with a separate `cacheDir` for the editor.
+
+Also fixed while in there: file-list entries were `<a>` elements with no `href`
+(not focusable, not announced as links) — now buttons; and the recurrence
+enable row was a `<label>` wrapping a `<button>`, which leaked surrounding text
+into the control's accessible name.
+
+Test coverage added: `tests/recurrence-editor.spec.ts` (round-trip over every
+rule in the corpus) and `tests/editor-ui.spec.ts` (7 browser tests driving the
+widget with `/api/*` stubbed, asserting the exact frontmatter a save commits).
+The editor had **zero** browser coverage before this. playwright.config.ts now
+starts the editor SPA as a second webServer.
+
+## 2026-07-28 round 7 — site batch + editor navigation
+
+Site (066a892): home-page copy moved into content/pages/home.md (frontmatter,
+with code-side defaults) so casual editors can change the front page; WG and
+committee emoji from the chapter's list in navigation.json, rendered in menus,
+home cards and page headings; contact page branch sections removed and socials
+shown as red buttons; event categories coloured from a fixed hue table;
+online/in-person/HYBRID markers; agenda grouped by day so a date appears once.
+Also restored the socials the rebuild had dropped (3 of 6 were missing).
+
+Contact (01d013d): the "contact form" was the **HGO Grievance Form** — the live
+WP site links it only as such, and the chapter's contact method is an email
+address. Renamed to grievanceForm/grievancePolicy + email; the route now renders
+the editable page body instead of a mislabelled embed.
+
+Editor (0bfbe8d): content browsing now mirrors the site's own navigation
+(navigation.json ships with /api/list); /api/titles → /api/meta returning title,
+live URL, date and recurrence in the same single GraphQL call; two-line rows,
+sorting, colour-coded section cards; `?edit` on any live page jumps to the
+editor with that file open (?url= / ?path=).
+
+### Open for the chapter
+
+- Emoji: Ecosocialist/Healthcare/Socialist Feminist were NOT in the chapter's
+  list — placeholders chosen. Electoral is listed by the chapter as a working
+  group but sits under committees in navigation.json — unresolved.
+- No general contact form exists; only the email address. If the chapter wants
+  one, it needs creating.

@@ -41,6 +41,7 @@ content/.raw/
 # Generated at build by scripts/build-content.ts — never hand-edited
 public/sitemap.xml
 public/robots.txt
+public/calendar/
 
 # Wrangler / Cloudflare
 .wrangler/
@@ -51,3 +52,7 @@ content/generated/
 
 # Editor setup walkthrough progress (local, non-secret)
 .editor-setup.local.json
+
+# Generated from content/config/redirects.yaml by build-content.ts
+public/_redirects
+media-originals/

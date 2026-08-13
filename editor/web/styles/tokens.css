@@ -1,0 +1,35 @@
+/*
+ * Design tokens — the whole palette, and the light/dark switch.
+ *
+ * Every other file in here refers to colours only through these variables, so a
+ * theme change is one edit and dark mode can't be forgotten in a new component.
+ */
+
+:root {
+  --red: #c0141a;
+  --red-soft: #f3d9da;
+  --ink: #191512;
+  --muted: #5f574f;
+  --line: #e4ddd2;
+  --hover: #f3efe9;
+  --bg: #ffffff;
+  --bg-raised: #faf8f5;
+  /* The top bar. Deliberately a quiet neutral, one step darker than the
+     sidebar, so the chapter's red stays reserved for things that mean
+     something (the brand mark, the primary action, drafts, errors). */
+  --bar: #ece7df;
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --red: #e04046;
+    --red-soft: #4a2023;
+    --ink: #ece7e0;
+    --muted: #a89f93;
+    --line: #3a352f;
+    --hover: #2a2622;
+    --bg: #1c1917;
+    --bg-raised: #242019;
+    --bar: #2c2724;
+  }
+}

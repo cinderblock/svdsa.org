@@ -14,9 +14,8 @@ organizer: Silicon Valley DSA
 categories:
   - Steering Committee
   - SV DSA
-repeats:
-  freq: weekly
-  interval: 1
+recurrence:
+  rrule: FREQ=WEEKLY;BYDAY=WE
 ---
 
 The elected officers (Steering Committee) meet every week on Zoom to check in on our Chapter’s administration, make decisions on behalf of the Chapter in between general meetings, and collaborate on urgent tasks. If you’re interested in the nuts and bolts of Chapter administration or have questions for the officers, you’re welcome to attend.
