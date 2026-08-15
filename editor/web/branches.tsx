@@ -204,7 +204,8 @@ export function BranchBrowser({
                 target="_blank"
                 rel="noreferrer"
               >
-                Open preview ↗
+                {/* Production isn't a preview of anything — it's the site. */}
+                {b.isProduction ? "Open live site ↗" : "Open preview ↗"}
               </a>
               {b.pull && (
                 <a
