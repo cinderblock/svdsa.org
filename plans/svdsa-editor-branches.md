@@ -96,6 +96,25 @@ visible caption into the accessible name instead of labelling it — the exact
 bug round 6 of `svdsa-editor-rich-ui.md` hit with the recurrence toggle.
 `tests/picker.spec.ts` asserts the name is exactly `Sort content`.
 
+## Round 3 — production is not a preview (SHIPPED)
+
+The browser linked `red` to `https://red-site.<subdomain>.workers.dev/`. **That
+host need not exist.** Workers Builds hands out the `<alias>-<worker>` hostname
+only to NON-production branches; the production branch deploys to the Worker's
+own name, so `red` is served at `site.<subdomain>` — which `siteOrigin()` had
+been computing correctly all along for the "view live ↗" link.
+
+Fixed by moving the derivation into `editor/src/urls.ts` (pure, no `Request`)
+with one `branchUrl(url, env, branch, production)` that owns the rule, and
+teaching the row to say "Open live site ↗" instead of "Open preview ↗" for
+production.
+
+**Why a new module rather than an inline conditional:** the browser specs stub
+`/api/*`, so they cannot see a URL the Worker computed wrongly — the original
+bug was invisible to a green suite. `tests/preview-urls.spec.ts` now tests the
+functions directly, including that the rule follows `production` rather than
+hard-coding `red`, and that `SITE_WORKER` stays configuration.
+
 ## Findings / gotchas
 
 - **`Ref.compare(headRef:)` is inverted from what you want.** The query asks

@@ -25,6 +25,11 @@ import {
   serializeMarkdown,
   validBranchName,
 } from "./content/serialize";
+import {
+  branchUrl,
+  previewUrl as previewOf,
+  siteOrigin as originOf,
+} from "./urls";
 import { fixText, lintText, type StyleRule } from "./content/lint";
 import { checkLinks } from "./content/links";
 import {
@@ -62,31 +67,13 @@ const json = (data: unknown, status = 200) =>
     headers: { "content-type": "application/json" },
   });
 
-/**
- * Both the site and this editor are Workers on the same account, so their
- * hostnames differ only in the first label: `<worker>.<subdomain>.workers.dev`.
- * Swap in the site Worker's name to reach it — and prefix the branch alias for
- * a Workers Builds preview. Keeps account/name moves to `SITE_WORKER`.
+/*
+ * URL derivation lives in ./urls.ts (pure, directly tested). These adapters
+ * keep the existing `(request, env, …)` call sites unchanged.
  */
-function siteHostParts(request: Request, env: Env) {
-  const [, ...rest] = new URL(request.url).host.split(".");
-  return { worker: env.SITE_WORKER ?? "site", rest: rest.join(".") };
-}
-
-function siteOrigin(request: Request, env: Env): string {
-  const { worker, rest } = siteHostParts(request, env);
-  return `https://${worker}${rest ? `.${rest}` : ""}`;
-}
-
-/** Best-effort Workers Builds preview URL for a branch of the production Worker. */
-function previewUrl(request: Request, env: Env, branch: string): string {
-  const { worker, rest } = siteHostParts(request, env);
-  const alias = branch
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
-  return `https://${alias}-${worker}${rest ? `.${rest}` : ""}/`;
-}
+const siteOrigin = (request: Request, env: Env) => originOf(request.url, env);
+const previewUrl = (request: Request, env: Env, branch: string) =>
+  previewOf(request.url, env, branch);
 
 /**
  * Split a `draft/<who>/<base>` workspace branch back into its parts, so the
@@ -153,10 +140,12 @@ async function handleApi(
       production,
       branches: details.map((b) => {
         const draft = parseDraftBranch(b.name);
+        const isProduction = b.name === production;
         return {
           ...b,
-          previewUrl: previewUrl(request, env, b.name),
-          isProduction: b.name === production,
+          // branchUrl knows production isn't an aliased preview — see urls.ts.
+          previewUrl: branchUrl(request.url, env, b.name, production),
+          isProduction,
           // `mine` drives "your draft" in the UI. Recomputing the name from the
           // signed-in identity is exact — no guessing from the `who` segment,
           // which is a slug and can collide.
