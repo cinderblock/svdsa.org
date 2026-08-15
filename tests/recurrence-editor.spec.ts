@@ -57,7 +57,7 @@ test("the widget's controls build the rules an editor would expect", () => {
       freq: "WEEKLY",
       interval: 2,
       days: ["MO"],
-      nth: 1,
+      nths: [1],
       until: "",
     }),
   ).toBe("FREQ=WEEKLY;INTERVAL=2;BYDAY=MO");
@@ -67,7 +67,7 @@ test("the widget's controls build the rules an editor would expect", () => {
       freq: "WEEKLY",
       interval: 1,
       days: ["TU", "TH"],
-      nth: 1,
+      nths: [1],
       until: "",
     }),
   ).toBe("FREQ=WEEKLY;BYDAY=TU,TH");
@@ -77,14 +77,38 @@ test("the widget's controls build the rules an editor would expect", () => {
       freq: "MONTHLY",
       interval: 1,
       days: ["SA"],
-      nth: 3,
+      nths: [3],
       until: "2027-06-30",
     }),
   ).toBe("FREQ=MONTHLY;BYDAY=3SA;UNTIL=20270630");
   // "last Sunday".
   expect(
-    toRRule({ freq: "MONTHLY", interval: 1, days: ["SU"], nth: -1, until: "" }),
+    toRRule({
+      freq: "MONTHLY",
+      interval: 1,
+      days: ["SU"],
+      nths: [-1],
+      until: "",
+    }),
   ).toBe("FREQ=MONTHLY;BYDAY=-1SU");
+  // TWICE a month on the same weekday. Three chapter meetings do this, and a
+  // single-ordinal model rewrote them to just the first one — silently deleting
+  // the month's second meeting from the calendar and the .ics feeds.
+  expect(
+    toRRule({
+      freq: "MONTHLY",
+      interval: 1,
+      days: ["TH"],
+      nths: [2, 4],
+      until: "",
+    }),
+  ).toBe("FREQ=MONTHLY;BYDAY=2TH,4TH");
+  // ...and it survives the trip back out of a stored rule.
+  expect(toDraft({ rrule: "FREQ=MONTHLY;BYDAY=2TH,4TH" }, "TH")).toMatchObject({
+    freq: "MONTHLY",
+    days: ["TH"],
+    nths: [2, 4],
+  });
 });
 
 test("an unparseable rule falls back instead of trapping the editor", () => {

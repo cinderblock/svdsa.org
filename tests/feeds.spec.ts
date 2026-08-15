@@ -75,8 +75,31 @@ test("series with hand-adjusted schedules keep their exceptions", () => {
     )!;
     const exdates = vevent.getAllProperties("exdate").length;
     const rdates = vevent.getAllProperties("rdate").length;
-    expect(exdates).toBe(s.recurrence.exdate?.length ?? 0);
-    expect(rdates).toBe(s.recurrence.rdate?.length ?? 0);
+
+    // Every EXDATE survives: an exclusion the feed drops would put a cancelled
+    // meeting back on a subscriber's calendar.
+    expect(exdates, `${s.slug} exdates`).toBe(s.recurrence.exdate?.length ?? 0);
+
+    /**
+     * RDATEs are NOT one-for-one. The feed omits any the RRULE already
+     * generates, because RFC 5545 makes the recurrence set a union but
+     * consumers don't agree — ICAL.js and real calendar apps emit such a date
+     * twice, showing the subscriber a duplicated meeting.
+     *
+     * So the invariant is "the extras, and only the extras". This became load
+     * bearing when three series had their rules broadened to 2nd-and-4th
+     * weekday while their old rdate compensations stayed behind.
+     */
+    const extras = (s.recurrence.rdate ?? []).filter(
+      (d) =>
+        !occurrences(
+          { rrule: s.recurrence.rrule, exdate: s.recurrence.exdate },
+          s.start,
+          d,
+          d,
+        ).length,
+    );
+    expect(rdates, `${s.slug} rdates beyond the rule`).toBe(extras.length);
   }
 });
 

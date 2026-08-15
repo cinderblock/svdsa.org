@@ -3,10 +3,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "bun run content && vite",
+    "build": "bun run content && vite build",
     "deploy": "bun run build && wrangler deploy",
-    "typecheck": "tsc"
+    "typecheck": "bun run content && tsc",
+    "//content": "The editor's home-page preview renders the SITE's real Home component, which imports content/generated/*.json — git-ignored artifacts of the root build. They exist locally because the site build made them, so this only fails where nothing else has built: a clean Workers Builds checkout with root directory `editor`. Generate them here rather than hoping.",
+    "content": "cd .. && bun run build:content"
   },
   "dependencies": {
     "@milkdown/crepe": "^7.21.3",

@@ -12,6 +12,10 @@
  * stale between rebuilds the way the site's expanded instance list does.
  */
 
+// The site's own expansion, so the feed can tell which RDATEs the RRULE already
+// covers — one engine deciding what a series means, not two.
+import { occurrences } from "../app/lib/recurrence";
+
 /** RFC 5545 §3.3.11 TEXT escaping. Order matters: backslash first. */
 function esc(s: string): string {
   return s
@@ -132,7 +136,39 @@ function vevent(ev: IcsEvent, dtstamp: string): string[] {
       ? `${name};VALUE=DATE:${dateOnly(date)}`
       : `${name};TZID=America/Los_Angeles:${dateOnly(date) + timeOfDay}`;
   for (const d of ev.exdate ?? []) lines.push(exception("EXDATE", d));
-  for (const d of ev.rdate ?? []) lines.push(exception("RDATE", d));
+  /**
+   * Skip any RDATE the RRULE already generates.
+   *
+   * RFC 5545 defines the recurrence set as a UNION, so a date in both is one
+   * occurrence — but consumers don't agree: ICAL.js (and, in testing, real
+   * calendar apps) emit it twice, which shows a subscriber the same meeting
+   * duplicated. Our own engine unions correctly, so without this the feed and
+   * the site disagree.
+   *
+   * This is defensive rather than cosmetic: it happens whenever a series' rule
+   * is broadened and its old `rdate` compensations are left behind, which is
+   * exactly what three chapter meetings look like right now.
+   */
+  const rdates = ev.rdate ?? [];
+  if (rdates.length) {
+    // NB: plain `YYYY-MM-DD` here, not dateOnly() — that returns the compact
+    // ICS form (20261112), which the engine doesn't parse, so comparing against
+    // it silently matches nothing and every RDATE survives.
+    const iso = (s: string) => s.slice(0, 10);
+    const days = rdates.map(iso).sort();
+    const fromRule = new Set(
+      ev.rrule
+        ? occurrences(
+            { rrule: ev.rrule, exdate: ev.exdate },
+            ev.start,
+            days[0],
+            days[days.length - 1],
+          )
+        : [],
+    );
+    for (const d of rdates)
+      if (!fromRule.has(iso(d))) lines.push(exception("RDATE", d));
+  }
   lines.push(`SUMMARY:${esc(ev.title)}`);
   if (ev.location) lines.push(`LOCATION:${esc(ev.location)}`);
   if (ev.description) lines.push(`DESCRIPTION:${esc(ev.description)}`);

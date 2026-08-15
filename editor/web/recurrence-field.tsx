@@ -158,20 +158,36 @@ export function RecurrenceField({
                 </select>
               </label>
             ) : (
-              <label>
-                <span>Which one</span>
-                <select
-                  aria-label="Which one"
-                  value={draft.nth}
-                  onChange={(e) => update({ nth: Number(e.target.value) })}
-                >
-                  {ORDINALS.map((o) => (
-                    <option key={o.value} value={o.value}>
+              <fieldset className="rec__nths">
+                {/* Toggles, not a dropdown: three chapter meetings happen twice
+                    a month on the same weekday (2nd AND 4th Thursday), which a
+                    single-choice control cannot express at all. */}
+                <legend>Which ones</legend>
+                {ORDINALS.map((o) => {
+                  const on = draft.nths.includes(o.value);
+                  return (
+                    <button
+                      key={o.value}
+                      type="button"
+                      aria-pressed={on}
+                      className={on ? "on" : ""}
+                      onClick={() =>
+                        update({
+                          // Keep first-seen order, and never let the list empty
+                          // out — a monthly rule with no ordinal is invalid.
+                          nths: on
+                            ? draft.nths.filter((n) => n !== o.value).length
+                              ? draft.nths.filter((n) => n !== o.value)
+                              : draft.nths
+                            : [...draft.nths, o.value],
+                        })
+                      }
+                    >
                       {o.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
+                    </button>
+                  );
+                })}
+              </fieldset>
             )}
 
             <label>
