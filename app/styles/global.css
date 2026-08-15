@@ -1191,16 +1191,19 @@ a.event-row:hover {
   color: hsl(var(--cat-hue) 60% 28%);
   border: 1px solid hsl(var(--cat-hue) 60% 82%);
 }
+/* These key off the hue directly rather than a var, so `?light` has to opt
+   them out by hand — unlike the palette above, which the `[data-force-light]`
+   block simply outbids. Miss this and forcing light leaves dark chips behind. */
 @media (prefers-color-scheme: dark) {
-  .tag--cat {
+  :root:not([data-force-light]) .tag--cat {
     background: hsl(var(--cat-hue) 45% 18%);
     color: hsl(var(--cat-hue) 70% 80%);
     border-color: hsl(var(--cat-hue) 40% 32%);
   }
-  .ecard {
+  :root:not([data-force-light]) .ecard {
     border-left-color: hsl(var(--cat-hue) 60% 55%);
   }
-  .ecard__place--hybrid {
+  :root:not([data-force-light]) .ecard__place--hybrid {
     color: hsl(var(--cat-hue) 70% 72%);
   }
 }
