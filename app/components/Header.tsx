@@ -1,23 +1,121 @@
 import { Link, NavLink } from "react-router";
-import { EXTERNAL, NAV } from "~/lib/site";
+import {
+  NAV,
+  isGroup,
+  type NavGroup,
+  type NavLink as NavLinkT,
+} from "~/lib/site";
 
+/**
+ * The chapter's name, once, beside the rose — as the original sets it. It was
+ * two stacked lines here for a while; the live top bar has never had a second
+ * line, and the wordmark that spells the name out in full is the hero's job.
+ */
 function Brand() {
   return (
-    <Link to="/" className="brand" aria-label="Silicon Valley DSA — home">
+    <Link to="/" className="brand">
       <img
         className="brand__mark"
-        src="/favicon-192.png"
+        src="/dsa-rose-mark.svg"
         alt=""
-        width={34}
-        height={34}
+        width={35}
+        height={35}
       />
-      <span className="brand__name">
-        <span>
-          <b>Silicon Valley</b>
-        </span>
-        <small>Democratic Socialists of America</small>
-      </span>
+      <span className="brand__name">Silicon Valley DSA</span>
     </Link>
+  );
+}
+
+/** An off-site target (dues, merch) still belongs in the menu it belongs in. */
+const isExternal = (to: string) => /^[a-z]+:/i.test(to);
+
+function Leaf({
+  item,
+  className,
+  children,
+}: {
+  item: NavLinkT;
+  className?: string;
+  children?: React.ReactNode;
+}) {
+  const label = (
+    <>
+      {item.icon && (
+        <span className="nav__icon" aria-hidden="true">
+          {item.icon}
+        </span>
+      )}
+      {item.label}
+      {children}
+    </>
+  );
+  return isExternal(item.to) ? (
+    <a className={className} href={item.to}>
+      {label}
+    </a>
+  ) : (
+    <NavLink className={className} to={item.to}>
+      {label}
+    </NavLink>
+  );
+}
+
+/**
+ * One menu entry, at any depth.
+ *
+ * `depth` only decides which way a submenu opens — down from the bar, sideways
+ * from inside a menu — so the recursion carries no other knowledge of where it
+ * is.
+ */
+function Entry({ node, depth }: { node: NavLinkT | NavGroup; depth: number }) {
+  const group = isGroup(node) ? node : null;
+  const link = node as NavLinkT;
+  return (
+    <li className={depth === 0 ? "nav__item" : undefined}>
+      {node.to ? (
+        <Leaf item={link} className={depth === 0 ? "nav__link" : undefined}>
+          {/* About is both a page and a menu. The caret is the only thing
+              saying there is more under it, so a link that opens one gets it
+              too — the original marks every menu the same way. */}
+          {group && <span aria-hidden="true"> ▾</span>}
+        </Leaf>
+      ) : (
+        <span
+          className={depth === 0 ? "nav__link" : "nav__parent"}
+          aria-haspopup="true"
+        >
+          {node.label} ▾
+        </span>
+      )}
+      {group && (
+        <ul className={depth === 0 ? "nav__menu" : "nav__menu nav__menu--sub"}>
+          {group.children!.map((c) => (
+            <Entry key={c.label} node={c} depth={depth + 1} />
+          ))}
+        </ul>
+      )}
+    </li>
+  );
+}
+
+/** The same tree, indented rather than flown out, for the mobile panel. */
+function PanelEntry({ node }: { node: NavLinkT | NavGroup }) {
+  const group = isGroup(node) ? node : null;
+  return (
+    <li>
+      {node.to ? (
+        <Leaf item={node as NavLinkT} />
+      ) : (
+        <strong>{node.label}</strong>
+      )}
+      {group && (
+        <ul className="sub">
+          {group.children!.map((c) => (
+            <PanelEntry key={c.label} node={c} />
+          ))}
+        </ul>
+      )}
+    </li>
   );
 }
 
@@ -31,42 +129,8 @@ export function Header() {
         <nav className="nav" aria-label="Primary">
           <ul className="nav__list">
             {NAV.map((group) => (
-              <li className="nav__item" key={group.label}>
-                {group.to ? (
-                  <NavLink to={group.to} className="nav__link">
-                    {group.label}
-                  </NavLink>
-                ) : (
-                  <span className="nav__link" aria-haspopup="true">
-                    {group.label} ▾
-                  </span>
-                )}
-                {group.children && (
-                  <ul className="nav__menu">
-                    {group.children.map((c) => (
-                      <li key={c.to}>
-                        <NavLink to={c.to}>
-                          {c.icon && (
-                            <span className="nav__icon" aria-hidden="true">
-                              {c.icon}
-                            </span>
-                          )}
-                          {c.label}
-                        </NavLink>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </li>
+              <Entry key={group.label} node={group} depth={0} />
             ))}
-            <li className="nav__cta">
-              <a className="btn btn-outline" href={EXTERNAL.donate}>
-                Donate
-              </a>
-              <Link className="btn btn-primary" to="/join/">
-                Join
-              </Link>
-            </li>
           </ul>
         </nav>
 
@@ -76,36 +140,8 @@ export function Header() {
           <div className="nav-panel">
             <ul>
               {NAV.map((group) => (
-                <li key={group.label}>
-                  {group.to ? (
-                    <NavLink to={group.to}>{group.label}</NavLink>
-                  ) : (
-                    <strong>{group.label}</strong>
-                  )}
-                  {group.children && (
-                    <ul className="sub">
-                      {group.children.map((c) => (
-                        <li key={c.to}>
-                          <NavLink to={c.to}>
-                            {c.icon && (
-                              <span className="nav__icon" aria-hidden="true">
-                                {c.icon}
-                              </span>
-                            )}
-                            {c.label}
-                          </NavLink>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </li>
+                <PanelEntry key={group.label} node={group} />
               ))}
-              <li>
-                <Link to="/join/">Join</Link>
-              </li>
-              <li>
-                <a href={EXTERNAL.donate}>Donate</a>
-              </li>
             </ul>
           </div>
         </details>

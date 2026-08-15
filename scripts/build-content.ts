@@ -345,8 +345,18 @@ await write("site.json", {
 // The home page's copy is content too (content/pages/home.md) so chapter
 // editors can change it in the browser; emit it as its own slim file rather
 // than making the home route import the whole pages bundle.
+//
+// `html` is the rendered BODY — the welcome inside the hero's plate card. It
+// lives in the body rather than in frontmatter because the original's does:
+// on the WordPress site that copy is the Welcome page's `entry-content`, three
+// paragraphs thick with <strong>, <em> and links, none of which survive a YAML
+// scalar. Keeping it a body also means the editor edits it with the same rich
+// text mode it uses for every other page.
 const homeDoc = pageDocs.find(({ data }) => data.path === "/");
-await write("home.json", homeDoc?.data ?? {});
+await write(
+  "home.json",
+  homeDoc ? { ...homeDoc.data, html: homeDoc.body } : {},
+);
 
 await write("pages.json", pages);
 await write("posts.json", posts);

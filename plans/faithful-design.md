@@ -6,8 +6,11 @@ DSA brand font"). Goal: reskin the static rebuild so it reads as clearly the
 _same_ site as the live WordPress one (`siliconvalleydsa.org`) — same visual
 language, not pixel-perfect.
 
-The content/routing/data layer is unchanged; this is a **reskin** (global.css +
-Header/Footer/home markup + assets).
+It began as a pure **reskin** — global.css, Header/Footer/home markup, assets —
+and the routing/data layer is still untouched. It is no longer content-neutral:
+the front page's words and the nav's shape are the original's now, so home.md,
+`app/lib/home.ts` and `app/lib/site.ts` belong to this branch too. See the
+2026-08-15 findings.
 
 ## Original design DNA (extracted from the live `dsa_wordpress_theme`)
 
@@ -71,6 +74,8 @@ Foundation-Sites based. Key tokens/patterns:
 11. [DONE] Restore the frontispiece after the `red` merge silently dropped it,
     and move Dispatches to the top — see "Findings: the merge that undid the
     reskin".
+12. [DONE] Take the top bar, the footer and the plate's copy to the original —
+    see "Findings: the top bar, the footer and the copy".
 
 ## Findings: the merge that undid the reskin
 
@@ -111,14 +116,83 @@ New tests guard both: "dispatches lead the page, directly under the
 frontispiece" and "a dispatch's title is legible on its card"
 (`tests/home.spec.ts`).
 
+## Findings: the top bar, the footer and the copy (2026-08-15)
+
+With the frontispiece back, three things still read as somebody else's site.
+All three were structural, not styling, and all three are now the original's.
+The live markup they were checked against is in this document's history — fetch
+`https://siliconvalleydsa.org/` and read `.top-bar`, `.svdsa-frontispiece` and
+`footer.footer` if it needs doing again.
+
+**The plate's copy is a page body, not frontmatter.** This is the finding the
+rest followed from. On the original, everything inside the plate — the wordmark,
+the rule, the three paragraphs — is the Welcome page's `entry-content`:
+
+```html
+<div style="text-align:center">
+  <h1><code>Silicon Valley</code></h1>
+  <h1>Democratic Socialists of America</h1>
+</div>
+<hr />
+<p>
+  …run <strong>democratically</strong>… We're <em>not</em> a political party…
+</p>
+<p>Come join us…, all while <strong>building community</strong>…</p>
+<p>
+  …one of our <strong><a>events</a></strong
+  >! … <strong>Solidarity Forever!</strong>
+</p>
+```
+
+So `content/pages/home.md` has a body now, and the plate renders it with the
+same `<Prose>` every other page uses. Consequences worth knowing:
+
+- `HomeCopy` lost `kicker`, `headline`, `headlineTwo` and `lead` — ten slots
+  remain, all headings and button labels. `HOME_HTML` (app/lib/home.ts) is the
+  body, and deliberately has **no default**: a fallback for a page of prose is
+  how home.md went missing unnoticed once already.
+- `build-content.ts` emits `html` into `home.json`; nothing else changed in the
+  pipeline, because home.md was always read by the same `readCollection`.
+- The wordmark is the document's own `h1`/`h2`. The monospace is why the
+  markdown says `` # `Silicon Valley` `` — a code span, exactly as the original
+  wraps it in `<code>`. Ours demotes the second line to `h2`; the original ships
+  two `h1`s.
+- **The editor gained tabs.** home.md is no longer body-less, so `Page`,
+  `Rich text` and `Source` all apply; `Page` is the default and there is no
+  `Preview` (Page is a better one). The plate in the `Page` pane re-renders from
+  the unsaved body through the site's own `renderMarkdown`, debounced.
+- **A trust boundary moved.** The home pane's iframe is same-origin and runs
+  scripts, which was safe while the page was React components over plain
+  strings. It now renders `rehype-raw` output, so `inertHtml` strips scripts,
+  framed content and `on*` handlers before it goes in. That guard is for the
+  editor only — the site renders the same markdown unfiltered, as it does every
+  other page.
+
+**The top bar** is one line beside the rose (`public/dsa-rose-mark.svg`, pulled
+from the chapter's theme — see `public/README.md`), and Donate and Join DSA are
+plain links rather than an outline/red button pair. `NAV` now nests one level:
+Working Groups and Committees are lists inside About, and Donate opens Monthly
+Local Dues + DSA Merch. `NavGroup.children` therefore holds `NavLink | NavGroup`
+and the Header renders it recursively; second-level menus fly out sideways, and
+flip to the left below 78rem so the right-hand ones don't open off-screen.
+
+**The footer** is the accounts and the newsletter, full stop: circular black
+buttons (red on hover) with inline SVG glyphs, a large red "Sign up for our
+newsletter!" opposite them, and the copyright. The four link columns are gone —
+the live site has never had them, and they were a second, quietly diverging copy
+of the nav two feet above. Glyphs are paths in `app/components/SocialIcon.tsx`
+keyed by the `label` in `socials.yaml`, with an initial-in-a-circle fallback so
+a newly added account is never a blank button.
+
 ### Known gaps against the original
 
-- The plate holds **one** paragraph where the live site has three, because
-  `lead` is a plain string and the original's copy is full of inline
-  `<strong>`/`<em>`/links. Closing that needs inline markdown in the slot layer,
-  end to end through the editor's contenteditable — deliberately not done.
-- Footer socials are black pills with text labels; the original uses circular
-  icon buttons. Never done on this branch, not a regression.
+- The original's second wordmark line is an `h1`; ours is an `h2`, so the page
+  has one `h1`. Deliberate.
+- The original's top bar has no `/about/` link at all — About is `href="#"`,
+  purely a menu. Ours links to the About page and marks the menu with a caret.
+- Working-group emoji show in the menus, as they do on the original, but the
+  original also has them in a different order (alphabetical); ours follows
+  `navigation.yaml`.
 
 ## Findings: editor integration (branch-as-draft)
 
@@ -130,9 +204,12 @@ frontispiece" and "a dispatch's title is legible on its card"
   as the editor via a bot credential); Workers Builds deploys it to a preview
   URL; **publish = merge the draft branch into `red`**.
 - **Coupling:** the editor's base is `red`. So editors edit/publish against
-  `red`, not `faithful-design`. For the editor to operate on the new design,
-  the reskin must **land on `red`** (merge). Rebasing kept `faithful-design`
-  caught up and trivially mergeable; the actual merge is Cameron's call.
+  `red`, not `theme/faithful`. For the editor to operate on the new design,
+  the reskin must **land on `red`** (merge). The actual merge is Cameron's call.
+- **This branch is no longer trivially mergeable.** It owns hero content
+  (`content/pages/home.md`), the slot set (`app/lib/home.ts`), the nav shape
+  (`app/lib/site.ts`), the Header and the Footer. Expect real conflicts in all
+  of those, and resolve toward whichever front page `red` ends up with.
 
 ## Things not to do
 

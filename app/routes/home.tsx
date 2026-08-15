@@ -4,9 +4,9 @@ import { expandEvents, postsIndex, upcomingEvents } from "~/lib/data";
 import { isUpcoming, shortDate } from "~/lib/format";
 import { useNow } from "~/lib/useNow";
 import { EventCard } from "~/components/EventCard";
-// Every word on this page is a <Slot>, so the browser editor can render this
-// very component with live values and make each one editable in place.
-import { Slot } from "~/components/HomeSlot";
+// Every word on this page comes through these, so the browser editor can render
+// this very component with live values and make each one editable in place.
+import { HomeBody, Slot } from "~/components/HomeSlot";
 import { CHAPTER_PHOTOS, EXTERNAL, SITE, WORKING_GROUPS } from "~/lib/site";
 
 export const meta: MetaFunction = () => {
@@ -51,25 +51,11 @@ export default function Home() {
             />
           </div>
           <div className="plate">
-            <p className="kicker plate__kicker">
-              <Slot k="kicker" />
-            </p>
-            {/* The chapter's name, set as the original sets it: "Silicon
-                Valley" in monospace over "Democratic Socialists of America".
-                Two spans rather than one string so each line keeps its own
-                type treatment while staying separately editable. */}
-            <h1 className="plate__wordmark">
-              <span className="sv">
-                <Slot k="headline" />
-              </span>
-              <span className="dsa">
-                <Slot k="headlineTwo" />
-              </span>
-            </h1>
-            <hr />
-            <p>
-              <Slot k="lead" />
-            </p>
+            {/* The wordmark, the rule and the welcome paragraphs are all one
+                document — content/pages/home.md's body — because that is what
+                they are on the original, where the plate holds the Welcome
+                page's entry-content. Bold, italics and links come free. */}
+            <HomeBody />
             <div className="hero__actions">
               <Link className="btn btn-primary" to="/join/">
                 <Slot k="ctaPrimary" />

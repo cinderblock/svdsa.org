@@ -218,6 +218,12 @@ img {
   border-color: currentColor;
   color: var(--text);
 }
+/* The footer's newsletter invitation, which the original sets much larger than
+   anything else down there — it is the one thing it asks a reader to do. */
+.btn-lg {
+  font-size: 1.25rem;
+  padding: 0.8rem 1.6rem;
+}
 
 /* ---- Header / nav -------------------------------------------------------- */
 
@@ -249,20 +255,10 @@ img {
   flex: none;
   display: block;
 }
+/* One line, in the body colour — the original's `dsa-top-name`. */
 .brand__name {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.05;
-}
-.brand__name b {
-  color: var(--red);
   font-weight: 700;
-}
-.brand__name small {
-  font-size: 0.72rem;
-  font-weight: 500;
-  color: var(--muted);
-  letter-spacing: 0.01em;
+  line-height: 1.1;
 }
 
 .nav {
@@ -320,31 +316,54 @@ img {
     transform 0.12s ease;
 }
 .nav__item:hover > .nav__menu,
-.nav__item:focus-within > .nav__menu {
+.nav__item:focus-within > .nav__menu,
+.nav__menu li:hover > .nav__menu,
+.nav__menu li:focus-within > .nav__menu {
   opacity: 1;
   visibility: visible;
   transform: translateY(0);
 }
+.nav__menu li {
+  position: relative;
+}
 .nav__menu li:not(:last-child) {
   border-bottom: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
 }
-.nav__menu a {
+.nav__menu a,
+.nav__parent {
   display: block;
   padding: 0.6rem 0.9rem;
   color: var(--text);
   font-size: 0.95rem;
   font-weight: 500;
 }
-.nav__menu a:hover {
+.nav__menu a:hover,
+.nav__menu li:hover > .nav__parent,
+.nav__menu li:focus-within > .nav__parent {
   background: var(--ink);
   color: var(--ink-text);
   text-decoration: none;
 }
-.nav__cta {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-left: 0.6rem;
+.nav__parent {
+  cursor: pointer;
+}
+/* Second level (Working Groups, Committees) opens sideways out of the first,
+   the way the original's Foundation dropdown does. */
+.nav__menu--sub {
+  top: 0;
+  left: 100%;
+  border-top: none;
+  border-left: 3px solid var(--ink);
+}
+/* On a narrow window the far-right menus would open off-screen; flip them back
+   over their parent instead. */
+@media (max-width: 78rem) {
+  .nav__menu--sub {
+    left: auto;
+    right: 100%;
+    border-left: none;
+    border-right: 3px solid var(--ink);
+  }
 }
 
 /* Mobile nav uses a native <details> disclosure — no JS required */
@@ -397,6 +416,15 @@ img {
     padding-left: 1rem;
     font-weight: 500;
     color: var(--muted);
+  }
+  /* Working Groups and Committees sit a level deeper, under About. There is no
+     flyout on a touch screen, so depth is indentation. */
+  .nav-panel .sub .sub a {
+    padding-left: 2rem;
+  }
+  .nav-panel .sub strong {
+    padding-left: 1rem;
+    font-size: 0.9rem;
   }
   .nav-panel strong {
     display: block;
@@ -453,47 +481,52 @@ img {
   padding: clamp(1.5rem, 3vw, 2.5rem);
   box-shadow: 0 10px 40px -12px rgba(0, 0, 0, 0.45);
 }
-/* The original has no kicker above the wordmark; the slot still has to render
-   somewhere, so it sits over the plate as a quiet eyebrow rather than being
-   dropped (a slot the editor offers but the page never shows is worse). */
-.plate__kicker {
-  text-align: center;
-  margin: 0 0 0.5rem;
+/* The plate's contents are a markdown body rendered through `.prose`, so the
+   wordmark is the document's own h1/h2 rather than a bespoke element. The
+   original does the same: `<h1><code>Silicon Valley</code></h1>` over
+   `<h1>Democratic Socialists of America</h1>`, centred, then an `<hr>`. Ours
+   demotes the second to h2 — one h1 per page — and takes the size back. */
+.plate .prose {
+  max-width: none;
 }
-.plate__wordmark {
+.plate .prose h1,
+.plate .prose h2 {
   text-align: center;
-  margin: 0 0 1rem;
-  font-weight: 700;
+  margin: 0;
+  line-height: 1.1;
 }
-.plate__wordmark .sv {
-  display: block;
-  font-family:
-    ui-monospace, "Cascadia Code", "SFMono-Regular", Menlo, monospace;
+.plate .prose h1 {
   font-size: clamp(1.8rem, 4vw, 2.6rem);
   font-weight: 700;
-  line-height: 1.1;
-  color: var(--text);
 }
-.plate__wordmark .dsa {
-  display: block;
+/* The monospace is the original's, and it is why the markdown says
+   `` `Silicon Valley` `` — a code span, not a font declaration in content. */
+.plate .prose h1 code {
+  font-family:
+    ui-monospace, "Cascadia Code", "SFMono-Regular", Menlo, monospace;
+  font-size: inherit;
+  background: none;
+  padding: 0;
+  color: inherit;
+}
+.plate .prose h2 {
   font-size: clamp(1.4rem, 3vw, 2rem);
   font-weight: 600;
-  line-height: 1.15;
   margin-top: 0.15rem;
 }
 /* The original rules off the wordmark across the whole plate, not with a
    centred stub. */
-.plate hr {
+.plate .prose hr {
   border: none;
   border-top: 1px solid var(--red);
   width: 100%;
   margin: 1rem auto 1.25rem;
 }
-.plate p {
+.plate .prose p {
   margin: 0 0 0.9rem;
   font-size: 1.02rem;
 }
-.plate p:last-child {
+.plate .prose > :last-child {
   margin-bottom: 0;
 }
 .hero__actions {
@@ -674,36 +707,26 @@ img {
   border-top: 3px solid var(--ink);
   color: var(--text);
 }
+/* Accounts on one side, the newsletter on the other — the original's two
+   halves. They stack, centred, before either can get cramped. */
 .site-footer__grid {
-  display: grid;
-  gap: 2rem;
-  grid-template-columns: 1.5fr repeat(3, 1fr);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem 2rem;
+  align-items: center;
+  justify-content: space-between;
   padding: 2.5rem 0;
 }
 @media (max-width: 48rem) {
   .site-footer__grid {
-    grid-template-columns: 1fr 1fr;
+    flex-direction: column;
+    justify-content: center;
   }
-}
-.site-footer h4 {
-  display: inline-block;
-  font-size: 0.8rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--ink-text);
-  background: var(--ink);
-  padding: 0.3rem 0.6rem;
-  border-radius: 0.25rem;
-  margin: 0 0 0.9rem;
 }
 .site-footer ul {
   list-style: none;
   margin: 0;
   padding: 0;
-}
-.site-footer li {
-  margin-bottom: 0.4rem;
 }
 .site-footer a {
   color: var(--text);
@@ -711,27 +734,35 @@ img {
 .socials {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 0.6rem;
-  margin-top: 0.9rem;
 }
-/* Circular social buttons: black, red on hover (original signature) */
+/* Circular account buttons: black, red on hover (original signature). Round,
+   not pill-shaped — which is what they became when they held text. */
 .socials a {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 2.5rem;
-  height: 2.5rem;
-  padding: 0 0.9rem;
-  border-radius: 999px;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
   background: var(--ink);
   color: var(--ink-text);
-  font-size: 0.8rem;
-  font-weight: 600;
   transition: background 0.15s ease;
 }
 .socials a:hover {
   background: var(--red);
   text-decoration: none;
+}
+.socials svg {
+  width: 1.35rem;
+  height: 1.35rem;
+  display: block;
+}
+.socials__initial {
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1;
 }
 .site-footer__bar {
   border-top: 1px solid var(--border);

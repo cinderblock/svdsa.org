@@ -25,12 +25,28 @@ test.describe("Home Page", () => {
   });
 
   test("displays hero wordmark heading", async ({ page }) => {
+    // "Silicon Valley" is the h1 and set in monospace, as the original sets it;
+    // the chapter's full name follows as the h2 beneath.
     const heading = page.getByRole("heading", { level: 1 });
-    await expect(heading).toContainText("Democratic Socialists of America");
+    await expect(heading).toHaveText("Silicon Valley");
+    await expect(page.locator(".plate .prose h2")).toHaveText(
+      "Democratic Socialists of America",
+    );
   });
 
   test("hero welcome copy states the mission", async ({ page }) => {
-    await expect(page.locator(".plate")).toContainText("working class power");
+    const plate = page.locator(".plate");
+    await expect(plate).toContainText("working class power");
+    // Three paragraphs with emphasis and links, because the welcome is a
+    // markdown body rather than a frontmatter string. A regression here means
+    // the plate has been flattened back into a scalar.
+    await expect(plate.locator(".prose > p")).toHaveCount(3);
+    await expect(plate.locator(".prose strong").first()).toHaveText(
+      "democratically",
+    );
+    await expect(
+      plate.locator(".prose a", { hasText: "events" }),
+    ).toHaveAttribute("href", "/calendar");
   });
 
   test("shows upcoming events section", async ({ page }) => {
@@ -42,7 +58,9 @@ test.describe("Home Page", () => {
   test("dispatches lead the page, directly under the frontispiece", async ({
     page,
   }) => {
-    const order = await page.locator("main section h2").allTextContents();
+    const order = await page
+      .locator("main > section .section__head h2")
+      .allTextContents();
     expect(order[0]).toContain("dispatches");
     // Not just first — first of the *sections*, i.e. nothing between it and
     // the hero, which is what the live site does.
@@ -65,6 +83,53 @@ test.describe("Home Page", () => {
     await expect(
       page.getByRole("link", { name: "Calendar" }).first(),
     ).toBeVisible();
+  });
+
+  test("the top bar is the chapter's, menu for menu", async ({ page }) => {
+    // One line beside the rose. It was a two-line lockup for a while, which the
+    // live top bar has never had.
+    await expect(page.locator(".brand__name")).toHaveText("Silicon Valley DSA");
+
+    // Donate and Join DSA are the last two links, not a pair of buttons.
+    await expect(page.locator(".nav__cta")).toHaveCount(0);
+    const top = page.locator(".nav__list > .nav__item > .nav__link");
+    await expect(top).toHaveText([
+      "Calendar",
+      /^About/,
+      /^Resources/,
+      "Blog",
+      /^Donate/,
+      "Join DSA",
+    ]);
+
+    // Working groups sit a level in, under About, as they do on the original.
+    const about = page.locator(".nav__item", { hasText: "About" }).first();
+    await about.hover();
+    const groups = about.locator(".nav__menu li", {
+      hasText: "Working Groups",
+    });
+    await groups.hover();
+    await expect(
+      groups.locator(".nav__menu--sub a", { hasText: "Housing" }),
+    ).toBeVisible();
+  });
+
+  test("the footer is the accounts and the newsletter, not a second nav", async ({
+    page,
+  }) => {
+    const footer = page.locator(".site-footer");
+    // Round, and a glyph rather than the account's name — they became wide
+    // pills the moment they held text.
+    const first = footer.locator(".socials a").first();
+    await expect(first.locator("svg")).toBeVisible();
+    const box = await first.boundingBox();
+    expect(box!.width).toBeCloseTo(box!.height, 0);
+
+    await expect(
+      footer.getByRole("link", { name: /newsletter/i }),
+    ).toBeVisible();
+    // The four link columns are gone; the nav above is the nav.
+    await expect(footer.locator("h4")).toHaveCount(0);
   });
 });
 

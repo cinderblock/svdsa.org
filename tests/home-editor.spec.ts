@@ -21,10 +21,6 @@ const FRONTMATTER = {
   slug: "home",
   path: "/",
   title: "Home",
-  kicker: "Silicon Valley · South Bay",
-  headline: "Building working-class power,",
-  headlineTwo: "for the many — not the few.",
-  lead: "We're not a political party — we're a community.",
   ctaPrimary: "Join us",
   ctaEvents: "See upcoming events",
   ctaDonate: "Donate",
@@ -36,6 +32,21 @@ const FRONTMATTER = {
   closingHeading: "Ready to get organized?",
   closingIntro: "Come to an event.",
 };
+
+/**
+ * The plate's welcome, as a body. Deliberately not the shipped copy: these
+ * tests should fail when the pane stops rendering the file it was handed, not
+ * when the chapter rewords its own front page.
+ */
+const BODY = [
+  "# `Sample Valley`",
+  "",
+  "## Democratic Socialists of America",
+  "",
+  "---",
+  "",
+  "We're **not** a political party — we're a community.",
+].join("\n");
 
 const json = (b: unknown) => ({
   status: 200,
@@ -90,7 +101,7 @@ async function mockEditor(page: Page): Promise<{ last: Saved }> {
         sha: "abc",
         kind: "markdown",
         frontmatter: FRONTMATTER,
-        body: "",
+        body: BODY,
       }),
     ),
   );
@@ -107,8 +118,8 @@ async function openHome(page: Page) {
   await page.getByRole("button", { name: /Home/ }).first().click();
   const frame = page.frameLocator("iframe.preview");
   await expect(
-    frame.getByRole("textbox", { name: "Hero: Headline", exact: true }),
-  ).toHaveText(FRONTMATTER.headline, { timeout: 20_000 });
+    frame.getByRole("textbox", { name: "Closing: Heading", exact: true }),
+  ).toHaveText(FRONTMATTER.closingHeading, { timeout: 20_000 });
   return frame;
 }
 
@@ -141,14 +152,40 @@ test.describe("the home page editor", () => {
     await expect(
       frame.getByRole("heading", { name: "Where the work happens" }),
     ).toBeVisible();
-    await expect(frame.locator(".plate__wordmark")).toContainText(
-      FRONTMATTER.headlineTwo,
-    );
 
-    // One mode, because the other three have nothing to show for this file.
-    await expect(page.getByRole("button", { name: "Page" })).toBeDisabled();
+    // The plate is the file's BODY, rendered through the site's own markdown
+    // pipeline — bold and all, which is the whole reason it isn't a slot.
+    const plate = frame.locator(".plate .prose");
+    await expect(plate.locator("h1")).toHaveText("Sample Valley");
+    await expect(plate.locator("strong")).toHaveText("not");
+
+    // Page is the default and its own tab; the body gets the ordinary two.
+    await expect(page.getByRole("button", { name: "Page" })).toHaveClass(/on/);
     await expect(page.getByRole("button", { name: "Rich text" })).toHaveCount(
-      0,
+      1,
+    );
+    // Preview would be a worse Page — the body without the page around it.
+    await expect(page.getByRole("button", { name: "Preview" })).toHaveCount(0);
+  });
+
+  test("the plate follows the body as it is typed", async ({ page }) => {
+    // The point of this pane: what the words will look like where they land,
+    // not in a document view. So an unsaved body edit has to reach the plate.
+    await mockEditor(page);
+    const frame = await openHome(page);
+
+    await page.getByRole("button", { name: "Source" }).click();
+    // Monaco is lazy-loaded and only takes keystrokes once focused.
+    const source = page.locator(".pane .monaco-editor").first();
+    await expect(source).toBeVisible({ timeout: 30_000 });
+    await source.click();
+    await page.keyboard.press("ControlOrMeta+a");
+    await page.keyboard.type("## Solidarity Forever");
+
+    await page.getByRole("button", { name: "Page" }).click();
+    await expect(frame.locator(".plate .prose h2")).toHaveText(
+      "Solidarity Forever",
+      { timeout: 20_000 },
     );
   });
 
@@ -157,8 +194,8 @@ test.describe("the home page editor", () => {
     const frame = await openHome(page);
 
     await frame
-      .getByRole("textbox", { name: "Hero: Headline", exact: true })
-      .fill("Building a better South Bay,");
+      .getByRole("textbox", { name: "Working groups: Heading", exact: true })
+      .fill("Where the work gets done");
     await frame
       .getByRole("textbox", { name: "Closing: Heading", exact: true })
       .fill("Come organize with us");
@@ -167,12 +204,14 @@ test.describe("the home page editor", () => {
     await expect(page.locator(".msg.ok")).toBeVisible({ timeout: 15_000 });
 
     expect(captured.last.frontmatter).toMatchObject({
-      headline: "Building a better South Bay,",
+      groupsHeading: "Where the work gets done",
       closingHeading: "Come organize with us",
       // Untouched slots round-trip verbatim rather than being rebuilt.
-      kicker: FRONTMATTER.kicker,
-      lead: FRONTMATTER.lead,
+      ctaPrimary: FRONTMATTER.ctaPrimary,
+      groupsIntro: FRONTMATTER.groupsIntro,
     });
+    // And the body it never touched goes back unchanged.
+    expect(captured.last.body).toBe(BODY);
   });
 
   test("a slot that takes a newline would produce broken YAML, so it can't", async ({
@@ -181,16 +220,16 @@ test.describe("the home page editor", () => {
     await mockEditor(page);
     const frame = await openHome(page);
 
-    const lead = frame.getByRole("textbox", {
-      name: "Hero: Lead paragraph",
+    const intro = frame.getByRole("textbox", {
+      name: "Working groups: Intro",
       exact: true,
     });
-    await lead.click();
+    await intro.click();
     await page.keyboard.press("End");
     await page.keyboard.press("Enter");
     await page.keyboard.type("second line");
 
-    expect(await lead.textContent()).not.toContain("\n");
+    expect(await intro.textContent()).not.toContain("\n");
   });
 
   test("clearing a slot shows the default the page will actually render", async ({
@@ -208,7 +247,7 @@ test.describe("the home page editor", () => {
     await heading.fill("");
     // Blur, which is when the resolved value goes back in.
     await frame
-      .getByRole("textbox", { name: "Hero: Kicker", exact: true })
+      .getByRole("textbox", { name: "Hero: Join button", exact: true })
       .click();
     await expect(heading).toHaveText("Ready to get organized?");
   });
@@ -220,7 +259,7 @@ test.describe("the home page editor", () => {
     await openHome(page);
     // Two controls for one value is how you get a stale one. Advanced plumbing
     // (slug, path) still lives in the form.
-    for (const key of ["headline", "kicker", "closingIntro"])
+    for (const key of ["groupsHeading", "ctaDonate", "closingIntro"])
       await expect(
         page.locator(`.fmField:has(> span:text-is("${key}"))`),
       ).toHaveCount(0);

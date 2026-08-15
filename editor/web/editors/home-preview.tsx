@@ -1,19 +1,24 @@
 /**
  * The home page, edited by typing on it.
  *
- * The home page is not a document — it is a fixed layout with fourteen short
- * string slots, kept in `content/pages/home.md`'s frontmatter. Shown through the
- * generic editor that is fourteen unlabelled text boxes beside an empty body, so
- * this pane replaces all three normal modes for that one file.
+ * The home page is a fixed layout arranged around one short document. The ten
+ * headings and button labels are frontmatter strings, edited in place here; the
+ * plate's welcome is the markdown body, edited in Rich text like any other page
+ * and shown here as it will look. Through the generic editor the strings were
+ * ten unlabelled text boxes, which is what this pane exists to replace.
  *
  * Fidelity comes from rendering the site's OWN route, not a lookalike:
  *
  *   Home        app/routes/home.tsx — the actual component that ships
- *   Slot        app/components/HomeSlot.tsx — the route reads its words through
+ *   Slot/HomeBody
+ *               app/components/HomeSlot.tsx — the route reads its words through
  *               a context, which is the seam this pane hooks into
  *   resolveHomeCopy
  *               app/lib/home.ts — the same blank-falls-back-to-default rule the
  *               build applies, so a cleared field looks here like it will there
+ *   renderMarkdown + cleanHtml
+ *               the site's own pipeline (see preview.tsx), so the plate shows
+ *               what the build will put there
  *
  * Imported by relative path, so there is one home page and it cannot drift.
  *
@@ -27,14 +32,18 @@
  * grids, so a shadow root (which would answer to the editor window) would show a
  * responsive layout that is simply a lie.
  *
- * But unlike `preview.tsx` this frame is same-origin and runs scripts. That
- * pane renders `rehype-raw` output — migrated WordPress markdown carrying real
- * embeds, forms and scripts — and `sandbox=""` is exactly right for it. This
- * pane renders our own React components against plain strings; there is no raw
- * HTML anywhere on the home page (post excerpts are text nodes, `Prose` is never
- * used). So the frame executes only editor code, at the editor's own trust
- * level. `preview.tsx` keeps its sandbox; these are two panes with two threat
- * models, deliberately not merged.
+ * But unlike `preview.tsx` this frame is same-origin and runs scripts, so what
+ * it renders matters. That pane shows arbitrary migrated WordPress markdown
+ * carrying real embeds, forms and scripts, and `sandbox=""` is exactly right
+ * for it. This pane is mostly our own React components against plain strings —
+ * except the plate, which is now `rehype-raw` output from home.md's body.
+ *
+ * So the body is stripped of scripts and framed content before it goes in (see
+ * `inertHtml`). The chapter's welcome needs none of that, an editor who wants
+ * an embed has every other page to put it on, and the alternative — executing
+ * whatever a content branch happens to contain at the editor's own trust
+ * level — is not a trade worth making for a preview. `preview.tsx` keeps its
+ * sandbox; these are two panes with two threat models, deliberately not merged.
  *
  * See plans/svdsa-home-inplace-editing.md.
  */
@@ -50,9 +59,32 @@ import {
   resolveHomeCopy,
   type HomeCopy,
 } from "../../../app/lib/home";
+import { cleanHtml } from "../../../app/lib/html";
+import { renderMarkdown } from "../../../scripts/render-markdown";
 import Home from "../../../app/routes/home";
 
 const SLOTS = new Map(HOME_SLOTS.map((s) => [s.key, s]));
+
+/** Debounce so a fast typist isn't re-running remark on every keystroke. */
+const DEBOUNCE_MS = 250;
+
+/**
+ * Strip what this frame must not run: scripts, and anything that loads a
+ * document of its own. See the threat-model note above.
+ *
+ * A regex rather than a parser because it is a preview guard, not a sanitiser
+ * standing between a hostile author and a reader — the same markdown is
+ * rendered unfiltered by the site, where it is static and same-origin with
+ * nothing. If that ever stops being true, this is not the thing to strengthen;
+ * `Prose` is.
+ */
+function inertHtml(html: string): string {
+  return html
+    .replace(/<script\b[\s\S]*?<\/script\s*>/gi, "")
+    .replace(/<(iframe|object|embed|frame)\b[\s\S]*?<\/\1\s*>/gi, "")
+    .replace(/<(iframe|object|embed|frame|script)\b[^>]*>/gi, "")
+    .replace(/\son\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, "");
+}
 
 /**
  * Editor chrome, injected into the frame alongside the site's CSS.
@@ -167,14 +199,17 @@ const MemoHome = memo(Home);
 /** The site's own route, with every slot swapped for an editable one. */
 function EditableHome({
   copy,
+  html,
   onEdit,
 }: {
   copy: HomeCopy;
+  html: string;
   onEdit: (key: string, value: string) => void;
 }) {
   return (
     <HomeCopyProvider
       copy={copy}
+      html={html}
       render={(k, value) => (
         <EditableSlot k={k} value={value} onEdit={onEdit} />
       )}
@@ -186,11 +221,14 @@ function EditableHome({
 
 export function HomePreview({
   frontmatter,
+  body,
   siteOrigin,
   onChange,
 }: {
   /** The item's frontmatter with any unsaved edits already laid over it. */
   frontmatter: Record<string, unknown>;
+  /** The current markdown body — the welcome inside the plate. */
+  body: string;
   /** Live site origin, so assets and fonts resolve as they do in production. */
   siteOrigin: string;
   onChange: (key: string, value: string) => void;
@@ -203,6 +241,26 @@ export function HomePreview({
   onChangeRef.current = onChange;
 
   const copy = useMemo(() => resolveHomeCopy(frontmatter), [frontmatter]);
+
+  // The plate, rendered through the site's own pipeline. Debounced and
+  // sequence-guarded for the same reasons preview.tsx is: remark is not free,
+  // and a slower earlier render must not overwrite a newer one.
+  const [html, setHtml] = useState("");
+  const seq = useRef(0);
+  useEffect(() => {
+    const mine = ++seq.current;
+    const t = setTimeout(() => {
+      renderMarkdown(body)
+        .then((out) => {
+          if (seq.current === mine) setHtml(inertHtml(cleanHtml(out)));
+        })
+        .catch(() => {
+          // A body that won't render is a body mid-keystroke; keep the last
+          // good plate rather than blanking the page under the typist.
+        });
+    }, DEBOUNCE_MS);
+    return () => clearTimeout(t);
+  }, [body]);
 
   const shell = useMemo(
     () =>
@@ -234,9 +292,13 @@ export function HomePreview({
 
   useEffect(() => {
     rootRef.current?.render(
-      <EditableHome copy={copy} onEdit={(k, v) => onChangeRef.current(k, v)} />,
+      <EditableHome
+        copy={copy}
+        html={html}
+        onEdit={(k, v) => onChangeRef.current(k, v)}
+      />,
     );
-  }, [copy, frameDoc]);
+  }, [copy, html, frameDoc]);
 
   return (
     <iframe

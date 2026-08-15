@@ -46,9 +46,12 @@ const HomePreview = lazy(() =>
 );
 
 /**
- * `home` is the home page's own mode, and its only one: that page has no body,
- * so Rich text and Preview would both show an empty document and Source would
- * show an empty file. Its words are all frontmatter, edited on the page itself.
+ * `home` is the home page's own mode and its default: the headings and button
+ * labels around the layout are frontmatter, and you edit them by typing on the
+ * page. Its body — the welcome inside the hero's plate — is an ordinary
+ * markdown document, so Rich text and Source apply to it as they do anywhere
+ * else. Preview does not: `home` already shows the body in the page it belongs
+ * to, which is strictly more than a bare document view would.
  */
 type Mode = "wysiwyg" | "raw" | "preview" | "home";
 
@@ -618,11 +621,27 @@ export function App() {
               <div className="modebar">
                 <div className="tabs">
                   {item.path === HOME_PATH ? (
-                    // One mode, so one tab — kept rather than hidden so the row
-                    // still says what you are looking at.
-                    <button className="on" disabled>
-                      Page
-                    </button>
+                    // No Preview tab: `Page` is the preview, and a better one.
+                    <>
+                      <button
+                        className={mode === "home" ? "on" : ""}
+                        onClick={() => switchMode("home")}
+                      >
+                        Page
+                      </button>
+                      <button
+                        className={mode === "wysiwyg" ? "on" : ""}
+                        onClick={() => switchMode("wysiwyg")}
+                      >
+                        Rich text
+                      </button>
+                      <button
+                        className={mode === "raw" ? "on" : ""}
+                        onClick={() => switchMode("raw")}
+                      >
+                        Source
+                      </button>
+                    </>
                   ) : item.kind === "markdown" ? (
                     <>
                       <button
@@ -666,6 +685,10 @@ export function App() {
                   >
                     <HomePreview
                       frontmatter={homeFrontmatter}
+                      // `switchMode` writes the live editor text back into
+                      // `body` before swapping, so arriving here from Rich
+                      // text shows the plate with the unsaved edit in it.
+                      body={body}
                       siteOrigin={siteOrigin}
                       onChange={(k, v) =>
                         setFmValues((cur) => ({ ...cur, [k]: v }))
