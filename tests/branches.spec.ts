@@ -25,7 +25,10 @@ const BRANCH_INFO = {
       ahead: 0,
       behind: 0,
       pull: null,
-      previewUrl: "https://red-site.invalid/",
+      // Production is served at the Worker's own hostname — NOT the
+      // `red-site.…` branch alias, which Workers Builds never creates for the
+      // production branch. See the Worker's /api/branch-info.
+      previewUrl: "https://site.invalid/",
       isProduction: true,
       draft: null,
     },
@@ -187,9 +190,32 @@ test.describe("branch browser", () => {
     for (const b of BRANCH_INFO.branches) {
       const row = page.locator(`.br__row[data-branch="${b.name}"]`);
       await expect(
-        row.getByRole("link", { name: /Open preview/ }),
+        row.getByRole("link", { name: /Open (preview|live site)/ }),
       ).toHaveAttribute("href", b.previewUrl);
     }
+  });
+
+  test("production links to the live site, not a branch alias", async ({
+    page,
+  }) => {
+    await mockEditor(page);
+    await page.goto(EDITOR_URL);
+    await openBrowser(page);
+
+    // Workers Builds gives the `<branch>-<worker>` alias only to NON-production
+    // branches; `red` is served at the Worker's own hostname. Linking it to
+    // red-site.… pointed at a host that need not resolve at all.
+    const live = page
+      .locator('.br__row[data-branch="red"]')
+      .getByRole("link", { name: "Open live site ↗" });
+    await expect(live).toHaveAttribute("href", "https://site.invalid/");
+
+    // And the other rows genuinely are previews, alias and all.
+    await expect(
+      page
+        .locator('.br__row[data-branch="theme/faithful"]')
+        .getByRole("link", { name: "Open preview ↗" }),
+    ).toHaveAttribute("href", "https://theme-faithful-site.invalid/");
   });
 
   test("shows what tells branches apart", async ({ page }) => {

@@ -255,7 +255,9 @@ every one passed when run alone. See `tests/compute-budget.ts`; it degrades to
 running unthrottled if the broker isn't installed, so CI and fresh clones are
 unaffected.
 
-Append `?light` to any URL in dev to force light mode.
+Append `?light` to any URL — dev, production or a branch preview — to force the
+light palette regardless of the OS setting. Reviewing a design from a dark-mode
+machine is the case it exists for, so it ships rather than being dev-only.
 
 ## Forms & external services
 

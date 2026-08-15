@@ -96,6 +96,25 @@ visible caption into the accessible name instead of labelling it — the exact
 bug round 6 of `svdsa-editor-rich-ui.md` hit with the recurrence toggle.
 `tests/picker.spec.ts` asserts the name is exactly `Sort content`.
 
+## Round 3 — production is not a preview (SHIPPED)
+
+The browser linked `red` to `https://red-site.<subdomain>.workers.dev/`. **That
+host need not exist.** Workers Builds hands out the `<alias>-<worker>` hostname
+only to NON-production branches; the production branch deploys to the Worker's
+own name, so `red` is served at `site.<subdomain>` — which `siteOrigin()` had
+been computing correctly all along for the "view live ↗" link.
+
+Fixed by moving the derivation into `editor/src/urls.ts` (pure, no `Request`)
+with one `branchUrl(url, env, branch, production)` that owns the rule, and
+teaching the row to say "Open live site ↗" instead of "Open preview ↗" for
+production.
+
+**Why a new module rather than an inline conditional:** the browser specs stub
+`/api/*`, so they cannot see a URL the Worker computed wrongly — the original
+bug was invisible to a green suite. `tests/preview-urls.spec.ts` now tests the
+functions directly, including that the rule follows `production` rather than
+hard-coding `red`, and that `SITE_WORKER` stays configuration.
+
 ## Findings / gotchas
 
 - **`Ref.compare(headRef:)` is inverted from what you want.** The query asks
@@ -136,8 +155,16 @@ just has nothing to edit.
 - Don't make `/api/branches` itself heavy — it runs on every page load to fill
   the picker. The rich query belongs on `/api/branch-info`, fetched when the
   modal opens.
-- Don't try to report Cloudflare build status per branch. Workers Builds state
-  isn't in the GitHub API, and a preview link that 404s for 90 seconds after a
-  push is better explained in copy than faked with a spinner.
+- Don't fake a spinner for build progress. A preview link that 404s for 90
+  seconds after a push is better explained in copy.
+
+  (Correction, 2026-08-14: the claim that "Workers Builds state isn't in the
+  GitHub API" was wrong. Workers Builds posts a **check run** named
+  `Workers Builds: site` — and `Workers Builds: edit` — on each commit, with a
+  `conclusion` and a `details_url` pointing at the build log:
+  `gh api repos/cinderblock/svdsa.org/commits/<sha>/check-runs`. That is the
+  cheapest way to tell "this branch has no preview because its build failed"
+  from "the build hasn't finished yet", and the branch modal could show it.)
+
 - Don't let the modal own `base`. It calls back into `App`, which stays the one
   owner of the current branch.
