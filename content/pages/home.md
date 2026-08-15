@@ -2,15 +2,17 @@
 slug: home
 path: /
 title: Home
-kicker: Silicon Valley · South Bay
-headline: Building working-class power,
-headlineTwo: for the many — not the few.
+kicker: Welcome
+headline: Silicon Valley
+headlineTwo: Democratic Socialists of America
 lead: >-
-  We're not a political party — we're a community building working-class power
-  while fighting for a radically equitable society. DSA is the largest socialist
-  organization in America, with 120,000+ members nationwide.
+  We believe economies and societies should be run democratically to meet the
+  needs of the many, not the few. We're not a political party — we're a
+  community building working class power while fighting for a radically
+  equitable society. DSA is the largest socialist organization in America, with
+  120,000+ members nationwide.
 ctaPrimary: Join us
-ctaEvents: See upcoming events
+ctaEvents: Upcoming events
 ctaDonate: Donate
 photosHeading: In the streets
 eventsHeading: Upcoming events

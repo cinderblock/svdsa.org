@@ -417,24 +417,21 @@ img {
 }
 .hero__grid {
   display: grid;
-  /* Favour the headline column so the two title lines each fit on one line. */
-  grid-template-columns: 1.3fr 0.7fr;
+  /* Even halves: the emblem stands on the red as its own half of the band,
+     exactly as it does on the live site. */
+  grid-template-columns: 1fr 1fr;
   gap: 2.5rem;
   align-items: center;
 }
-/* The headline is a two-line couplet: size it so the longer line fits the
-   column, and let each line balance its own wrap when it must break. */
-.hero__title {
-  font-size: clamp(1.85rem, 4vw, 2.45rem);
-  text-wrap: balance;
+/* The emblem sits directly on the red — no card, no border. */
+.hero__logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-.hero__title span {
-  display: block;
-}
-.hero__art img {
-  width: 100%;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
+.hero__logo img {
+  width: min(20rem, 70%);
+  height: auto;
   display: block;
   filter: drop-shadow(0 6px 24px rgba(0, 0, 0, 0.25));
 }
@@ -455,6 +452,13 @@ img {
   border-radius: 1rem;
   padding: clamp(1.5rem, 3vw, 2.5rem);
   box-shadow: 0 10px 40px -12px rgba(0, 0, 0, 0.45);
+}
+/* The original has no kicker above the wordmark; the slot still has to render
+   somewhere, so it sits over the plate as a quiet eyebrow rather than being
+   dropped (a slot the editor offers but the page never shows is worse). */
+.plate__kicker {
+  text-align: center;
+  margin: 0 0 0.5rem;
 }
 .plate__wordmark {
   text-align: center;
@@ -477,10 +481,12 @@ img {
   line-height: 1.15;
   margin-top: 0.15rem;
 }
+/* The original rules off the wordmark across the whole plate, not with a
+   centred stub. */
 .plate hr {
   border: none;
-  border-top: 2px solid var(--red);
-  width: 4rem;
+  border-top: 1px solid var(--red);
+  width: 100%;
   margin: 1rem auto 1.25rem;
 }
 .plate p {
@@ -551,9 +557,15 @@ img {
   padding: 1.25rem;
   box-shadow: var(--shadow);
 }
-/* On the dark band, cards read as light plates with a red top-stripe */
+/* On the dark band, cards read as light plates with a red top-stripe — so they
+   opt back out of the band's white text, which would otherwise leave a
+   dispatch's title white on a white card. */
 .section--dark .card {
   border-top-color: var(--red);
+  color: var(--text);
+}
+.section--dark .card h3 {
+  color: var(--text);
 }
 .card h3 {
   margin: 0 0 0.35rem;

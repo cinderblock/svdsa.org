@@ -137,11 +137,11 @@ test.describe("the home page editor", () => {
 
     // Fidelity: these come from the site's OWN route and its config, none of
     // them from the frontmatter being edited. A lookalike wouldn't have them.
-    await expect(frame.locator("img[alt*='solidarity' i]")).toBeVisible();
+    await expect(frame.locator("img[alt*='emblem' i]")).toBeVisible();
     await expect(
       frame.getByRole("heading", { name: "Where the work happens" }),
     ).toBeVisible();
-    await expect(frame.locator(".hero__title")).toContainText(
+    await expect(frame.locator(".plate__wordmark")).toContainText(
       FRONTMATTER.headlineTwo,
     );
 

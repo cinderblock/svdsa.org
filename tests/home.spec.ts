@@ -39,6 +39,28 @@ test.describe("Home Page", () => {
     ).toBeVisible();
   });
 
+  test("dispatches lead the page, directly under the frontispiece", async ({
+    page,
+  }) => {
+    const order = await page.locator("main section h2").allTextContents();
+    expect(order[0]).toContain("dispatches");
+    // Not just first — first of the *sections*, i.e. nothing between it and
+    // the hero, which is what the live site does.
+    const dark = page.locator("main > section").nth(1);
+    await expect(dark).toHaveClass(/section--dark/);
+  });
+
+  test("a dispatch's title is legible on its card", async ({ page }) => {
+    // The dark band paints its text white, but its cards are light plates, so
+    // an unscoped rule leaves every dispatch title white on white.
+    const title = page.locator(".section--dark .card h3").first();
+    const [color, background] = await title.evaluate((el) => [
+      getComputedStyle(el).color,
+      getComputedStyle(el.closest(".card")!).backgroundColor,
+    ]);
+    expect(color).not.toBe(background);
+  });
+
   test("has primary nav to the calendar", async ({ page }) => {
     await expect(
       page.getByRole("link", { name: "Calendar" }).first(),

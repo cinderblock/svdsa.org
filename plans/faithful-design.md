@@ -1,9 +1,10 @@
 # SVDSA.org — "Faithful Design" branch
 
-Branch: `faithful-design` (rebased onto `red`, which now ships the Manifold DSA
-brand font — commit "Include the Manifold DSA brand font"). Goal: reskin the
-static rebuild so it reads as clearly the _same_ site as the live WordPress one
-(`siliconvalleydsa.org`) — same visual language, not pixel-perfect.
+Branch: `theme/faithful` (formerly `faithful-design`; rebased, then merged, onto
+`red`, which ships the Manifold DSA brand font — commit "Include the Manifold
+DSA brand font"). Goal: reskin the static rebuild so it reads as clearly the
+_same_ site as the live WordPress one (`siliconvalleydsa.org`) — same visual
+language, not pixel-perfect.
 
 The content/routing/data layer is unchanged; this is a **reskin** (global.css +
 Header/Footer/home markup + assets).
@@ -65,8 +66,59 @@ Foundation-Sites based. Key tokens/patterns:
 9. [DONE] Rebase onto `red` again to pick up the WYSIWYG editor work; reconcile
    `home.tsx`/`Footer.tsx`/tests (my reskin + red's client-clock filter +
    hydration-safe year merged cleanly). 11/11 chromium tests green.
-10. [ ] (Cameron) Merge `faithful-design` → `red` so the editor + new design
+10. [ ] (Cameron) Merge `theme/faithful` → `red` so the editor + new design
         coexist — see Findings below.
+11. [DONE] Restore the frontispiece after the `red` merge silently dropped it,
+    and move Dispatches to the top — see "Findings: the merge that undid the
+    reskin".
+
+## Findings: the merge that undid the reskin
+
+`76df3ef` ("Merge branch 'red' into theme/faithful") resolved `app/routes/home.tsx`
+in **red's** favour, so the branch shipped red's hero — a marketing couplet in
+near-black **on the red band** with the emblem boxed in a bordered card at the
+right. The plate card was gone. Nothing failed loudly: the `.plate` CSS survived
+untouched in `global.css` (orphaned), and `tests/home.spec.ts` kept asserting
+`.plate` contains "working class power" — a test that must have been red at the
+time of the merge. **Lesson: this branch's home tests are the tripwire for the
+reskin; a merge that leaves them red has eaten the design.**
+
+Restored 2026-08-14, and reconciled with the editor rather than around it:
+
+- The hero is the frontispiece again — `.hero__logo` (emblem, unboxed, on the
+  red) at the left, `.plate` at the right with the monospace `Silicon Valley`
+  wordmark over `Democratic Socialists of America`, a rule, the welcome copy,
+  and the three buttons.
+- **Every hero word is still a `<Slot>`.** `headline`/`headlineTwo` are the two
+  wordmark lines on this theme, `lead` is the welcome paragraph, `kicker` is a
+  small red eyebrow over the plate (the original has none, but a slot the
+  editor offers and the page never renders is worse than an addition). The slot
+  set, its labels and the editor are untouched, so the branch stays trivially
+  mergeable into `red`.
+- Consequently this branch **does** diverge on content: `content/pages/home.md`
+  and the `DEFAULTS` in `app/lib/home.ts` carry the faithful words. That breaks
+  the old "content layer unchanged" claim above, deliberately — falling back to
+  red's copy would set "Building working-class power," in the wordmark's
+  monospace. Expect a conflict in those two files on the merge to `red`, and
+  resolve it toward whichever hero `red` ends up with.
+- Dispatches moved directly under the hero, as on the live site. The Join CTA
+  dropped `--alt` so it doesn't abut the working groups' tint as one gray slab.
+- Fixed a bug that predates the merge: `.section--dark h3 { color: #fff }` also
+  hit `.card h3`, so every dispatch title was **white on a white card**. Cards
+  on the dark band now opt back out to `var(--text)`.
+
+New tests guard both: "dispatches lead the page, directly under the
+frontispiece" and "a dispatch's title is legible on its card"
+(`tests/home.spec.ts`).
+
+### Known gaps against the original
+
+- The plate holds **one** paragraph where the live site has three, because
+  `lead` is a plain string and the original's copy is full of inline
+  `<strong>`/`<em>`/links. Closing that needs inline markdown in the slot layer,
+  end to end through the editor's contenteditable — deliberately not done.
+- Footer socials are black pills with text labels; the original uses circular
+  icon buttons. Never done on this branch, not a regression.
 
 ## Findings: editor integration (branch-as-draft)
 

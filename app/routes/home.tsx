@@ -37,22 +37,37 @@ export default function Home() {
   return (
     <main id="main">
       <section className="hero">
+        {/* The live site's frontispiece: emblem on the red at the left, and a
+            white plate card at the right carrying the welcome. Every word in
+            the plate is still a <Slot>, so the browser editor edits this
+            layout in place exactly as it does red's. */}
         <div className="container hero__grid">
-          <div>
-            <p className="kicker">
+          <div className="hero__logo">
+            <img
+              src="/svdsa-logo.svg"
+              alt="Silicon Valley DSA emblem"
+              width={190}
+              height={269}
+            />
+          </div>
+          <div className="plate">
+            <p className="kicker plate__kicker">
               <Slot k="kicker" />
             </p>
-            {/* Two deliberate lines. Spans (not <br/>) so each clause is its
-                own block and can balance its own wrap on narrow screens. */}
-            <h1 className="hero__title">
-              <span>
+            {/* The chapter's name, set as the original sets it: "Silicon
+                Valley" in monospace over "Democratic Socialists of America".
+                Two spans rather than one string so each line keeps its own
+                type treatment while staying separately editable. */}
+            <h1 className="plate__wordmark">
+              <span className="sv">
                 <Slot k="headline" />
               </span>
-              <span>
+              <span className="dsa">
                 <Slot k="headlineTwo" />
               </span>
             </h1>
-            <p className="lead">
+            <hr />
+            <p>
               <Slot k="lead" />
             </p>
             <div className="hero__actions">
@@ -67,17 +82,34 @@ export default function Home() {
               </a>
             </div>
           </div>
-          {/* The hero grid is two columns, so it needs both. This theme's art is
-              the chapter's rose emblem rather than red's solidarity
-              illustration — leading with the emblem is what `faithful`
-              reproduces from the live site. */}
-          <div className="hero__art">
-            <img
-              src="/svdsa-logo.svg"
-              alt="Silicon Valley DSA rose emblem"
-              width={190}
-              height={269}
-            />
+        </div>
+      </section>
+
+      {/* Latest dispatches — the dark band sits directly under the
+          frontispiece, as it does on the live site: what the chapter has been
+          saying is the first thing after who the chapter is. */}
+      <section className="section section--dark">
+        <div className="container">
+          <div className="section__head">
+            <h2>
+              <Slot k="dispatchesHeading" />
+            </h2>
+            <Link to="/blog">All posts →</Link>
+          </div>
+          <div className="grid grid--cards">
+            {latest.map((p) => (
+              <Link
+                key={p.id}
+                to={p.path}
+                className="card"
+                style={{ textDecoration: "none" }}
+              >
+                <div className="meta">{shortDate(p.date)}</div>
+                <h3>{p.title}</h3>
+                <p>{p.excerpt.slice(0, 140)}…</p>
+                <span className="card__more">Read →</span>
+              </Link>
+            ))}
           </div>
         </div>
       </section>
@@ -157,35 +189,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Latest dispatches */}
-      <section className="section section--dark">
-        <div className="container">
-          <div className="section__head">
-            <h2>
-              <Slot k="dispatchesHeading" />
-            </h2>
-            <Link to="/blog">All posts →</Link>
-          </div>
-          <div className="grid grid--cards">
-            {latest.map((p) => (
-              <Link
-                key={p.id}
-                to={p.path}
-                className="card"
-                style={{ textDecoration: "none" }}
-              >
-                <div className="meta">{shortDate(p.date)}</div>
-                <h3>{p.title}</h3>
-                <p>{p.excerpt.slice(0, 140)}…</p>
-                <span className="card__more">Read →</span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Join CTA */}
-      <section className="section section--alt">
+      {/* Join CTA. Plain rather than `--alt`: with Dispatches moved up, the
+          working groups above are the tinted band, and two `--alt` sections in
+          a row read as one long gray block split by a hairline. */}
+      <section className="section">
         <div className="container text-center">
           <h2>
             <Slot k="closingHeading" />
