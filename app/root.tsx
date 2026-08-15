@@ -39,13 +39,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
         />
         <Meta />
         <Links />
-        {import.meta.env.DEV && (
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `if(new URLSearchParams(location.search).has('light'))document.documentElement.dataset.forceLight=''`,
-            }}
-          />
-        )}
+        {/* Add `?light` to any page to force the light palette regardless of
+            the OS setting. Ships everywhere, not just dev: reviewing a branch
+            preview from a dark-mode machine is exactly when you need it, and
+            a design you can only see one of two ways is half a preview. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `if(new URLSearchParams(location.search).has('light'))document.documentElement.dataset.forceLight=''`,
+          }}
+        />
         {/* Add `?edit` to any page to jump straight to editing it. The editor
             lives on a sibling Worker (`edit.<subdomain>`), is behind Cloudflare
             Access, and resolves ?url= back to the content file. Runs before
