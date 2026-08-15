@@ -136,8 +136,16 @@ just has nothing to edit.
 - Don't make `/api/branches` itself heavy — it runs on every page load to fill
   the picker. The rich query belongs on `/api/branch-info`, fetched when the
   modal opens.
-- Don't try to report Cloudflare build status per branch. Workers Builds state
-  isn't in the GitHub API, and a preview link that 404s for 90 seconds after a
-  push is better explained in copy than faked with a spinner.
+- Don't fake a spinner for build progress. A preview link that 404s for 90
+  seconds after a push is better explained in copy.
+
+  (Correction, 2026-08-14: the claim that "Workers Builds state isn't in the
+  GitHub API" was wrong. Workers Builds posts a **check run** named
+  `Workers Builds: site` — and `Workers Builds: edit` — on each commit, with a
+  `conclusion` and a `details_url` pointing at the build log:
+  `gh api repos/cinderblock/svdsa.org/commits/<sha>/check-runs`. That is the
+  cheapest way to tell "this branch has no preview because its build failed"
+  from "the build hasn't finished yet", and the branch modal could show it.)
+
 - Don't let the modal own `base`. It calls back into `App`, which stays the one
   owner of the current branch.
