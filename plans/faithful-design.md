@@ -49,6 +49,12 @@ Foundation-Sites based. Key tokens/patterns:
   already built (red band stays red; plate/cards adapt).
 - Not pixel-perfect — "more aligned." Reuse existing class vocabulary where
   possible so routes (calendar, event, prose, blog, forms) don't break.
+- **This branch does not merge to `red`** (Cameron, 2026-08-15). It is one of
+  several design _variants_ being put in front of the chapter to choose between
+  — `theme/faithful`, `theme/midnight-rose`, and whatever follows. They stay on
+  their branches and are compared through their preview URLs. Do not propose or
+  perform a `theme/… → red` merge. Adoption, if it happens, is Cameron's call
+  and his to direct.
 
 ## Assets added (by this branch)
 
@@ -69,8 +75,8 @@ Foundation-Sites based. Key tokens/patterns:
 9. [DONE] Rebase onto `red` again to pick up the WYSIWYG editor work; reconcile
    `home.tsx`/`Footer.tsx`/tests (my reskin + red's client-clock filter +
    hydration-safe year merged cleanly). 11/11 chromium tests green.
-10. [ ] (Cameron) Merge `theme/faithful` → `red` so the editor + new design
-        coexist — see Findings below.
+10. [DROPPED] ~~Merge `theme/faithful` → `red`.~~ Wrong from the start: this is
+    a variant for comparison, not work queued for landing. See Decisions.
 11. [DONE] Restore the frontispiece after the `red` merge silently dropped it,
     and move Dispatches to the top — see "Findings: the merge that undid the
     reskin".
@@ -98,14 +104,14 @@ Restored 2026-08-14, and reconciled with the editor rather than around it:
   wordmark lines on this theme, `lead` is the welcome paragraph, `kicker` is a
   small red eyebrow over the plate (the original has none, but a slot the
   editor offers and the page never renders is worse than an addition). The slot
-  set, its labels and the editor are untouched, so the branch stays trivially
-  mergeable into `red`.
+  set, its labels and the editor are untouched.
+  (Superseded on 2026-08-15: the hero prose is the page body now, and four of
+  those slots are gone. See the later findings.)
 - Consequently this branch **does** diverge on content: `content/pages/home.md`
   and the `DEFAULTS` in `app/lib/home.ts` carry the faithful words. That breaks
   the old "content layer unchanged" claim above, deliberately — falling back to
   red's copy would set "Building working-class power," in the wordmark's
-  monospace. Expect a conflict in those two files on the merge to `red`, and
-  resolve it toward whichever hero `red` ends up with.
+  monospace. Fine: a variant is allowed to own its own front page.
 - Dispatches moved directly under the hero, as on the live site. The Join CTA
   dropped `--alt` so it doesn't abut the working groups' tint as one gray slab.
 - Fixed a bug that predates the merge: `.section--dark h3 { color: #fff }` also
@@ -203,17 +209,28 @@ a newly added account is never a blank button.
   commits to a throwaway `draft/<editor>/<slug>` branch **off `red`** (authored
   as the editor via a bot credential); Workers Builds deploys it to a preview
   URL; **publish = merge the draft branch into `red`**.
-- **Coupling:** the editor's base is `red`. So editors edit/publish against
-  `red`, not `theme/faithful`. For the editor to operate on the new design,
-  the reskin must **land on `red`** (merge). The actual merge is Cameron's call.
-- **This branch is no longer trivially mergeable.** It owns hero content
+- **Coupling:** the editor's base is `red`, so editors edit and publish against
+  `red`. This branch is not where anyone edits, and that is not a problem to
+  fix — it is a variant, shown through its preview URL. The editor's own home
+  pane works here (the tabs and the plate preview are on this branch) because
+  the code has to keep working wherever it is checked out, not because editors
+  will be pointed at it.
+- **Merging this into `red` was never the plan.** An earlier version of this
+  document said the reskin "must land on `red`", reasoning from the editor's
+  base. That reasoning is wrong and the step is dropped — see Decisions.
+- Worth knowing regardless: this branch owns hero content
   (`content/pages/home.md`), the slot set (`app/lib/home.ts`), the nav shape
-  (`app/lib/site.ts`), the Header and the Footer. Expect real conflicts in all
-  of those, and resolve toward whichever front page `red` ends up with.
+  (`app/lib/site.ts`), the Header and the Footer. Merges **from** `red` will
+  conflict in all of those, and the resolution is always toward this branch's
+  design — that is what `76df3ef` got wrong.
 
 ## Things not to do
 
+- **Don't merge this branch into `red`**, and don't propose it. It is a design
+  variant for the chapter to compare, not work waiting to land.
 - Don't break the shared class vocabulary the content/calendar/event/prose
   routes rely on (`.card`, `.btn`, `.prose`, `.event-row`, `.nav`, `.section`).
+- Don't resolve a merge **from** `red` in red's favour. That is how the
+  frontispiece was lost, and the home tests are the tripwire that catches it.
 - No `title=` tooltips (global rule).
 - Don't touch infra/deploy.
