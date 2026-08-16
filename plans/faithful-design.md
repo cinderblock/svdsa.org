@@ -49,12 +49,22 @@ Foundation-Sites based. Key tokens/patterns:
   already built (red band stays red; plate/cards adapt).
 - Not pixel-perfect — "more aligned." Reuse existing class vocabulary where
   possible so routes (calendar, event, prose, blog, forms) don't break.
-- **This branch does not merge to `red`** (Cameron, 2026-08-15). It is one of
-  several design _variants_ being put in front of the chapter to choose between
-  — `theme/faithful`, `theme/midnight-rose`, and whatever follows. They stay on
-  their branches and are compared through their preview URLs. Do not propose or
-  perform a `theme/… → red` merge. Adoption, if it happens, is Cameron's call
-  and his to direct.
+- **This branch is a proposal, not work queued to land** (Cameron, 2026-08-15).
+  The rebuild is three separable things: a new core (SSG, React, no WordPress,
+  Cloudflare cron for daily updates), a new site design (dark mode, different
+  layouts, more pictures, more info, easier to navigate), and a tech
+  upgrade/simplification. The **design** is the part the chapter chooses, and it
+  is deliberately decoupled from the other two — so the variants
+  (`theme/faithful`, `theme/midnight-rose`, whatever follows) live on their
+  branches and are compared through their preview URLs.
+- **`theme/faithful` is the "keep the look you have" option.** Its job is to let
+  the chapter take the new stack without also being handed a redesign. That is
+  why fidelity to `siliconvalleydsa.org` is the spec here and "nicer" is not.
+- **Adoption is open, and not this plan's business.** If the chapter picks this
+  one it might be merged into `red`, or `red` might simply be switched to it, or
+  something else — Cameron decides and directs, when there is a decision to act
+  on. Don't schedule it, don't argue for it from the editor's base branch, and
+  don't treat the branch's existence as a merge waiting to happen.
 
 ## Assets added (by this branch)
 
@@ -75,8 +85,9 @@ Foundation-Sites based. Key tokens/patterns:
 9. [DONE] Rebase onto `red` again to pick up the WYSIWYG editor work; reconcile
    `home.tsx`/`Footer.tsx`/tests (my reskin + red's client-clock filter +
    hydration-safe year merged cleanly). 11/11 chromium tests green.
-10. [DROPPED] ~~Merge `theme/faithful` → `red`.~~ Wrong from the start: this is
-    a variant for comparison, not work queued for landing. See Decisions.
+10. [DROPPED] ~~Merge `theme/faithful` → `red`.~~ Not a step: this is a proposal
+    awaiting a chapter decision, and if it is adopted the mechanism is Cameron's
+    to choose (merge, repoint `red`, or otherwise). See Decisions.
 11. [DONE] Restore the frontispiece after the `red` merge silently dropped it,
     and move Dispatches to the top — see "Findings: the merge that undid the
     reskin".
@@ -215,9 +226,10 @@ a newly added account is never a blank button.
   pane works here (the tabs and the plate preview are on this branch) because
   the code has to keep working wherever it is checked out, not because editors
   will be pointed at it.
-- **Merging this into `red` was never the plan.** An earlier version of this
-  document said the reskin "must land on `red`", reasoning from the editor's
-  base. That reasoning is wrong and the step is dropped — see Decisions.
+- **That is not an argument for merging this into `red`.** An earlier version of
+  this document said the reskin "must land on `red`", reasoning from the
+  editor's base branch, which turned a design decision into an apparent
+  technical necessity. Step dropped — see Decisions.
 - Worth knowing regardless: this branch owns hero content
   (`content/pages/home.md`), the slot set (`app/lib/home.ts`), the nav shape
   (`app/lib/site.ts`), the Header and the Footer. Merges **from** `red` will
@@ -226,8 +238,9 @@ a newly added account is never a blank button.
 
 ## Things not to do
 
-- **Don't merge this branch into `red`**, and don't propose it. It is a design
-  variant for the chapter to compare, not work waiting to land.
+- **Don't merge this branch into `red`, and don't schedule or propose it.** It
+  is a design proposal for the chapter to compare. If they adopt it, Cameron
+  says how.
 - Don't break the shared class vocabulary the content/calendar/event/prose
   routes rely on (`.card`, `.btn`, `.prose`, `.event-row`, `.nav`, `.section`).
 - Don't resolve a merge **from** `red` in red's favour. That is how the
