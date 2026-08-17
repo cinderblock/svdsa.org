@@ -1,41 +1,37 @@
 /**
- * Nothing in the repo may still point at WordPress.
+ * Nothing in the repo may still point at OUR WordPress uploads.
  *
  * WHY THIS EXISTS AS A TEST, when `wordpress-asset` is already an error-level
- * rule in scripts/lint-content.ts: that linter is not run by any workflow, so
- * it detected the problem and nothing acted on it. A broken Free Store banner
- * shipped to production for days with a green build and green CI. A detector
- * without a gate is not a safeguard.
+ * rule in the content linter: that linter is not run by any workflow, so it
+ * detected the problem and nothing acted on it. A broken Free Store banner
+ * shipped to production with a green build and green CI. A detector without a
+ * gate is not a safeguard.
  *
- * It also came back after being fixed. The images migration rewrote every
- * reference correctly; then `b33aeb0` ("restore the 21 recurring-meeting rules
+ * It also came back after being fixed. The images migration rewrote all 50
+ * references correctly; then `b33aeb0` ("restore the 21 recurring-meeting rules
  * the WXR re-import dropped") took those series' bodies from a pre-rewrite
  * source and resurrected the old URL. So this is a REGRESSION gate first and a
- * migration check second — the failure mode is content being restored from a
- * stale copy, which will happen again.
+ * migration check second — the failure mode is content restored from a stale
+ * copy, which will happen again.
  *
- * `cleanHtml` strips the siliconvalleydsa.org origin at render, so these become
- * `/wp-content/...` — an address this site does not serve. They are broken the
- * day they land, not the day WordPress is switched off.
+ * `cleanHtml` strips the siliconvalleydsa.org origin at render, so our own
+ * uploads resolve to `/wp-content/...` — an address this site does not serve.
+ * They are broken the day they land, not the day WordPress is switched off.
+ *
+ * It delegates to `checkLinks` rather than grepping for "wp-content", which is
+ * the mistake that produced this file's first version: a plain text search also
+ * matches OTHER organisations' WordPress sites (csh.org, sccdp.org appear in
+ * citations here), and those links are fine. One definition of "ours", shared
+ * with the linter and the editor, is the only way that stays true.
  */
 
 import { test, expect } from "@playwright/test";
 import { readdir, readFile } from "node:fs/promises";
 import { join, sep } from "node:path";
+import { checkLinks } from "../editor/src/content/links";
 
 const ROOT = join(import.meta.dirname, "..");
 const CONTENT = join(ROOT, "content");
-
-/**
- * Two PDFs the migration never downloaded, so there is nothing in the repo to
- * point them at. They are genuinely broken links today and need the files
- * committed (or the links removed) — listed here so the gate stays meaningful
- * for everything else instead of being switched off.
- */
-const KNOWN_UNFIXED = [
-  "content/pages/defund-police.md",
-  "content/pages/international-solidarity.md",
-];
 
 async function contentFiles(): Promise<string[]> {
   const out: string[] = [];
@@ -49,21 +45,19 @@ async function contentFiles(): Promise<string[]> {
   return out;
 }
 
-test("no content file references a WordPress upload", async () => {
+test("no content file references one of our WordPress uploads", async () => {
+  const all = await contentFiles();
   const offenders: string[] = [];
-  for (const rel of await contentFiles()) {
+  for (const rel of all) {
     const text = await readFile(join(ROOT, rel), "utf8");
-    for (const m of text.matchAll(/\/wp-content\/[^\s")>]+/g))
-      offenders.push(`${rel}  ->  ${m[0]}`);
+    for (const f of checkLinks(text, all))
+      if (f.ruleId === "wordpress-asset")
+        offenders.push(`${rel}  ->  ${f.match}`);
   }
-
-  const unexpected = offenders.filter(
-    (o) => !KNOWN_UNFIXED.some((k) => o.startsWith(k)),
-  );
   expect(
-    unexpected,
-    "These point at WordPress and will 404 on the built site. The file must be " +
-      "committed under public/media/ and the reference rewritten to /media/...",
+    offenders,
+    "These resolve to /wp-content/... which the built site does not serve. " +
+      "Commit the file under public/media/ and rewrite the reference to /media/...",
   ).toEqual([]);
 });
 
