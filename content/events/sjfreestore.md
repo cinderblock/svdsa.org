@@ -53,4 +53,4 @@ Train: San Jose Diridon Station – take Rapid 500 to Santa Clara / 6th or 22 to
 
 For anyone entering the Center, it is recommended that you wear a mask. Thank you!
 
-![](https://siliconvalleydsa.org/wp-content/uploads/2024/12/PREVIEW-Free-Store-Banner-Export-Not-for-Print-300x189.jpg)
+![](/media/2024/12/PREVIEW-Free-Store-Banner-Export-Not-for-Print-300x189.jpg)
