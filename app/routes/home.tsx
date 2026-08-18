@@ -8,6 +8,7 @@ import { EventCard } from "~/components/EventCard";
 // very component with live values and make each one editable in place.
 import { Slot } from "~/components/HomeSlot";
 import { CHAPTER_PHOTOS, EXTERNAL, SITE, WORKING_GROUPS } from "~/lib/site";
+import { chapterDay, isTodayOrLater } from "~/lib/today";
 
 export const meta: MetaFunction = () => {
   const title = `${SITE.name} — ${SITE.tagline}`;
@@ -27,8 +28,8 @@ export default function Home() {
   // hydration (now === null) render the build snapshot.
   const nextEvents = (
     now
-      ? expandEvents(now.toISOString().slice(0, 10), 120).filter((e) =>
-          isUpcoming(e.start, now),
+      ? expandEvents(chapterDay(now), 120).filter((e) =>
+          isTodayOrLater(e.start, now),
         )
       : upcomingEvents
   ).slice(0, 4);

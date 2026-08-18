@@ -8,6 +8,7 @@ import { FACETS, matchesFacet, type FacetKey } from "~/lib/eventFacets";
 import { dayNumber, isUpcoming, monthOf, weekdayOf } from "~/lib/format";
 import { useNow } from "~/lib/useNow";
 import { SITE } from "~/lib/site";
+import { CALENDAR_LOOKBACK_DAYS, chapterDay, shiftDay } from "~/lib/today";
 
 export const meta: MetaFunction = () => [
   { title: `Calendar · ${SITE.name}` },
@@ -69,10 +70,12 @@ export default function Calendar() {
   // hydration (now === null) we show the build snapshot.
   const upcoming = useMemo(
     () =>
+      // Past events are NOT evicted: the calendar is a record of what the
+      // chapter does, and a meeting that happened this morning is still the
+      // most useful thing on the page for someone checking what they missed.
+      // Expansion starts well before today so the list has history to show.
       now
-        ? expandEvents(now.toISOString().slice(0, 10)).filter((e) =>
-            isUpcoming(e.start, now),
-          )
+        ? expandEvents(shiftDay(chapterDay(now), -CALENDAR_LOOKBACK_DAYS))
         : upcomingEvents,
     [now],
   );
@@ -105,9 +108,10 @@ export default function Calendar() {
     return [...map.entries()];
   }, [shown]);
 
+  // The grids start on the chapter's today, not the reader's and not UTC's.
   const firstDay = now
-    ? localDay(now)
-    : (shown[0]?.start.slice(0, 10) ?? localDay(new Date()));
+    ? chapterDay(now)
+    : (shown[0]?.start.slice(0, 10) ?? chapterDay());
 
   return (
     <main id="main">
