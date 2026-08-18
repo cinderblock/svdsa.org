@@ -24,6 +24,7 @@ import {
   weekdayOfDate,
   type Draft,
 } from "./recurrence-model";
+import { chapterDay } from "../../app/lib/today";
 
 const DAY_LABEL: Record<Weekday, string> = {
   SU: "Sun",
@@ -49,7 +50,7 @@ const INTERVALS = [
   { value: 4, label: "Every 4 weeks" },
 ];
 
-const today = () => new Date().toISOString().slice(0, 10);
+const today = () => chapterDay();
 const prettyDate = (ymd: string) =>
   new Date(`${ymd}T12:00:00Z`).toLocaleDateString(undefined, {
     weekday: "short",

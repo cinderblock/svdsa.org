@@ -16,6 +16,7 @@ import { Link } from "react-router";
 import type { EventSlim } from "~/lib/data";
 import { categoryStyle, PLACE_META, placeOf } from "~/lib/eventStyle";
 import { time } from "~/lib/format";
+import { chapterDay } from "~/lib/today";
 
 const DAY_MS = 86_400_000;
 const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -91,7 +92,7 @@ export function WeekView({
   weeks: number;
 }) {
   const byDay = groupByDay(events);
-  const today = ymd(new Date());
+  const today = chapterDay();
   const start = atMidnight(from);
   // Back up to Sunday so each block is a real calendar week.
   const firstSunday = addDays(start, -start.getDay());
@@ -171,7 +172,7 @@ export function MonthView({
   months: number;
 }) {
   const byDay = groupByDay(events);
-  const today = ymd(new Date());
+  const today = chapterDay();
   const first = atMidnight(from);
 
   return (
