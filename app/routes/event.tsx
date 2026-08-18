@@ -6,6 +6,7 @@ import { describeRecurrence } from "~/lib/recurrence";
 import { useNow } from "~/lib/useNow";
 import { Prose } from "~/components/Prose";
 import { SITE } from "~/lib/site";
+import { chapterDay } from "~/lib/today";
 
 export const meta: MetaFunction = ({ location }) => {
   const ev = getEvent(location.pathname);
@@ -61,7 +62,7 @@ export default function Event() {
   const now = useNow();
   // Resolve against the client's date once hydrated, so a series page shows the
   // genuinely-next occurrence rather than the one that was next at build time.
-  const ev = getEvent(pathname, now?.toISOString().slice(0, 10));
+  const ev = getEvent(pathname, now ? chapterDay(now) : undefined);
 
   if (!ev) {
     return (

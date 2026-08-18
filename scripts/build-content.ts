@@ -28,6 +28,7 @@ import { occurrences, type Recurrence } from "../app/lib/recurrence";
 import { icalendar, utcStamp, type IcsEvent } from "./ics";
 import { renderMarkdown } from "./render-markdown";
 import { renderRedirects, type RedirectRule } from "./redirects";
+import { CALENDAR_LOOKBACK_DAYS, chapterDay, shiftDay } from "../app/lib/today";
 
 const CONTENT = join(import.meta.dirname, "..", "content");
 const GENERATED = join(CONTENT, "generated");
@@ -164,10 +165,12 @@ interface Venue {
  * cannot go stale no matter how long ago the site was built.
  */
 const PRERENDER_DAYS = 90;
-const nowDate = new Date().toISOString().slice(0, 10);
-const horizon = new Date(Date.now() + PRERENDER_DAYS * 86_400_000)
-  .toISOString()
-  .slice(0, 10);
+// Includes the calendar's lookback, so what the browser recomputes and what
+// the prerendered HTML shows cover the same span.
+const nowDate = shiftDay(chapterDay(), -CALENDAR_LOOKBACK_DAYS);
+// Also the chapter's day, not UTC's — otherwise the prerender window's far
+// edge lands a day out for half of every day.
+const horizon = chapterDay(new Date(Date.now() + PRERENDER_DAYS * 86_400_000));
 
 /** Expand one doc into its concrete occurrences within [from, to]. */
 function expandDoc(
@@ -266,8 +269,14 @@ assertUniqueIds(
   })),
 );
 
-const today = new Date().toISOString().slice(0, 10);
-const upcoming = events.filter((e) => e.start.slice(0, 10) >= today);
+const today = chapterDay();
+// Keeps the calendar's lookback window, so the prerendered snapshot shows the
+// same recent past the browser recomputes — otherwise a JS-less reader, and
+// every first paint, sees a calendar that starts abruptly at today.
+// `today` itself is the chapter's day, never UTC's (see app/lib/today.ts).
+const upcoming = events.filter(
+  (e) => e.start.slice(0, 10) >= shiftDay(today, -CALENDAR_LOOKBACK_DAYS),
+);
 
 // ---- Derived shapes the app imports ----------------------------------------
 

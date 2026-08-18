@@ -177,12 +177,29 @@ test.describe("Content routes", () => {
     await page.clock.setFixedTime(new Date("2099-01-01T12:00:00"));
     await page.goto("/calendar");
 
+    // Wait for hydration before reading hrefs: the prerendered snapshot holds
+    // the BUILD's occurrences, and evaluateAll (unlike a Playwright assertion)
+    // does not retry, so reading early samples the pre-hydration DOM.
+    await calendarHydrated(page);
+
     await expect(page.getByText(/^0 upcoming events/)).toHaveCount(0);
     const rows = page.locator("a.ecard");
     await expect(rows.first()).toBeVisible();
     expect(await rows.count()).toBeGreaterThan(10);
-    // Dates shown must be in 2099, not the build's window.
-    await expect(rows.first()).toHaveAttribute("href", /\/2099-/);
+    // Dates shown must be near the mocked clock, not the build's window. NOT
+    // `rows.first()`: the calendar deliberately keeps a lookback window, so the
+    // first card is the most recent PAST occurrence (late 2098 here). What
+    // matters is that the rules are being expanded around now, not that the
+    // list starts in the future.
+    const hrefs = await rows.evaluateAll((els) =>
+      els.map((e) => e.getAttribute("href") ?? ""),
+    );
+    // Dated occurrence URLs must sit around the mocked clock, proving the rules
+    // were expanded against it rather than served from the build's window. The
+    // lookback means the earliest are in late 2098, so accept either year.
+    const dated = hrefs.filter((h) => /\/\d{4}-\d{2}-\d{2}\//.test(h));
+    expect(dated.length).toBeGreaterThan(0);
+    expect(dated.every((h) => /\/(2098|2099)-/.test(h))).toBe(true);
   });
 
   test("join page embeds the dues + newsletter forms", async ({ page }) => {
