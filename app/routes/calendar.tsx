@@ -91,19 +91,26 @@ export default function Calendar() {
     ? feedHttps.replace(/^https?:/, "webcal:")
     : null;
 
+  // The chapter's today — not the reader's, not UTC's.
+  const todayDay = now ? chapterDay(now) : chapterDay();
+
   // Group the agenda by DAY so the date appears once, however many events it
   // holds — three events on Aug 1 read as one dated block, not three "Aug 1"s.
+  //
+  // The LIST is today forward, unlike the grids. It's an agenda: it opens at
+  // the top, so a month of history there is a month of scrolling before the
+  // reader reaches anything they can still attend. A grid can carry the past
+  // because it scrolls in a direction and holds today in view while it grows;
+  // a list can't. This also means the default view doesn't move on hydration.
   const byDay = useMemo(() => {
     const map = new Map<string, typeof shown>();
     for (const e of shown) {
       const key = e.start.slice(0, 10);
+      if (key < todayDay) continue;
       (map.get(key) ?? map.set(key, []).get(key)!).push(e);
     }
     return [...map.entries()];
-  }, [shown]);
-
-  // The chapter's today — not the reader's, not UTC's.
-  const todayDay = now ? chapterDay(now) : chapterDay();
+  }, [shown, todayDay]);
   /**
    * Where the grids BEGIN.
    *
@@ -207,7 +214,9 @@ export default function Calendar() {
           </div>
         </div>
 
-        {shown.length === 0 && (
+        {/* The list drops the past, so it can be empty while the grids aren't
+            — a filter matching only last month's events, say. */}
+        {(view === "list" ? byDay.length === 0 : shown.length === 0) && (
           <p className="muted">No events match that filter.</p>
         )}
 
