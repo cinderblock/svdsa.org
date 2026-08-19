@@ -76,6 +76,14 @@ backward extension happens on the second render.
 layout effect keyed on `from`, `window.scrollBy`s by however much it moved.
 Weeks get inserted above the viewport and the reader sees nothing shift.
 
+**The list view is today-forward, unlike the grids.** It's an agenda and it
+opens at the top, so a month of history there is a month of scrolling before
+the reader reaches anything they can still attend — and, being a flat list, it
+has no today marker to anchor to while it grows. The grids carry the lookback
+because scrolling back through a week/month grid is a natural gesture and the
+anchor holds today in view. Practical consequence: the default view is byte-for
+-byte stable across hydration.
+
 ## Findings / gotchas
 
 - **`toISOString().slice(0, 10)` is UTC.** That single idiom, in six places, was
@@ -99,6 +107,21 @@ Weeks get inserted above the viewport and the reader sees nothing shift.
   clicking one landed on "This event isn't on the calendar". Caught by an
   existing test, not by the new ones. Those pages are prerendered as well
   (`react-router.config.ts`), so a link shared last week still opens without JS.
+- **On the DEPLOYED site `?view=week` serves the list.** `/calendar` is
+  prerendered once, with no query string, so a JS-less reader always gets the
+  list view — the week/month grids only exist after hydration. That means the
+  no-JS grid assertions in the suite are a dev-server property; what the built
+  site actually guarantees is that the prerendered LIST starts at today
+  (verified: earliest dated link in `build/client/calendar/index.html` is
+  today's date). It also means the list, not the grid, is what a first-time
+  visitor lands on — which is how the list's lookback got caught.
+- **The list's lookback was the real regression.** With the past folded into
+  `shown`, the default view hydrated into last month: 56 past events prepended
+  above today, shoving the agenda down. Only visible against a **built** site,
+  because under `react-router dev` the query string does select the week view
+  and the list is never exercised cold. Measured before/after the fix: first
+  agenda day now identical pre- and post-hydration (`Wed 19 Aug`, top =
+  580.296875 px, `scrollY` 0).
 - **Week and month chips are `a.cal-chip`, not `a.ecard`.** `.ecard` is the list
   view only. A test selecting `a.ecard` on `?view=week` silently finds nothing
   and passes vacuously.
@@ -119,7 +142,8 @@ Weeks get inserted above the viewport and the reader sees nothing shift.
       `events-past.json`, folded in by `expandEvents` after hydration
 - [x] `useAnchorToday` scroll compensation
 - [x] `events-full.json` and the prerender list extended back over the lookback
-- [x] Three `Calendar scrollback` tests in `tests/home.spec.ts`
+- [x] List view kept today-forward; grids carry the lookback
+- [x] Four `Calendar scrollback` tests in `tests/home.spec.ts`
 - [ ] Commit, push `red`, mirror onto `theme/faithful` + `theme/midnight-rose`,
       redeploy
 
@@ -142,6 +166,9 @@ Weeks get inserted above the viewport and the reader sees nothing shift.
 - Don't put the lookback back into `events-upcoming.json`; that is the file the
   static HTML renders from, and it defines where a JS-less reader lands.
 - Don't assert pixel positions against the dev server's no-JS render.
+- Don't verify calendar behaviour only under `react-router dev`. The query
+  string selects a view there and doesn't on the deployed site, so the default
+  (list) view goes untested exactly where it matters most.
 - Don't add a window to one of the three event files without checking the other
   two — the calendar showing a card whose detail page doesn't exist is the
   failure mode.
