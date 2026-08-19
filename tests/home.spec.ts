@@ -436,6 +436,35 @@ test.describe("Calendar scrollback", () => {
     expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
   });
 
+  test("the list stays an agenda from today, before and after hydration", async ({
+    page,
+  }) => {
+    // The list is the DEFAULT view and it opens at the top, so a month of
+    // history there is a month of scrolling before the reader reaches anything
+    // they can still attend. Unlike a grid it can't hold today in view while
+    // it grows — so it keeps only today forward, and hydration doesn't move it.
+    const firstDayLabel = () =>
+      page.locator(".agenda__date").first().textContent();
+
+    await page.goto("/calendar");
+    const before = await firstDayLabel();
+    await calendarHydrated(page);
+    // Give the expansion a chance to prepend something, if it were going to.
+    await expect
+      .poll(() => page.locator(".agenda__day").count(), { timeout: 10_000 })
+      .toBeGreaterThan(1);
+
+    expect(await firstDayLabel()).toBe(before);
+    const days = await page
+      .locator(".agenda__day a.ecard")
+      .evaluateAll((els) => els.map((e) => e.getAttribute("href") ?? ""));
+    const dated = days
+      .map((h) => h.match(/\/(\d{4}-\d{2}-\d{2})\//)?.[1])
+      .filter((d): d is string => !!d);
+    expect(dated.length).toBeGreaterThan(0);
+    expect(dated.every((d) => d >= chapterDay())).toBe(true);
+  });
+
   test("a past event the calendar shows still has a page", async ({ page }) => {
     // The lookback is only worth having if its cards go somewhere: past
     // one-offs must survive into events-full.json, and be prerendered.
