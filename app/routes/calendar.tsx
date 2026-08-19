@@ -41,12 +41,6 @@ const VIEWS: { key: ViewKey; label: string }[] = [
   { key: "month", label: "Month" },
 ];
 
-/** 'YYYY-MM-DD' in local time. */
-function localDay(d: Date): string {
-  const p = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
-}
-
 export default function Calendar() {
   const [filter, setFilter] = useState<FacetKey>("all");
   const [q, setQ] = useState("");
@@ -108,17 +102,28 @@ export default function Calendar() {
     return [...map.entries()];
   }, [shown]);
 
-  // The grids start on the chapter's today, not the reader's and not UTC's.
-  const firstDay = now
-    ? chapterDay(now)
-    : (shown[0]?.start.slice(0, 10) ?? chapterDay());
+  // The chapter's today — not the reader's, not UTC's.
+  const todayDay = now ? chapterDay(now) : chapterDay();
+  /**
+   * Where the grids BEGIN.
+   *
+   * Without JS (`now === null`, the prerendered snapshot) this is TODAY, so the
+   * page opens on the current week exactly as it always has — no scrolling
+   * required to see what's next, which is the whole job of the page.
+   *
+   * Once hydrated, it moves back by the lookback, prepending the recent past so
+   * it can be scrolled into. CalendarViews holds today still on screen while
+   * that content is inserted above it, so the view doesn't jump.
+   */
+  const firstDay = now ? shiftDay(todayDay, -CALENDAR_LOOKBACK_DAYS) : todayDay;
 
   return (
     <main id="main">
       <div className="container page-head">
         <h1>Calendar</h1>
         <p className="muted">
-          {upcoming.length} upcoming events. All times Pacific.
+          {upcoming.filter((e) => e.start.slice(0, 10) >= todayDay).length}{" "}
+          upcoming events. All times Pacific.
         </p>
       </div>
 
@@ -207,10 +212,20 @@ export default function Calendar() {
         )}
 
         {view === "week" && shown.length > 0 && (
-          <WeekView events={shown} from={firstDay} weeks={16} />
+          <WeekView
+            events={shown}
+            from={firstDay}
+            weeks={22}
+            today={todayDay}
+          />
         )}
         {view === "month" && shown.length > 0 && (
-          <MonthView events={shown} from={firstDay} months={6} />
+          <MonthView
+            events={shown}
+            from={firstDay}
+            months={8}
+            today={todayDay}
+          />
         )}
 
         {view === "list" && (
