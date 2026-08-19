@@ -8,6 +8,7 @@
 
 import postsIndexData from "../../content/generated/posts-index.json";
 import eventsData from "../../content/generated/events-upcoming.json";
+import pastData from "../../content/generated/events-past.json";
 import seriesData from "../../content/generated/events-series.json";
 import { occurrences, type Recurrence } from "./recurrence";
 
@@ -62,13 +63,26 @@ export const upcomingEvents = eventsData as unknown as EventSlim[];
 export const eventSeries = seriesData as unknown as EventSeries[];
 
 /**
+ * The recent past — NOT part of the prerendered snapshot.
+ *
+ * Kept separate so a reader without JS opens on the current week, while a
+ * hydrated page can extend backwards and let them scroll into what already
+ * happened.
+ */
+export const pastEvents = pastData as unknown as EventSlim[];
+
+/**
  * The full upcoming list as of `today`, computed from one-offs + recurrence
  * rules. Because occurrences are derived rather than baked, this stays correct
  * however long ago the site was built.
  */
 export function expandEvents(today: string, days = 365): EventSlim[] {
   const to = addDays(today, days);
-  const oneOffs = upcomingEvents.filter((e) => !e.seriesSlug);
+  // Past one-offs join in only when the requested window actually reaches back
+  // — series occurrences come from the rules either way.
+  const oneOffs = [...pastEvents, ...upcomingEvents].filter(
+    (e) => !e.seriesSlug,
+  );
   const derived = eventSeries.flatMap((s) =>
     occurrences(s.recurrence, s.start, today, to).map((date) => ({
       ...s,

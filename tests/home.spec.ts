@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import { chapterDay } from "../app/lib/today";
 
 /**
  * Barrier for "the calendar has hydrated".
@@ -376,6 +377,76 @@ test.describe("Calendar subscription feeds", () => {
     expect(res.status()).toBe(200);
     const body = await res.text();
     expect(body.match(/BEGIN:VEVENT/g)?.length).toBe(1);
+  });
+});
+
+test.describe("Calendar scrollback", () => {
+  /**
+   * The calendar keeps a month of history so a member can scroll back to what
+   * they missed — but the page's job is "what's on next", so it must still OPEN
+   * on the current week. Those pull against each other, and the split is: the
+   * prerendered grid starts at today, and only a hydrated page extends
+   * backwards, scroll-anchoring today so the reader isn't shoved down the page.
+   *
+   * These assert structure, not pixels. The dev server injects CSS through the
+   * JS bundle, so a JS-disabled page here is unstyled and every coordinate read
+   * off it is meaningless; comparing offsets between the two renders only works
+   * against a built site.
+   */
+  const firstWeekHoldsToday = (page: Page) =>
+    page.evaluate(
+      () => !!document.querySelector(".cal-week")?.querySelector(".is-today"),
+    );
+
+  test("without JS the week grid starts on the current week", async ({
+    browser,
+  }) => {
+    const ctx = await browser.newContext({ javaScriptEnabled: false });
+    const p = await ctx.newPage();
+    await p.goto("/calendar?view=week", { waitUntil: "domcontentloaded" });
+    const days = (
+      await p
+        .locator("a.cal-chip")
+        .evaluateAll((els) => els.map((e) => e.getAttribute("href") ?? ""))
+    )
+      .map((h) => h.match(/\/(\d{4}-\d{2}-\d{2})\//)?.[1])
+      .filter((d): d is string => !!d);
+    const startsOnToday = await firstWeekHoldsToday(p);
+    await ctx.close();
+
+    expect(days.length).toBeGreaterThan(0);
+    // Against the CHAPTER's day, not the runner's: on a UTC machine in a
+    // Pacific evening those differ, and that difference was the original bug.
+    expect(days.every((d) => d >= chapterDay())).toBe(true);
+    expect(startsOnToday).toBe(true);
+  });
+
+  test("hydration prepends the past and scrolls to hold today in place", async ({
+    page,
+  }) => {
+    await page.goto("/calendar?view=week");
+    await calendarHydrated(page);
+
+    // Weeks really were inserted above today...
+    await expect
+      .poll(() => firstWeekHoldsToday(page), { timeout: 10_000 })
+      .toBe(false);
+    // ...and the page scrolled to compensate, rather than leaving the reader
+    // parked a month in the past. Without the anchor this is 0.
+    expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
+  });
+
+  test("a past event the calendar shows still has a page", async ({ page }) => {
+    // The lookback is only worth having if its cards go somewhere: past
+    // one-offs must survive into events-full.json, and be prerendered.
+    await page.goto("/calendar?view=week");
+    await calendarHydrated(page);
+    const href = await page.locator("a.cal-chip").first().getAttribute("href");
+    expect(href).toBeTruthy();
+    await page.goto(href!);
+    await expect(page.getByRole("heading", { name: "When" })).toBeVisible({
+      timeout: 30_000,
+    });
   });
 });
 

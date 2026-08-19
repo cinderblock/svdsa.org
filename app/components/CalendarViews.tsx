@@ -12,6 +12,7 @@
  * Both take the already-filtered event list and are pure presentation.
  */
 
+import { useEffect, useLayoutEffect, useRef } from "react";
 import { Link } from "react-router";
 import type { EventSlim } from "~/lib/data";
 import { categoryStyle, PLACE_META, placeOf } from "~/lib/eventStyle";
@@ -38,6 +39,39 @@ function addDays(d: Date, n: number): Date {
 /** Whole days between two local midnights (rounded past DST's ±1 h). */
 function daysBetween(a: Date, b: Date): number {
   return Math.round((b.getTime() - a.getTime()) / DAY_MS);
+}
+
+/**
+ * Keep today where it is on screen while earlier weeks are inserted above it.
+ *
+ * The prerendered page starts at today, so a reader without JS opens on the
+ * current week. Hydration then extends the grid BACKWARDS to make the recent
+ * past scrollable — which inserts content above the viewport and would shove
+ * everything down by however tall that content is, yanking today off screen at
+ * the exact moment the page comes alive.
+ *
+ * So: measure today's offset from the top of the viewport before the change,
+ * and after it, and scroll by the difference. A layout effect, not a plain one
+ * — this has to happen before the browser paints, or the jump is visible.
+ */
+const useIsomorphicLayoutEffect =
+  typeof window === "undefined" ? useEffect : useLayoutEffect;
+
+function useAnchorToday(dependency: string) {
+  const ref = useRef<HTMLElement | null>(null);
+  const lastTop = useRef<number | null>(null);
+
+  useIsomorphicLayoutEffect(() => {
+    const top = ref.current?.getBoundingClientRect().top ?? null;
+    if (lastTop.current !== null && top !== null) {
+      const shifted = top - lastTop.current;
+      // Sub-pixel noise isn't worth a scroll call.
+      if (Math.abs(shifted) > 1) window.scrollBy(0, shifted);
+    }
+    lastTop.current = ref.current?.getBoundingClientRect().top ?? null;
+  }, [dependency]);
+
+  return ref;
 }
 
 /** 'YYYY-MM-DD' of a Date, in local time (not UTC — avoids off-by-one). */
@@ -85,14 +119,17 @@ export function WeekView({
   events,
   from,
   weeks,
+  today = chapterDay(),
 }: {
   events: EventSlim[];
   /** First day to show ('YYYY-MM-DD'); its week is the first block. */
   from: string;
   weeks: number;
+  /** The chapter's today, for the marker and the initial scroll position. */
+  today?: string;
 }) {
   const byDay = groupByDay(events);
-  const today = chapterDay();
+  const todayRef = useAnchorToday(from);
   const start = atMidnight(from);
   // Back up to Sunday so each block is a real calendar week.
   const firstSunday = addDays(start, -start.getDay());
@@ -115,8 +152,13 @@ export function WeekView({
           (n, d) => n + (byDay.get(ymd(d))?.length ?? 0),
           0,
         );
+        const holdsToday = days.some((d) => ymd(d) === today);
         return (
-          <section className="cal-week" key={ymd(weekStart)}>
+          <section
+            className="cal-week"
+            key={ymd(weekStart)}
+            ref={holdsToday ? (todayRef as React.Ref<HTMLElement>) : undefined}
+          >
             <h2 className="cal-week__head">
               {label}
               <span className="muted">
@@ -166,13 +208,16 @@ export function MonthView({
   events,
   from,
   months,
+  today = chapterDay(),
 }: {
   events: EventSlim[];
   from: string;
   months: number;
+  /** The chapter's today, for the marker and the initial scroll position. */
+  today?: string;
 }) {
   const byDay = groupByDay(events);
-  const today = chapterDay();
+  const todayRef = useAnchorToday(from);
   const first = atMidnight(from);
 
   return (
@@ -190,18 +235,24 @@ export function MonthView({
         );
         // Pad to whole weeks (Sunday-start) so the grid is rectangular…
         let gridStart = addDays(monthStart, -monthStart.getDay());
-        // …but for the CURRENT month, start at this week rather than the 1st:
-        // this is an upcoming-events calendar, so weeks that are entirely in
-        // the past would otherwise open the view on rows of empty cells.
-        if (m === 0) {
-          const thisWeek = addDays(first, -first.getDay());
-          if (thisWeek > gridStart) gridStart = thisWeek;
-        }
+        // The current month is NOT trimmed to the current week any more. It was,
+        // to avoid opening on empty rows — but that also made the past
+        // unreachable, and now that the lookback loads real events those rows
+        // are not empty. The view scrolls to today instead of hiding what
+        // precedes it.
         const cells = daysBetween(gridStart, monthEnd) + 1;
         const weekRows = Math.ceil(cells / 7);
 
         return (
-          <table className="cal-month" key={ymd(monthStart)}>
+          <table
+            className="cal-month"
+            key={ymd(monthStart)}
+            ref={
+              today.slice(0, 7) === ymd(monthStart).slice(0, 7)
+                ? (todayRef as React.Ref<HTMLTableElement>)
+                : undefined
+            }
+          >
             <caption>
               {monthStart.toLocaleDateString("en-US", {
                 month: "long",

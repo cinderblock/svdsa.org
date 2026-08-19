@@ -12,7 +12,9 @@
  *   posts.json           full posts (content route)
  *   posts-index.json     slim post metadata (home, blog)
  *   events-upcoming.json slim upcoming events (home, calendar)
- *   events-full.json     full upcoming events (event route)
+ *   events-past.json     slim recent-past events (calendar, after hydration)
+ *   events-series.json   recurring series + rules (calendar, browser-expanded)
+ *   events-full.json     full event detail, past window forward (event route)
  * Plus public/sitemap.xml, public/robots.txt, and the public/calendar/*.ics
  * subscription feeds (all / per-facet / per-category / per-event).
  *
@@ -270,13 +272,23 @@ assertUniqueIds(
 );
 
 const today = chapterDay();
-// Keeps the calendar's lookback window, so the prerendered snapshot shows the
-// same recent past the browser recomputes — otherwise a JS-less reader, and
-// every first paint, sees a calendar that starts abruptly at today.
-// `today` itself is the chapter's day, never UTC's (see app/lib/today.ts).
-const upcoming = events.filter(
-  (e) => e.start.slice(0, 10) >= shiftDay(today, -CALENDAR_LOOKBACK_DAYS),
-);
+/**
+ * The prerendered snapshot is TODAY FORWARD, deliberately.
+ *
+ * A reader without JS must open on the current week — that is the page's whole
+ * job. The recent past ships separately (below) and is only folded in once the
+ * browser hydrates, which is what makes scrolling back possible without
+ * changing where the page starts.
+ *
+ * `today` is the chapter's day, never UTC's (see app/lib/today.ts).
+ */
+const upcoming = events.filter((e) => e.start.slice(0, 10) >= today);
+
+/** The lookback window: recent one-offs, for scrolling back after hydration. */
+const recentPast = events.filter((e) => {
+  const day = e.start.slice(0, 10);
+  return day < today && day >= shiftDay(today, -CALENDAR_LOOKBACK_DAYS);
+});
 
 // ---- Derived shapes the app imports ----------------------------------------
 
@@ -371,6 +383,7 @@ await write("pages.json", pages);
 await write("posts.json", posts);
 await write("posts-index.json", postsIndex);
 await write("events-upcoming.json", eventsUpcoming);
+await write("events-past.json", recentPast.map(slim));
 await write("events-series.json", eventSeries);
 // Full detail for the event route: upcoming occurrences (prerendered window)
 // plus one row per SERIES, so /event/<slug>/ and any far-future dated URL can
@@ -408,7 +421,10 @@ const seriesFull = eventDocs
       recurrence: data.recurrence as Recurrence,
     };
   });
-await write("events-full.json", [...upcoming, ...seriesFull]);
+// `recentPast` is included: the hydrated calendar scrolls back into these, and
+// every card the calendar shows must have a detail page behind it. The route
+// splits this file out precisely so the extra weight lands only on /event/.
+await write("events-full.json", [...recentPast, ...upcoming, ...seriesFull]);
 
 // ---- Calendar subscription feeds (.ics) -------------------------------------
 //
