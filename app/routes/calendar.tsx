@@ -5,7 +5,8 @@ import { MonthView, WeekView } from "~/components/CalendarViews";
 import { EventCard } from "~/components/EventCard";
 import { expandEvents, upcomingEvents } from "~/lib/data";
 import { FACETS, matchesFacet, type FacetKey } from "~/lib/eventFacets";
-import { dayNumber, isUpcoming, monthOf, weekdayOf } from "~/lib/format";
+import { dayNumber, monthOf, weekdayOf } from "~/lib/format";
+import { TimeZonePicker } from "~/components/TimeZonePicker";
 import { useNow } from "~/lib/useNow";
 import { SITE } from "~/lib/site";
 import { CALENDAR_LOOKBACK_DAYS, chapterDay, shiftDay } from "~/lib/today";
@@ -130,7 +131,11 @@ export default function Calendar() {
         <h1>Calendar</h1>
         <p className="muted">
           {upcoming.filter((e) => e.start.slice(0, 10) >= todayDay).length}{" "}
-          upcoming events. All times Pacific.
+          upcoming events. All times{" "}
+          {/* Was the flat words "Pacific" — true, but useless to anyone who
+              wanted them in their own clock. Now it says which Pacific (PST or
+              PDT, it changes) and lets them switch. */}
+          <TimeZonePicker at={`${todayDay} 12:00:00`} />.
         </p>
       </div>
 
