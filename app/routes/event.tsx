@@ -2,6 +2,8 @@ import type { MetaFunction } from "react-router";
 import { Link, useLocation } from "react-router";
 import { getEvent } from "~/lib/events";
 import { longDate, time } from "~/lib/format";
+import { useTimeZone } from "~/lib/timezone";
+import { TimeZonePicker } from "~/components/TimeZonePicker";
 import { describeRecurrence } from "~/lib/recurrence";
 import { useNow } from "~/lib/useNow";
 import { Prose } from "~/components/Prose";
@@ -60,6 +62,7 @@ function locationLabel(ev: NonNullable<ReturnType<typeof getEvent>>): string {
 export default function Event() {
   const { pathname } = useLocation();
   const now = useNow();
+  const { zone } = useTimeZone();
   // Resolve against the client's date once hydrated, so a series page shows the
   // genuinely-next occurrence rather than the one that was next at build time.
   const ev = getEvent(pathname, now ? chapterDay(now) : undefined);
@@ -101,12 +104,15 @@ export default function Event() {
           <div>
             <h4>When</h4>
             <p>
-              {longDate(ev.start)}
+              {longDate(ev.start, zone)}
               <br />
               {ev.allDay
                 ? "All day"
-                : `${time(ev.start)} – ${time(ev.end)}`}{" "}
-              <span className="muted">Pacific</span>
+                : `${time(ev.start, zone)} – ${time(ev.end, zone)}`}{" "}
+              {/* The zone isn't decoration — it's what makes the time above
+                  mean anything to a reader outside California. It's also the
+                  control for changing it. */}
+              {!ev.allDay && <TimeZonePicker at={ev.start} />}
             </p>
             {ev.recurrence && (
               <p className="muted" style={{ marginTop: "0.35rem" }}>

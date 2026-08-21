@@ -144,6 +144,10 @@ anchor holds today in view. Practical consequence: the default view is byte-for
 - [x] `events-full.json` and the prerender list extended back over the lookback
 - [x] List view kept today-forward; grids carry the lookback
 - [x] Four `Calendar scrollback` tests in `tests/home.spec.ts`
+- [x] `format.ts` converts from Pacific explicitly; 14 tests in
+      `tests/format.spec.ts` that pass in any runner timezone
+- [x] Timezone picker + localStorage + day-shift marker; 6 tests in
+      `tests/timezone.spec.ts`
 - [ ] Commit, push `red`, mirror onto `theme/faithful` + `theme/midnight-rose`,
       redeploy
 
@@ -172,5 +176,9 @@ anchor holds today in view. Practical consequence: the default view is byte-for
 - Don't add a window to one of the three event files without checking the other
   two — the calendar showing a card whose detail page doesn't exist is the
   failure mode.
+- Don't use a `title=` attribute for the zone label, or for anything else. It
+  is invisible on a phone, which is where this site is mostly read.
+- Don't assume a zone id from memory when writing a picker test — check it
+  against `Intl.supportedValuesOf("timeZone")` on the machine running it.
 - Don't trust a Playwright run without checking nothing else holds `:9999`
   (`reuseExistingServer: !CI` will happily test another worktree's server).

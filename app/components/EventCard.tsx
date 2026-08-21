@@ -15,6 +15,8 @@ import {
   placeOf,
 } from "~/lib/eventStyle";
 import { time } from "~/lib/format";
+import { DayShift } from "~/components/DayShift";
+import { useTimeZone } from "~/lib/timezone";
 
 export function EventCard({
   e,
@@ -24,6 +26,7 @@ export function EventCard({
   /** Home page: drop the excerpt, keep it to a line or two. */
   compact?: boolean;
 }) {
+  const { zone } = useTimeZone();
   const place = placeOf(e);
   const meta = PLACE_META[place];
   const tags = e.categories.filter((c) => c !== "SV DSA").slice(0, 3);
@@ -35,7 +38,14 @@ export function EventCard({
       style={categoryStyle(e.categories) as React.CSSProperties}
     >
       <span className="ecard__time">
-        {e.allDay ? "all day" : time(e.start)}
+        {e.allDay ? (
+          "all day"
+        ) : (
+          <>
+            {time(e.start, zone)}
+            <DayShift at={e.start} zone={zone} />
+          </>
+        )}
       </span>
       <span className="ecard__body">
         <span className="ecard__title">{e.title}</span>
