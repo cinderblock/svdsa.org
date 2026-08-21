@@ -165,17 +165,50 @@ replacing the wholesale delete with a merge.
 
 `/calendar` offers **List**, **Week** and **Month**. Week and Month are
 **continuously vertically scrolling** — periods stack in order and you scroll
-into the future, so there is no prev/next paging to hunt through (which also
-suits a phone). Month is a real `<table>` grid so screen readers get row/column
-semantics; for the current month it starts at the current week rather than the
-1st, since past weeks would otherwise open the view on empty rows. The active
-view lives in the URL (`?view=week`) so it can be shared, and the facet filters
-and search apply to every view. See `app/components/CalendarViews.tsx`.
+through them, so there is no prev/next paging to hunt through (which also suits
+a phone). Month is a real `<table>` grid so screen readers get row/column
+semantics. The active view lives in the URL (`?view=week`) so it can be shared,
+and the facet filters and search apply to every view. See
+`app/components/CalendarViews.tsx`.
+
+**Where the calendar opens, and how far back it goes.** The grids carry a
+`CALENDAR_LOOKBACK_DAYS` window of the recent past, so a member can scroll back
+to a meeting they missed and the current week isn't full of empty leading days.
+That past is **not** in the prerendered HTML: `events-upcoming.json` is today
+forward and `events-past.json` ships separately, folded in only once the page
+hydrates. A reader without JavaScript therefore lands on today, which is the
+page's whole job. When the past is prepended, `useAnchorToday` scrolls by
+exactly the height that was inserted, so today doesn't move on screen.
+
+The **List** view is the exception: it stays today forward even hydrated. It
+opens at the top and has no today marker to anchor to, so history there is just
+scrolling between the reader and anything they can still attend.
 
 Both grids step by **calendar day** (`new Date(y, m, d + n)`), never by adding
 86,400,000 ms — on a daylight-saving boundary local midnight + 24 h is 23:00 on
 the _same_ date, which repeats a day and drops the next one. `tests/calendar-grid.spec.ts`
 pins the invariant in Pacific time.
+
+### Times, and whose clock they're in
+
+Event frontmatter stores **Pacific wall-clock** strings with no offset — the
+chapter meets in San Jose, and that's the time it means. Two rules follow:
+
+- **"Today" is today in Los Angeles**, never UTC and never the reader's. It is
+  computed in one place, `app/lib/today.ts`, with `Intl` and an explicit
+  `timeZone` so daylight saving is never our arithmetic. Getting this wrong
+  cost the calendar a whole day every evening after 5pm Pacific.
+- **Displayed times say which zone they are**, and the label is the control.
+  `app/lib/format.ts` resolves each stored string to a real instant as Pacific
+  and formats it in an explicit zone; `TimeZonePicker` renders that zone's short
+  name (`PDT`, `EST`, …) as a button opening a menu — chapter time, this
+  device's zone, or any zone by search. The choice lives in `localStorage` and
+  is applied after hydration, so the prerendered HTML stays Pacific for
+  everyone who hasn't chosen.
+
+Because the list and grids group by the **chapter's** calendar day, a reader far
+enough east can see a late meeting as an early-morning time under the previous
+day's heading. `DayShift` marks those with a superscript `+1`.
 
 ### Calendar subscription feeds
 
